@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Panel principal
+{% endblock %}
+
+{% block content %}
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+        <div>
+            <h1 class="page-title">Panel principal</h1>
+            <p class="page-subtitle">
+                Consulta rápidamente clientes, cuentas y saldos pendientes.
+            </p>
+        </div>
+
+        <a
+            href="{% url 'cuentas:crear' %}"
+            class="btn btn-primary"
+        >
+            <i class="bi bi-plus-circle me-1"></i>
+            Nueva cuenta
+        </a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card content-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1">
+                                Clientes registrados
+                            </p>
+
+                            <h2 class="mb-0">
+                                {{ clientes_registrados }}
+                            </h2>
+                        </div>
+
+                        <div class="fs-2 text-primary">
+                            <i class="bi bi-people"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card content-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1">
+                                Cuentas pendientes
+                            </p>
+
+                            <h2 class="mb-0">
+                                {{ cuentas_pendientes }}
+                            </h2>
+                        </div>
+
+                        <div class="fs-2 text-warning">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card content-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1">
+                                Cuentas pagadas
+                            </p>
+
+                            <h2 class="mb-0">
+                                {{ cuentas_pagadas }}
+                            </h2>
+                        </div>
+
+                        <div class="fs-2 text-success">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card content-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1">
+                                Total por cobrar
+                            </p>
+
+                            <h2 class="mb-0">
+                                ${{ total_por_cobrar }}
+                            </h2>
+                        </div>
+
+                        <div class="fs-2 text-danger">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card content-card mb-4">
+        <div class="card-body p-4">
+            <h2 class="h4 mb-3">
+                <i class="bi bi-search me-2"></i>
+                Buscar cuentas
+            </h2>
+
+            <form method="get" class="row g-2">
+                <div class="col-12 col-md">
+                    <input
+                        type="text"
+                        name="buscar"
+                        value="{{ busqueda }}"
+                        class="form-control form-control-lg"
+                        placeholder="Nombre, teléfono o concepto"
+                    >
+                </div>
+
+                <div class="col-12 col-md-auto">
+                    <button
+                        type="submit"
+                        class="btn btn-primary btn-lg w-100"
+                    >
+                        Buscar
+                    </button>
+                </div>
+            </form>
+
+            {% if busqueda %}
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="h5 mb-0">
+                        Resultados para “{{ busqueda }}”
+                    </h3>
+
+                    <a href="{% url 'inicio' %}" class="btn btn-sm btn-outline-secondary">
+                        Limpiar
+                    </a>
+                </div>
+
+                {% for cuenta in resultados %}
+                    <div class="border rounded-3 p-3 mb-3">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-12 col-md">
+                                <h4 class="h5 mb-1">
+                                    {{ cuenta.cliente }}
+                                </h4>
+
+                                <p class="text-muted mb-1">
+                                    {{ cuenta.cliente.telefono }}
+                                </p>
+
+                                <p class="mb-0">
+                                    {{ cuenta.concepto }}
+                                </p>
+                            </div>
+
+                            <div class="col-6 col-md-auto">
+                                <small class="text-muted d-block">
+                                    Saldo
+                                </small>
+
+                                <strong>
+                                    ${{ cuenta.saldo_pendiente }}
+                                </strong>
+                            </div>
+
+                            <div class="col-6 col-md-auto">
+                                {% if cuenta.estado == "pagada" %}
+                                    <span class="badge text-bg-success">
+                                        Pagada
+                                    </span>
+                                {% else %}
+                                    <span class="badge text-bg-warning">
+                                        Pendiente
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-12 col-md-auto">
+                                <a
+                                    href="{% url 'cuentas:detalle' cuenta.id %}"
+                                    class="btn btn-outline-primary w-100"
+                                >
+                                    Ver detalle
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="alert alert-light border mb-0">
+                        No se encontraron cuentas para “{{ busqueda }}”.
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card content-card">
+        <div class="card-body p-4">
+            <h2 class="h4 mb-3">
+                Acciones rápidas
+            </h2>
+
+            <div class="row g-3">
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <a
+                        href="{% url 'clientes:crear' %}"
+                        class="btn btn-outline-primary w-100 py-3"
+                    >
+                        <i class="bi bi-person-plus d-block fs-3 mb-2"></i>
+                        Registrar cliente
+                    </a>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <a
+                        href="{% url 'cuentas:crear' %}"
+                        class="btn btn-outline-primary w-100 py-3"
+                    >
+                        <i class="bi bi-file-earmark-plus d-block fs-3 mb-2"></i>
+                        Nueva cuenta
+                    </a>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <a
+                        href="{% url 'clientes:lista' %}"
+                        class="btn btn-outline-secondary w-100 py-3"
+                    >
+                        <i class="bi bi-people d-block fs-3 mb-2"></i>
+                        Ver clientes
+                    </a>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <a
+                        href="{% url 'cuentas:lista' %}"
+                        class="btn btn-outline-secondary w-100 py-3"
+                    >
+                        <i class="bi bi-receipt d-block fs-3 mb-2"></i>
+                        Ver cuentas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

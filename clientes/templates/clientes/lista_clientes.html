@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Clientes
+{% endblock %}
+
+{% block content %}
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+        <div>
+            <h1 class="page-title">Clientes</h1>
+            <p class="page-subtitle">
+                Consulta, edita y gestiona las cuentas de cada cliente.
+            </p>
+        </div>
+
+        <a
+            href="{% url 'clientes:crear' %}"
+            class="btn btn-primary"
+        >
+            <i class="bi bi-person-plus me-1"></i>
+            Registrar cliente
+        </a>
+    </div>
+
+    {% if clientes %}
+        <div class="row g-3">
+            {% for cliente in clientes %}
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="card content-card h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h2 class="h4 mb-1">
+                                        {{ cliente.nombre }}
+                                        {{ cliente.apellido }}
+                                    </h2>
+
+                                    <p class="text-muted mb-0">
+                                        <i class="bi bi-telephone me-1"></i>
+                                        {{ cliente.telefono }}
+                                    </p>
+                                </div>
+
+                                {% if cliente.estado == "Activo" or cliente.estado == "activo" %}
+                                    <span class="badge text-bg-success">
+                                        Activo
+                                    </span>
+                                {% else %}
+                                    <span class="badge text-bg-secondary">
+                                        Suspendido
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="border-top pt-3">
+
+                            <p class="text-muted mb-1">
+                                Saldo pendiente
+                            </p>
+
+                            <h3 class="text-danger mb-2">
+                                ${{ cliente.total_pendiente | floatformat:2 }}
+                            </h3>
+
+                            <p class="text-muted mb-0">
+                                {{ cliente.total_cuentas }} cuenta{{ cliente.total_cuentas|pluralize }}
+                            </p>
+
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <a
+                                    href="{% url 'clientes:editar' cliente.id %}"
+                                    class="btn btn-outline-primary"
+                                >
+                                    <i class="bi bi-pencil me-1"></i>
+                                    Editar cliente
+                                </a>
+
+                                <a
+                                    href="{% url 'clientes:eliminar' cliente.id %}"
+                                    class="btn btn-outline-danger"
+                                >
+                                    <i class="bi bi-trash me-1"></i>
+                                    Eliminar cliente
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card content-card">
+            <div class="card-body p-5 text-center">
+                <div class="fs-1 text-muted mb-3">
+                    <i class="bi bi-people"></i>
+                </div>
+
+                <h2 class="h4">Todavía no hay clientes</h2>
+
+                <p class="text-muted">
+                    Registra el primer cliente para comenzar a gestionar sus cuentas.
+                </p>
+
+                <a
+                    href="{% url 'clientes:crear' %}"
+                    class="btn btn-primary"
+                >
+                    Registrar cliente
+                </a>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
