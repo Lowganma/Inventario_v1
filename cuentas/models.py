@@ -91,3 +91,42 @@ class Abono(models.Model):
 
     def __str__(self):
         return f"{self.cuenta.cliente} - {self.monto_pagado}"
+
+
+class TasaCambio(models.Model):
+    """
+    Guarda la tasa oficial de referencia USD/VES.
+
+    Se conserva un historial para saber qué tasa estaba vigente
+    en cada fecha.
+    """
+
+    moneda = models.CharField(
+        max_length=3,
+        default="USD",
+    )
+
+    valor = models.DecimalField(
+        max_digits=15,
+        decimal_places=6,
+    )
+
+    fecha_vigencia = models.DateField()
+
+    fecha_actualizacion = models.DateTimeField(
+        auto_now=True,
+    )
+
+    fuente = models.CharField(
+        max_length=100,
+        default="BCV",
+    )
+
+    class Meta:
+        ordering = ["-fecha_vigencia", "-id"]
+
+    def __str__(self):
+        return (
+            f"{self.moneda} {self.valor} Bs. "
+            f"({self.fecha_vigencia})"
+        )

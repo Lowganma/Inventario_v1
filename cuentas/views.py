@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect, get_object_or_404
 from django.db.models import Sum, Q
-
+from django.contrib.auth.decorators import login_required
 
 from .models import CuentaPorCobrar
 from .forms import CuentaPorCobrarForm, AbonoForm
@@ -8,38 +8,63 @@ from clientes.models import Cliente
 
 # Create your views here.
 
+@login_required
 def dashboard(request):
-    clientes_registrados = Cliente.objects.count()
+    """
+    Muestra únicamente los indicadores, cuentas y clientes
+    pertenecientes al negocio del usuario autenticado.
+    """
 
-    cuentas_pendientes = CuentaPorCobrar.objects.filter(
+    # Protege a usuarios antiguos que todavía no tengan negocio.
+    if not hasattr(request.user, "negocio"):
+        return redirect("usuarios:registro")
+
+    negocio = request.user.negocio
+
+    # Clientes exclusivos del negocio actual.
+    clientes = Cliente.objects.filter(
+        negocio=negocio
+    )
+
+    # Cuentas cuyos clientes pertenecen al negocio actual.
+    cuentas = CuentaPorCobrar.objects.filter(
+        cliente__negocio=negocio
+    ).select_related("cliente")
+
+    # Indicadores del dashboard.
+    total_clientes = clientes.count()
+
+    cuentas_pendientes = cuentas.filter(
         estado="pendiente"
     ).count()
 
-    cuentas_pagadas = CuentaPorCobrar.objects.filter(
+    cuentas_pagadas = cuentas.filter(
         estado="pagada"
     ).count()
-
-    cuentas = CuentaPorCobrar.objects.all()
 
     total_por_cobrar = sum(
         cuenta.saldo_pendiente
         for cuenta in cuentas
     )
 
+    # Búsqueda del dashboard.
     busqueda = request.GET.get("buscar", "").strip()
 
-    resultados = CuentaPorCobrar.objects.none()
+    resultados = None
 
     if busqueda:
-        resultados = CuentaPorCobrar.objects.filter(
+        resultados = cuentas.filter(
             Q(cliente__nombre__icontains=busqueda)
             | Q(cliente__apellido__icontains=busqueda)
             | Q(cliente__telefono__icontains=busqueda)
             | Q(concepto__icontains=busqueda)
-        ).select_related("cliente")
+        ).order_by(
+            "-fecha",
+            "-id",
+        )
 
     contexto = {
-        "clientes_registrados": clientes_registrados,
+        "total_clientes": total_clientes,
         "cuentas_pendientes": cuentas_pendientes,
         "cuentas_pagadas": cuentas_pagadas,
         "total_por_cobrar": total_por_cobrar,
@@ -52,17 +77,33 @@ def dashboard(request):
         "cuentas/dashboard.html",
         contexto,
     )
-    
 
+@login_required
 def lista_cuentas(request):
+    """
+    Muestra únicamente las cuentas pertenecientes al negocio
+    del usuario autenticado.
+    """
+
+    # Texto ingresado en el buscador.
     busqueda = request.GET.get("buscar", "").strip()
+
+    # Filtro por estado: todas, pendiente o pagada.
     estado = request.GET.get("estado", "todas")
+
+    # Orden cronológico.
     orden = request.GET.get("orden", "desc")
 
+    # FILTRO PRINCIPAL:
+    # solo trae cuentas cuyos clientes pertenecen
+    # al negocio del usuario actual.
     cuentas = CuentaPorCobrar.objects.select_related(
         "cliente"
+    ).filter(
+        cliente__negocio=request.user.negocio
     )
 
+    # Búsqueda por datos del cliente o concepto.
     if busqueda:
         cuentas = cuentas.filter(
             Q(cliente__nombre__icontains=busqueda)
@@ -71,16 +112,28 @@ def lista_cuentas(request):
             | Q(concepto__icontains=busqueda)
         )
 
+    # Filtro por estado.
     if estado == "pendiente":
-        cuentas = cuentas.filter(estado="pendiente")
+        cuentas = cuentas.filter(
+            estado="pendiente"
+        )
 
     elif estado == "pagada":
-        cuentas = cuentas.filter(estado="pagada")
+        cuentas = cuentas.filter(
+            estado="pagada"
+        )
 
+    # Orden ascendente o descendente.
     if orden == "asc":
-        cuentas = cuentas.order_by("fecha", "id")
+        cuentas = cuentas.order_by(
+            "fecha",
+            "id",
+        )
     else:
-        cuentas = cuentas.order_by("-fecha", "-id")
+        cuentas = cuentas.order_by(
+            "-fecha",
+            "-id",
+        )
 
     contexto = {
         "cuentas": cuentas,
@@ -95,16 +148,41 @@ def lista_cuentas(request):
         contexto,
     )
 
+@login_required
 def crear_cuenta(request):
+    """
+    Crea una cuenta por cobrar y redirige a su detalle.
+
+    La redirección evita que el navegador vuelva a enviar
+    el formulario al actualizar la página.
+    """
+
     if request.method == "POST":
         formulario = CuentaPorCobrarForm(request.POST)
-
-        if formulario.is_valid():
-            formulario.save()
-            return redirect("cuentas:lista")
-
     else:
         formulario = CuentaPorCobrarForm()
+
+    # Solo muestra clientes pertenecientes al negocio actual.
+    formulario.fields["cliente"].queryset = (
+        request.user.negocio.clientes.all()
+        .order_by("nombre", "apellido")
+    )
+
+    if request.method == "POST" and formulario.is_valid():
+        cuenta = formulario.save(commit=False)
+
+        # Evita asociar una cuenta con clientes de otro negocio.
+        if cuenta.cliente.negocio_id != request.user.negocio.id:
+            return redirect("cuentas:lista")
+
+        cuenta.save()
+
+        # Después de guardar, abandona el formulario
+        # y muestra el detalle de la cuenta recién creada.
+        return redirect(
+            "cuentas:detalle",
+            cuenta_id=cuenta.id,
+        )
 
     contexto = {
         "formulario": formulario,
@@ -116,10 +194,13 @@ def crear_cuenta(request):
         contexto,
     )
 
+
+@login_required
 def detalle_cuenta(request, cuenta_id):
     cuenta = get_object_or_404(
         CuentaPorCobrar,
         id=cuenta_id,
+        cliente__negocio=request.user.negocio
     )
 
     abonos = cuenta.abonos.all().order_by("-fecha_pago")
@@ -135,6 +216,7 @@ def detalle_cuenta(request, cuenta_id):
         contexto,
     )
 
+@login_required
 def registrar_abono(request, cuenta_id):
     cuenta = get_object_or_404(
         CuentaPorCobrar,
@@ -178,10 +260,12 @@ def registrar_abono(request, cuenta_id):
         contexto,
     )
 
+@login_required
 def pagar_cuenta_completa(request, cuenta_id):
     cuenta = get_object_or_404(
         CuentaPorCobrar,
         id=cuenta_id,
+        cliente__negocio=request.user.negocio
     )
 
     if cuenta.saldo_pendiente <= 0:

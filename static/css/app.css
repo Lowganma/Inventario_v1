@@ -131,3 +131,36 @@ body {
 .min-width-0 {
     min-width: 0;
 }
+
+/* ============================================================
+   TASA BCV EN LA BARRA DE NAVEGACIÓN
+   ============================================================ */
+
+.navbar-rate {
+    min-width: 145px;
+    color: rgba(255, 255, 255, 0.95);
+    text-align: right;
+    line-height: 1.15;
+    border-left: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.navbar-rate span {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.navbar-rate strong {
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+/* En teléfonos se alinea a la izquierda dentro del menú desplegable. */
+@media (max-width: 991.98px) {
+    .navbar-rate {
+        width: 100%;
+        margin-top: 0.75rem;
+        margin-bottom: 0.5rem;
+        padding-left: 0 !important;
+        text-align: left;
+        border-left: 0;
+    }
+}

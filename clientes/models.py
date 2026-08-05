@@ -1,4 +1,5 @@
 from django.db import models
+from usuarios.models import Negocio
 
 # Create your models here.
 class Cliente(models.Model):
@@ -13,10 +14,16 @@ class Cliente(models.Model):
     estado = models.CharField(
         max_length=10,
         choices=Estados,
-        default='activo',
+        default='Activo',
     )
     
     fecha_registro = models.DateTimeField(auto_now_add=True)
+
+    negocio = models.ForeignKey(
+        Negocio,
+        on_delete=models.CASCADE,
+        related_name='clientes',
+    )
 
     def __str__(self):
         return self.nombre

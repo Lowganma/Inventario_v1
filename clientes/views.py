@@ -1,23 +1,32 @@
 from django.shortcuts import redirect,render, get_object_or_404
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
 
 from .forms import ClienteForm
 from .models import Cliente
 
 # Create your views here.
 
+@login_required
 def lista_clientes(request):
-    # Texto ingresado en el buscador.
+    """
+    Muestra únicamente los clientes pertenecientes al negocio
+    del usuario que tiene la sesión iniciada.
+    """
+
+    # Obtiene el texto escrito en el buscador.
     busqueda = request.GET.get("buscar", "").strip()
 
-    # Tipo de visualización seleccionada.
-    # Puede ser "tarjetas" o "lista".
+    # Conserva el modo de visualización seleccionado.
     vista = request.GET.get("vista", "tarjetas")
 
-    # Consulta inicial de todos los clientes.
-    clientes = Cliente.objects.all()
+    # FILTRO PRINCIPAL:
+    # solo trae clientes del negocio del usuario actual.
+    clientes = Cliente.objects.filter(
+        negocio=request.user.negocio
+    )
 
-    # Filtra por nombre, apellido o teléfono.
+    # Busca por nombre, apellido o teléfono.
     if busqueda:
         clientes = clientes.filter(
             Q(nombre__icontains=busqueda)
@@ -25,10 +34,13 @@ def lista_clientes(request):
             | Q(telefono__icontains=busqueda)
         )
 
-    # Orden alfabético.
-    clientes = clientes.order_by("nombre", "apellido")
+    # Organiza alfabéticamente los resultados.
+    clientes = clientes.order_by(
+        "nombre",
+        "apellido",
+    )
 
-    # Calcula los datos financieros de cada cliente.
+    # Calcula las cuentas y el saldo de cada cliente.
     for cliente in clientes:
         cuentas = cliente.cuentas.all()
 
@@ -50,46 +62,33 @@ def lista_clientes(request):
         "clientes/lista_clientes.html",
         contexto,
     )
-    clientes = Cliente.objects.all()
 
-    for cliente in clientes:
-        cuentas = cliente.cuentas.all()
-
-        cliente.total_cuentas = cuentas.count()
-
-        cliente.total_pendiente = sum(
-            cuenta.saldo_pendiente
-            for cuenta in cuentas
-        )
-
-    contexto = {
-        "clientes": clientes,
-    }
-
-    return render(
-        request,
-        "clientes/lista_clientes.html",
-        contexto,
-    )
-
+@login_required
 def crear_cliente(request):
     if request.method == "POST":
         formulario = ClienteForm(request.POST)
 
         if formulario.is_valid():
-            formulario.save()
-            return redirect('clientes:lista')
+            cliente = formulario.save(commit=False)
+
+            # El cliente queda asociado al negocio del usuario actual.
+            cliente.negocio = request.user.negocio
+
+            cliente.save()
+
+            return redirect("clientes:lista")
+
     else:
         formulario = ClienteForm()
 
     contexto = {
-        'formulario': formulario
+        "formulario": formulario,
     }
 
     return render(
         request,
-        'clientes/crear_cliente.html',
-        contexto
+        "clientes/crear_cliente.html",
+        contexto,
     )
 
 def editar_cliente(request, cliente_id):

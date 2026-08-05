@@ -76,7 +76,31 @@
                 id="menuPrincipal"
             >
                 <ul class="navbar-nav ms-auto align-items-lg-center">
+                    
+                    <li class="nav-item d-flex align-items-center me-lg-3">
+    {% if tasa_bcv_global %}
+        <div
+            class="navbar-rate px-3 py-2"
+            title="Tasa oficial de referencia"
+        >
+            <span class="d-block small">
+                Tasa BCV
+            </span>
 
+            <strong>
+                $1 = Bs.
+                {{ tasa_bcv_global.valor|floatformat:2 }}
+            </strong>
+        </div>
+    {% else %}
+        <div class="navbar-rate px-3 py-2">
+            <span class="small">
+                Tasa BCV no disponible
+            </span>
+        </div>
+    {% endif %}
+</li>
+                    
                     <li class="nav-item">
                         <a
                             class="nav-link"

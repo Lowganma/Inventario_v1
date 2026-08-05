@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "productos.apps.ProductosConfig",
     "clientes.apps.ClientesConfig",
     "cuentas.apps.CuentasConfig",
+    "usuarios.apps.UsuariosConfig",
 ]
 
 MIDDLEWARE = [
@@ -69,6 +70,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                "cuentas.context_processors.tasa_bcv_global",
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
