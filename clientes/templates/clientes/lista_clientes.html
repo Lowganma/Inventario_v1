@@ -5,11 +5,28 @@
 {% endblock %}
 
 {% block content %}
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+
+    {# ======================================================== #}
+    {# ENCABEZADO                                               #}
+    {# ======================================================== #}
+    <div
+        class="
+            d-flex
+            flex-column
+            flex-md-row
+            justify-content-between
+            align-items-md-center
+            gap-3
+            mb-4
+        "
+    >
         <div>
-            <h1 class="page-title">Clientes</h1>
-            <p class="page-subtitle">
-                Consulta, edita y gestiona las cuentas de cada cliente.
+            <h1 class="page-title">
+                Clientes
+            </h1>
+
+            <p class="page-subtitle mb-0">
+                Busca clientes y consulta rápidamente sus saldos.
             </p>
         </div>
 
@@ -22,94 +39,374 @@
         </a>
     </div>
 
-    {% if clientes %}
-        <div class="row g-3">
-            {% for cliente in clientes %}
-                <div class="col-12 col-md-6 col-xl-4">
-                    <div class="card content-card h-100">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div>
-                                    <h2 class="h4 mb-1">
-                                        {{ cliente.nombre }}
-                                        {{ cliente.apellido }}
-                                    </h2>
 
-                                    <p class="text-muted mb-0">
-                                        <i class="bi bi-telephone me-1"></i>
-                                        {{ cliente.telefono }}
-                                    </p>
+    {# ======================================================== #}
+    {# BUSCADOR Y CAMBIO DE VISUALIZACIÓN                       #}
+    {# ======================================================== #}
+    <div class="card content-card mb-4">
+        <div class="card-body p-3">
+
+            <div class="row g-2 align-items-end">
+
+                {# Formulario de búsqueda #}
+                <div class="col-12 col-lg">
+                    <form method="get" class="d-flex gap-2">
+
+                        {# Conserva el modo de visualización actual #}
+                        <input
+                            type="hidden"
+                            name="vista"
+                            value="{{ vista_seleccionada }}"
+                        >
+
+                        <div class="flex-grow-1">
+                            <label
+                                for="buscar"
+                                class="form-label fw-semibold"
+                            >
+                                Buscar cliente
+                            </label>
+
+                            <input
+                                type="text"
+                                id="buscar"
+                                name="buscar"
+                                value="{{ busqueda }}"
+                                class="form-control"
+                                placeholder="Nombre, apellido o teléfono"
+                            >
+                        </div>
+
+                        <div class="align-self-end">
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                            >
+                                <i class="bi bi-search"></i>
+
+                                <span class="d-none d-sm-inline ms-1">
+                                    Buscar
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+
+                {# Botones para cambiar entre tarjetas y lista #}
+                <div class="col-12 col-lg-auto">
+                    <label class="form-label fw-semibold d-block">
+                        Visualización
+                    </label>
+
+                    <div class="btn-group w-100" role="group">
+
+                        <a
+                            href="?buscar={{ busqueda|urlencode }}&vista=tarjetas"
+                            class="
+                                btn
+                                {% if vista_seleccionada == 'tarjetas' %}
+                                    btn-primary
+                                {% else %}
+                                    btn-outline-primary
+                                {% endif %}
+                            "
+                            title="Vista de tarjetas"
+                        >
+                            <i class="bi bi-grid-3x3-gap"></i>
+                            <span class="d-sm-none ms-1">
+                                Tarjetas
+                            </span>
+                        </a>
+
+                        <a
+                            href="?buscar={{ busqueda|urlencode }}&vista=lista"
+                            class="
+                                btn
+                                {% if vista_seleccionada == 'lista' %}
+                                    btn-primary
+                                {% else %}
+                                    btn-outline-primary
+                                {% endif %}
+                            "
+                            title="Vista de lista"
+                        >
+                            <i class="bi bi-list-ul"></i>
+                            <span class="d-sm-none ms-1">
+                                Lista
+                            </span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+
+            {# Botón para limpiar la búsqueda #}
+            {% if busqueda %}
+                <div class="mt-3">
+                    <a
+                        href="?vista={{ vista_seleccionada }}"
+                        class="btn btn-sm btn-outline-secondary"
+                    >
+                        <i class="bi bi-x-circle me-1"></i>
+                        Limpiar búsqueda
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+
+    {% if clientes %}
+
+        {# ==================================================== #}
+        {# VISTA DE TARJETAS                                    #}
+        {# Tres tarjetas por fila desde pantallas medianas.      #}
+        {# ==================================================== #}
+        {% if vista_seleccionada == "tarjetas" %}
+
+            <div class="row g-3">
+                {% for cliente in clientes %}
+
+                    <div class="col-12 col-md-4">
+                        <div class="card content-card cliente-card h-100">
+
+                            <div class="card-body p-3">
+
+                                {# Nombre, teléfono y estado #}
+                                <div
+                                    class="
+                                        d-flex
+                                        justify-content-between
+                                        align-items-start
+                                        gap-2
+                                        mb-2
+                                    "
+                                >
+                                    <div class="min-width-0">
+                                        <h2 class="h5 mb-1 text-truncate">
+                                            {{ cliente }}
+                                        </h2>
+
+                                        <p class="text-muted small mb-0">
+                                            <i class="bi bi-telephone me-1"></i>
+                                            {{ cliente.telefono }}
+                                        </p>
+                                    </div>
+
+                                    {% if cliente.estado == "Activo" or cliente.estado == "activo" %}
+                                        <span class="badge text-bg-success">
+                                            Activo
+                                        </span>
+                                    {% else %}
+                                        <span class="badge text-bg-secondary">
+                                            Suspendido
+                                        </span>
+                                    {% endif %}
                                 </div>
 
-                                {% if cliente.estado == "Activo" or cliente.estado == "activo" %}
-                                    <span class="badge text-bg-success">
-                                        Activo
-                                    </span>
-                                {% else %}
-                                    <span class="badge text-bg-secondary">
-                                        Suspendido
-                                    </span>
-                                {% endif %}
-                            </div>
+                                <hr class="my-3">
 
-                            <div class="border-top pt-3">
-
-                            <p class="text-muted mb-1">
-                                Saldo pendiente
-                            </p>
-
-                            <h3 class="text-danger mb-2">
-                                ${{ cliente.total_pendiente | floatformat:2 }}
-                            </h3>
-
-                            <p class="text-muted mb-0">
-                                {{ cliente.total_cuentas }} cuenta{{ cliente.total_cuentas|pluralize }}
-                            </p>
-
-                            </div>
-
-                            <div class="d-grid gap-2">
-                                <a
-                                    href="{% url 'clientes:editar' cliente.id %}"
-                                    class="btn btn-outline-primary"
+                                {# Resumen financiero #}
+                                <div
+                                    class="
+                                        d-flex
+                                        justify-content-between
+                                        align-items-end
+                                        mb-3
+                                    "
                                 >
-                                    <i class="bi bi-pencil me-1"></i>
-                                    Editar cliente
-                                </a>
+                                    <div>
+                                        <small class="text-muted d-block">
+                                            Saldo pendiente
+                                        </small>
 
-                                <a
-                                    href="{% url 'clientes:eliminar' cliente.id %}"
-                                    class="btn btn-outline-danger"
-                                >
-                                    <i class="bi bi-trash me-1"></i>
-                                    Eliminar cliente
-                                </a>
+                                        <strong
+                                            class="
+                                                fs-4
+                                                {% if cliente.total_pendiente > 0 %}
+                                                    text-danger
+                                                {% else %}
+                                                    text-success
+                                                {% endif %}
+                                            "
+                                        >
+                                            ${{ cliente.total_pendiente|floatformat:2 }}
+                                        </strong>
+                                    </div>
+
+                                    <span class="text-muted small">
+                                        {{ cliente.total_cuentas }}
+                                        cuenta{{ cliente.total_cuentas|pluralize }}
+                                    </span>
+                                </div>
+
+                                {# Acciones del cliente #}
+                                <div class="d-grid gap-2">
+
+                                    <a
+                                        href="{% url 'clientes:editar' cliente.id %}"
+                                        class="btn btn-sm btn-outline-primary"
+                                    >
+                                        <i class="bi bi-pencil me-1"></i>
+                                        Editar
+                                    </a>
+
+                                    <a
+                                        href="{% url 'clientes:eliminar' cliente.id %}"
+                                        class="btn btn-sm btn-outline-danger"
+                                    >
+                                        <i class="bi bi-trash me-1"></i>
+                                        Eliminar
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                {% endfor %}
+            </div>
+
+
+        {# ==================================================== #}
+        {# VISTA DE LISTA                                       #}
+        {# ==================================================== #}
+        {% else %}
+
+            <div class="card content-card">
+                <div class="card-body p-0">
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Cliente</th>
+                                    <th>Teléfono</th>
+                                    <th>Cuentas</th>
+                                    <th>Saldo pendiente</th>
+                                    <th>Estado</th>
+                                    <th class="text-end pe-4">
+                                        Acciones
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for cliente in clientes %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <strong>
+                                                {{ cliente }}
+                                            </strong>
+                                        </td>
+
+                                        <td>
+                                            {{ cliente.telefono }}
+                                        </td>
+
+                                        <td>
+                                            {{ cliente.total_cuentas }}
+                                        </td>
+
+                                        <td>
+                                            <strong
+                                                class="
+                                                    {% if cliente.total_pendiente > 0 %}
+                                                        text-danger
+                                                    {% else %}
+                                                        text-success
+                                                    {% endif %}
+                                                "
+                                            >
+                                                ${{ cliente.total_pendiente|floatformat:2 }}
+                                            </strong>
+                                        </td>
+
+                                        <td>
+                                            {% if cliente.estado == "Activo" or cliente.estado == "activo" %}
+                                                <span class="badge text-bg-success">
+                                                    Activo
+                                                </span>
+                                            {% else %}
+                                                <span class="badge text-bg-secondary">
+                                                    Suspendido
+                                                </span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td class="text-end pe-4">
+                                            <a
+                                                href="{% url 'clientes:editar' cliente.id %}"
+                                                class="btn btn-sm btn-outline-primary"
+                                            >
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+
+                                            <a
+                                                href="{% url 'clientes:eliminar' cliente.id %}"
+                                                class="btn btn-sm btn-outline-danger"
+                                            >
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            {% endfor %}
-        </div>
+            </div>
+
+        {% endif %}
+
+
+    {# ======================================================== #}
+    {# ESTADO VACÍO                                             #}
+    {# ======================================================== #}
     {% else %}
+
         <div class="card content-card">
             <div class="card-body p-5 text-center">
+
                 <div class="fs-1 text-muted mb-3">
-                    <i class="bi bi-people"></i>
+                    <i class="bi bi-person-x"></i>
                 </div>
 
-                <h2 class="h4">Todavía no hay clientes</h2>
+                {% if busqueda %}
+                    <h2 class="h4">
+                        No se encontraron clientes
+                    </h2>
 
-                <p class="text-muted">
-                    Registra el primer cliente para comenzar a gestionar sus cuentas.
-                </p>
+                    <p class="text-muted">
+                        Prueba con otro nombre, apellido o teléfono.
+                    </p>
 
-                <a
-                    href="{% url 'clientes:crear' %}"
-                    class="btn btn-primary"
-                >
-                    Registrar cliente
-                </a>
+                    <a
+                        href="{% url 'clientes:lista' %}"
+                        class="btn btn-outline-primary"
+                    >
+                        Limpiar búsqueda
+                    </a>
+                {% else %}
+                    <h2 class="h4">
+                        Todavía no hay clientes
+                    </h2>
+
+                    <p class="text-muted">
+                        Registra el primer cliente para comenzar.
+                    </p>
+
+                    <a
+                        href="{% url 'clientes:crear' %}"
+                        class="btn btn-primary"
+                    >
+                        Registrar cliente
+                    </a>
+                {% endif %}
             </div>
         </div>
+
     {% endif %}
+
 {% endblock %}

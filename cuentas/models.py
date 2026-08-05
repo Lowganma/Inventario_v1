@@ -22,7 +22,10 @@ class CuentaPorCobrar(models.Model):
         decimal_places=2,
     )
 
-    fecha = models.DateField(auto_now_add=True)
+    fecha = models.DateTimeField(
+    auto_now_add=True,
+    verbose_name="Fecha y hora de creación",
+)
 
     fecha_vencimiento = models.DateField(
         blank=True,

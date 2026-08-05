@@ -1,0 +1,133 @@
+/* ============================================================
+   ARCHIVO GLOBAL DE ESTILOS
+   Proyecto: Control de cuentas
+   Descripción:
+   Contiene los colores, componentes y estilos compartidos por
+   todas las páginas de la aplicación.
+   ============================================================ */
+
+
+/* ============================================================
+   1. VARIABLES DEL TEMA CLARO
+   ============================================================ */
+
+:root {
+    --app-background: #e9eef5;
+    --app-card-background: #ffffff;
+    --app-card-border: rgba(15, 23, 42, 0.08);
+    --app-shadow: 0 0.35rem 1rem rgba(15, 23, 42, 0.08);
+}
+
+
+/* ============================================================
+   2. VARIABLES DEL TEMA OSCURO
+   Bootstrap activa este bloque mediante data-bs-theme="dark".
+   ============================================================ */
+
+[data-bs-theme="dark"] {
+    --app-background: #111827;
+    --app-card-background: #1f2937;
+    --app-card-border: rgba(255, 255, 255, 0.1);
+    --app-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.35);
+}
+
+
+/* ============================================================
+   3. ESTRUCTURA GENERAL
+   ============================================================ */
+
+body {
+    min-height: 100vh;
+    background-color: var(--app-background);
+
+    transition:
+        background-color 0.25s ease,
+        color 0.25s ease;
+}
+
+.main-container {
+    max-width: 1200px;
+}
+
+
+/* ============================================================
+   4. BARRA DE NAVEGACIÓN
+   ============================================================ */
+
+.navbar-brand {
+    font-weight: 700;
+}
+
+
+/* ============================================================
+   5. TÍTULOS DE PÁGINA
+   ============================================================ */
+
+.page-title {
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+}
+
+.page-subtitle {
+    margin-bottom: 1.5rem;
+    color: var(--bs-secondary-color);
+}
+
+
+/* ============================================================
+   6. TARJETAS
+   ============================================================ */
+
+.content-card {
+    background-color: var(--app-card-background);
+    border: 1px solid var(--app-card-border);
+    border-radius: 1rem;
+    box-shadow: var(--app-shadow);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.25s ease;
+}
+
+.cliente-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.6rem 1.4rem rgba(15, 23, 42, 0.13);
+}
+
+[data-bs-theme="dark"] .cliente-card:hover {
+    box-shadow: 0 0.6rem 1.4rem rgba(0, 0, 0, 0.4);
+}
+
+
+/* ============================================================
+   7. BOTONES
+   ============================================================ */
+
+.btn {
+    border-radius: 0.65rem;
+}
+
+
+/* ============================================================
+   8. BOTÓN DEL TEMA
+   ============================================================ */
+
+.theme-toggle {
+    display: inline-flex;
+    width: 2.4rem;
+    height: 2.4rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border-radius: 50%;
+}
+
+
+/* ============================================================
+   9. UTILIDADES
+   ============================================================ */
+
+.min-width-0 {
+    min-width: 0;
+}

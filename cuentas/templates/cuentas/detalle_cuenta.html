@@ -5,7 +5,21 @@
 {% endblock %}
 
 {% block content %}
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start mb-4">
+
+    {# ====================================================== #}
+    {# ENCABEZADO                                             #}
+    {# ====================================================== #}
+    <div
+        class="
+            d-flex
+            flex-column
+            flex-md-row
+            justify-content-between
+            align-items-md-start
+            gap-3
+            mb-4
+        "
+    >
         <div>
             <a
                 href="{% url 'cuentas:lista' %}"
@@ -25,23 +39,36 @@
         </div>
 
         {% if cuenta.estado == "pagada" %}
-            <span class="badge text-bg-success fs-6 mt-3 mt-md-0 px-3 py-2">
+            <span class="badge text-bg-success fs-6 px-3 py-2">
                 <i class="bi bi-check-circle me-1"></i>
                 Cuenta pagada
             </span>
         {% else %}
-            <span class="badge text-bg-warning fs-6 mt-3 mt-md-0 px-3 py-2">
+            <span class="badge text-bg-warning fs-6 px-3 py-2">
                 <i class="bi bi-hourglass-split me-1"></i>
                 Cuenta pendiente
             </span>
         {% endif %}
     </div>
 
+
+    {# ====================================================== #}
+    {# DISTRIBUCIÓN PRINCIPAL                                 #}
+    {# Izquierda: datos e historial. Derecha: saldo y acciones #}
+    {# ====================================================== #}
     <div class="row g-4">
+
+        {# ================================================== #}
+        {# COLUMNA IZQUIERDA                                  #}
+        {# ================================================== #}
         <div class="col-12 col-lg-8">
+
+            {# DATOS DE LA CUENTA #}
             <div class="card content-card mb-4">
                 <div class="card-body p-4">
-                    <div class="d-flex align-items-start gap-3 mb-4">
+
+                    {# Datos del cliente #}
+                    <div class="d-flex align-items-center gap-3 mb-4">
                         <div class="fs-1 text-primary">
                             <i class="bi bi-person-circle"></i>
                         </div>
@@ -58,10 +85,15 @@
                         </div>
                     </div>
 
+
+                    {# Información principal organizada en cuadrícula #}
                     <div class="row g-3">
+
+                        {# Concepto #}
                         <div class="col-12 col-md-6">
                             <div class="border rounded-3 p-3 h-100">
                                 <small class="text-muted d-block mb-1">
+                                    <i class="bi bi-card-text me-1"></i>
                                     Concepto
                                 </small>
 
@@ -71,9 +103,31 @@
                             </div>
                         </div>
 
+
+                        {# Fecha de creación #}
                         <div class="col-12 col-md-6">
                             <div class="border rounded-3 p-3 h-100">
                                 <small class="text-muted d-block mb-1">
+                                    <i class="bi bi-calendar-plus me-1"></i>
+                                    Fecha de creación
+                                </small>
+
+                                <strong>
+                                    {{ cuenta.fecha|date:"d/m/Y" }}
+                                </strong>
+
+                                <span class="text-muted ms-1">
+                                    {{ cuenta.fecha|date:"H:i" }}
+                                </span>
+                            </div>
+                        </div>
+
+
+                        {# Fecha de vencimiento #}
+                        <div class="col-12 col-md-6">
+                            <div class="border rounded-3 p-3 h-100">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="bi bi-calendar-event me-1"></i>
                                     Fecha de vencimiento
                                 </small>
 
@@ -88,11 +142,37 @@
                                 {% endif %}
                             </div>
                         </div>
+
+
+                        {# Estado #}
+                        <div class="col-12 col-md-6">
+                            <div class="border rounded-3 p-3 h-100">
+                                <small class="text-muted d-block mb-2">
+                                    <i class="bi bi-activity me-1"></i>
+                                    Estado de la cuenta
+                                </small>
+
+                                {% if cuenta.estado == "pagada" %}
+                                    <span class="badge text-bg-success">
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        Pagada
+                                    </span>
+                                {% else %}
+                                    <span class="badge text-bg-warning">
+                                        <i class="bi bi-hourglass-split me-1"></i>
+                                        Pendiente
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
                     </div>
 
+
+                    {# Notas: aparecen una sola vez #}
                     {% if cuenta.notas %}
                         <div class="alert alert-light border mt-3 mb-0">
-                            <strong class="d-block mb-1">
+                            <strong class="d-block mb-2">
                                 <i class="bi bi-journal-text me-1"></i>
                                 Notas
                             </strong>
@@ -100,12 +180,28 @@
                             {{ cuenta.notas }}
                         </div>
                     {% endif %}
+
                 </div>
             </div>
 
+
+            {# ================================================== #}
+            {# HISTORIAL DE ABONOS                                #}
+            {# ================================================== #}
             <div class="card content-card">
                 <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+
+                    <div
+                        class="
+                            d-flex
+                            flex-column
+                            flex-sm-row
+                            justify-content-between
+                            align-items-sm-center
+                            gap-2
+                            mb-4
+                        "
+                    >
                         <div>
                             <h2 class="h4 mb-1">
                                 Historial de abonos
@@ -122,9 +218,13 @@
                         </span>
                     </div>
 
+
                     {% for abono in abonos %}
                         <div class="border rounded-3 p-3 mb-3">
+
                             <div class="row g-3 align-items-center">
+
+                                {# Monto y fecha #}
                                 <div class="col-12 col-md">
                                     <strong class="fs-5 text-success">
                                         ${{ abono.monto_pagado|floatformat:2 }}
@@ -135,6 +235,8 @@
                                     </small>
                                 </div>
 
+
+                                {# Método #}
                                 <div class="col-6 col-md-auto">
                                     <small class="text-muted d-block">
                                         Método
@@ -145,6 +247,8 @@
                                     </span>
                                 </div>
 
+
+                                {# Referencia #}
                                 <div class="col-6 col-md-auto">
                                     <small class="text-muted d-block">
                                         Referencia
@@ -160,14 +264,19 @@
                                         </span>
                                     {% endif %}
                                 </div>
+
                             </div>
+
 
                             {% if abono.notas %}
                                 <div class="border-top mt-3 pt-3 text-muted">
+                                    <i class="bi bi-chat-left-text me-1"></i>
                                     {{ abono.notas }}
                                 </div>
                             {% endif %}
+
                         </div>
+
                     {% empty %}
                         <div class="text-center py-5">
                             <div class="fs-1 text-muted mb-3">
@@ -178,18 +287,25 @@
                                 Aún no hay abonos
                             </h3>
 
-                            <p class="text-muted mb-0">
-                                Registra el primer pago de esta cuenta.
-                            </p>
+                            
                         </div>
                     {% endfor %}
+
                 </div>
             </div>
+
         </div>
 
+
+        {# ================================================== #}
+        {# COLUMNA DERECHA                                    #}
+        {# ================================================== #}
         <div class="col-12 col-lg-4">
+
+            {# RESUMEN FINANCIERO #}
             <div class="card content-card mb-4">
                 <div class="card-body p-4">
+
                     <h2 class="h5 mb-4">
                         Resumen financiero
                     </h2>
@@ -220,22 +336,34 @@
                         </small>
 
                         <strong
-                            class="fs-2 {% if cuenta.saldo_pendiente > 0 %}text-danger{% else %}text-success{% endif %}"
+                            class="
+                                fs-2
+                                {% if cuenta.saldo_pendiente > 0 %}
+                                    text-danger
+                                {% else %}
+                                    text-success
+                                {% endif %}
+                            "
                         >
                             ${{ cuenta.saldo_pendiente|floatformat:2 }}
                         </strong>
                     </div>
+
                 </div>
             </div>
 
+
+            {# ACCIONES #}
             {% if cuenta.saldo_pendiente > 0 %}
                 <div class="card content-card">
                     <div class="card-body p-4">
+
                         <h2 class="h5 mb-3">
                             Acciones
                         </h2>
 
                         <div class="d-grid gap-2">
+
                             <a
                                 href="{% url 'cuentas:registrar_abono' cuenta.id %}"
                                 class="btn btn-primary"
@@ -251,15 +379,20 @@
                                 <i class="bi bi-check2-circle me-1"></i>
                                 Pagar saldo completo
                             </a>
+
                         </div>
                     </div>
                 </div>
+
             {% else %}
                 <div class="alert alert-success">
                     <i class="bi bi-check-circle-fill me-2"></i>
                     Esta cuenta fue pagada completamente.
                 </div>
             {% endif %}
+
         </div>
+
     </div>
+
 {% endblock %}

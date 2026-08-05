@@ -37,6 +37,33 @@
                         {% endif %}
 
                         <div class="row g-3">
+
+                            {# ====================================================== #}
+{# FECHA Y HORA AUTOMÁTICA                               #}
+{# Es informativa; Django guardará el valor real.         #}
+{# ====================================================== #}
+<div class="col-12">
+    <label class="form-label fw-semibold">
+        Fecha y hora de creación
+    </label>
+
+    <div class="input-group">
+        <span class="input-group-text">
+            <i class="bi bi-calendar-check"></i>
+        </span>
+
+        <input
+            type="text"
+            class="form-control"
+            value="{% now 'd/m/Y H:i' %}"
+            readonly
+        >
+    </div>
+
+    <div class="form-text">
+        Se registrará automáticamente al guardar la cuenta.
+    </div>
+</div>
                             {% for field in formulario %}
                                 <div
                                     class="{% if field.name == 'notas' %}col-12{% else %}col-12 col-md-6{% endif %}"
