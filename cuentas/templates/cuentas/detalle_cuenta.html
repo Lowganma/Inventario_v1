@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Detalle de la cuenta
+{% endblock %}
+
+{% block content %}
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start mb-4">
+        <div>
+            <a
+                href="{% url 'cuentas:lista' %}"
+                class="text-decoration-none"
+            >
+                <i class="bi bi-arrow-left me-1"></i>
+                Volver a cuentas
+            </a>
+
+            <h1 class="page-title mt-3">
+                Detalle de la cuenta
+            </h1>
+
+            <p class="page-subtitle mb-0">
+                Consulta el saldo y registra nuevos movimientos.
+            </p>
+        </div>
+
+        {% if cuenta.estado == "pagada" %}
+            <span class="badge text-bg-success fs-6 mt-3 mt-md-0 px-3 py-2">
+                <i class="bi bi-check-circle me-1"></i>
+                Cuenta pagada
+            </span>
+        {% else %}
+            <span class="badge text-bg-warning fs-6 mt-3 mt-md-0 px-3 py-2">
+                <i class="bi bi-hourglass-split me-1"></i>
+                Cuenta pendiente
+            </span>
+        {% endif %}
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-8">
+            <div class="card content-card mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start gap-3 mb-4">
+                        <div class="fs-1 text-primary">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+
+                        <div>
+                            <h2 class="h4 mb-1">
+                                {{ cuenta.cliente }}
+                            </h2>
+
+                            <p class="text-muted mb-0">
+                                <i class="bi bi-telephone me-1"></i>
+                                {{ cuenta.cliente.telefono }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <div class="border rounded-3 p-3 h-100">
+                                <small class="text-muted d-block mb-1">
+                                    Concepto
+                                </small>
+
+                                <strong>
+                                    {{ cuenta.concepto }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="border rounded-3 p-3 h-100">
+                                <small class="text-muted d-block mb-1">
+                                    Fecha de vencimiento
+                                </small>
+
+                                {% if cuenta.fecha_vencimiento %}
+                                    <strong>
+                                        {{ cuenta.fecha_vencimiento|date:"d/m/Y" }}
+                                    </strong>
+                                {% else %}
+                                    <span class="text-muted">
+                                        Sin fecha definida
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if cuenta.notas %}
+                        <div class="alert alert-light border mt-3 mb-0">
+                            <strong class="d-block mb-1">
+                                <i class="bi bi-journal-text me-1"></i>
+                                Notas
+                            </strong>
+
+                            {{ cuenta.notas }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card content-card">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h2 class="h4 mb-1">
+                                Historial de abonos
+                            </h2>
+
+                            <p class="text-muted mb-0">
+                                Movimientos registrados para esta cuenta.
+                            </p>
+                        </div>
+
+                        <span class="badge text-bg-light border">
+                            {{ abonos|length }}
+                            movimiento{{ abonos|length|pluralize }}
+                        </span>
+                    </div>
+
+                    {% for abono in abonos %}
+                        <div class="border rounded-3 p-3 mb-3">
+                            <div class="row g-3 align-items-center">
+                                <div class="col-12 col-md">
+                                    <strong class="fs-5 text-success">
+                                        ${{ abono.monto_pagado|floatformat:2 }}
+                                    </strong>
+
+                                    <small class="text-muted d-block">
+                                        {{ abono.fecha_pago|date:"d/m/Y" }}
+                                    </small>
+                                </div>
+
+                                <div class="col-6 col-md-auto">
+                                    <small class="text-muted d-block">
+                                        Método
+                                    </small>
+
+                                    <span>
+                                        {{ abono.get_metodo_display }}
+                                    </span>
+                                </div>
+
+                                <div class="col-6 col-md-auto">
+                                    <small class="text-muted d-block">
+                                        Referencia
+                                    </small>
+
+                                    {% if abono.referencia %}
+                                        <span>
+                                            {{ abono.referencia }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">
+                                            Sin referencia
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {% if abono.notas %}
+                                <div class="border-top mt-3 pt-3 text-muted">
+                                    {{ abono.notas }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-5">
+                            <div class="fs-1 text-muted mb-3">
+                                <i class="bi bi-cash-coin"></i>
+                            </div>
+
+                            <h3 class="h5">
+                                Aún no hay abonos
+                            </h3>
+
+                            <p class="text-muted mb-0">
+                                Registra el primer pago de esta cuenta.
+                            </p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card content-card mb-4">
+                <div class="card-body p-4">
+                    <h2 class="h5 mb-4">
+                        Resumen financiero
+                    </h2>
+
+                    <div class="mb-3">
+                        <small class="text-muted d-block">
+                            Monto original
+                        </small>
+
+                        <strong class="fs-4">
+                            ${{ cuenta.monto_total|floatformat:2 }}
+                        </strong>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-muted d-block">
+                            Total abonado
+                        </small>
+
+                        <strong class="fs-4 text-success">
+                            ${{ cuenta.total_abonado|floatformat:2 }}
+                        </strong>
+                    </div>
+
+                    <div class="border-top pt-3">
+                        <small class="text-muted d-block">
+                            Saldo pendiente
+                        </small>
+
+                        <strong
+                            class="fs-2 {% if cuenta.saldo_pendiente > 0 %}text-danger{% else %}text-success{% endif %}"
+                        >
+                            ${{ cuenta.saldo_pendiente|floatformat:2 }}
+                        </strong>
+                    </div>
+                </div>
+            </div>
+
+            {% if cuenta.saldo_pendiente > 0 %}
+                <div class="card content-card">
+                    <div class="card-body p-4">
+                        <h2 class="h5 mb-3">
+                            Acciones
+                        </h2>
+
+                        <div class="d-grid gap-2">
+                            <a
+                                href="{% url 'cuentas:registrar_abono' cuenta.id %}"
+                                class="btn btn-primary"
+                            >
+                                <i class="bi bi-cash-coin me-1"></i>
+                                Registrar abono
+                            </a>
+
+                            <a
+                                href="{% url 'cuentas:pagar_completo' cuenta.id %}"
+                                class="btn btn-success"
+                            >
+                                <i class="bi bi-check2-circle me-1"></i>
+                                Pagar saldo completo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    Esta cuenta fue pagada completamente.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

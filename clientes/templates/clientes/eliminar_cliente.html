@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Eliminar cliente</h1>
+
+    <p>
+        ¿Seguro que deseas eliminar a
+        <strong>{{ cliente.nombre }}</strong>?
+    </p>
+
+    <p>
+        Esta acción también eliminará sus pagos asociados.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <button type="submit">
+            Sí, eliminar
+        </button>
+    </form>
+
+    <p>
+        <a href="{% url 'clientes:lista' %}">
+            Cancelar y volver
+        </a>
+    </p>
+{% endblock %}

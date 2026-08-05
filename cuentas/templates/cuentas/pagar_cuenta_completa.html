@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Pagar saldo completo</h1>
+
+    <h2>{{ cuenta.cliente }}</h2>
+
+    <p>
+        <strong>Concepto:</strong>
+        {{ cuenta.concepto }}
+    </p>
+
+    <p>
+        <strong>Saldo pendiente:</strong>
+        {{ cuenta.saldo_pendiente }}
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ formulario.as_p }}
+
+        <button type="submit">
+            Confirmar pago completo
+        </button>
+    </form>
+
+    <p>
+        <a href="{% url 'cuentas:detalle' cuenta.id %}">
+            Cancelar y volver
+        </a>
+    </p>
+{% endblock %}

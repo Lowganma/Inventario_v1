@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+
+{# Título de la pestaña del navegador #}
+{% block title %}
+    Cuentas por cobrar
+{% endblock %}
+
+{% block content %}
+
+    {# ========================================================= #}
+    {# ENCABEZADO PRINCIPAL                                      #}
+    {# Muestra el título y las acciones rápidas de la pantalla.  #}
+    {# ========================================================= #}
+    <div
+        class="
+            d-flex
+            flex-column
+            flex-md-row
+            justify-content-between
+            align-items-md-center
+            gap-3
+            mb-4
+        "
+    >
+        <div>
+            <h1 class="page-title">
+                Cuentas por cobrar
+            </h1>
+
+            <p class="page-subtitle mb-0">
+                Consulta saldos, estados y vencimientos de cada cuenta.
+            </p>
+        </div>
+
+        <div class="d-flex flex-column flex-sm-row gap-2">
+
+            {# ------------------------------------------------- #}
+            {# BOTÓN TIPO SWITCH                                 #}
+            {# Si ya se muestran solo pendientes, permite volver #}
+            {# a mostrar todas las cuentas.                      #}
+            {# ------------------------------------------------- #}
+            {% if estado_seleccionado == "pendiente" %}
+                <a
+                    href="?buscar={{ busqueda|urlencode }}&estado=todas&orden={{ orden_seleccionado }}"
+                    class="btn btn-outline-secondary"
+                >
+                    <i class="bi bi-eye me-1"></i>
+                    Mostrar pagadas
+                </a>
+
+            {# Si se muestran todas o solo pagadas, ofrece ocultar #}
+            {# las cuentas pagadas.                               #}
+            {% else %}
+                <a
+                    href="?buscar={{ busqueda|urlencode }}&estado=pendiente&orden={{ orden_seleccionado }}"
+                    class="btn btn-outline-warning"
+                >
+                    <i class="bi bi-eye-slash me-1"></i>
+                    Ocultar pagadas
+                </a>
+            {% endif %}
+
+            {# Botón para crear una nueva cuenta por cobrar #}
+            <a
+                href="{% url 'cuentas:crear' %}"
+                class="btn btn-primary"
+            >
+                <i class="bi bi-file-earmark-plus me-1"></i>
+                Registrar cuenta
+            </a>
+        </div>
+    </div>
+
+
+    {# ========================================================= #}
+    {# PANEL DE BÚSQUEDA Y FILTROS                               #}
+    {# Usa el método GET para que los filtros aparezcan en la URL #}
+    {# y puedan combinarse entre sí.                             #}
+    {# ========================================================= #}
+    <div class="card content-card mb-4">
+        <div class="card-body p-4">
+
+            <form method="get" class="row g-3 align-items-end">
+
+                {# Campo de búsqueda por cliente, teléfono o concepto #}
+                <div class="col-12 col-lg-5">
+                    <label
+                        for="buscar"
+                        class="form-label fw-semibold"
+                    >
+                        Buscar cuenta
+                    </label>
+
+                    <input
+                        type="text"
+                        id="buscar"
+                        name="buscar"
+                        value="{{ busqueda }}"
+                        class="form-control"
+                        placeholder="Cliente, teléfono o concepto"
+                    >
+                </div>
+
+
+                {# Filtro por estado de la cuenta #}
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <label
+                        for="estado"
+                        class="form-label fw-semibold"
+                    >
+                        Mostrar
+                    </label>
+
+                    <select
+                        id="estado"
+                        name="estado"
+                        class="form-select"
+                    >
+                        <option
+                            value="todas"
+                            {% if estado_seleccionado == "todas" %}
+                                selected
+                            {% endif %}
+                        >
+                            Todas las cuentas
+                        </option>
+
+                        <option
+                            value="pendiente"
+                            {% if estado_seleccionado == "pendiente" %}
+                                selected
+                            {% endif %}
+                        >
+                            Solo pendientes
+                        </option>
+
+                        <option
+                            value="pagada"
+                            {% if estado_seleccionado == "pagada" %}
+                                selected
+                            {% endif %}
+                        >
+                            Solo pagadas
+                        </option>
+                    </select>
+                </div>
+
+
+                {# Orden de las cuentas por fecha de creación #}
+                <div class="col-12 col-sm-6 col-lg-2">
+                    <label
+                        for="orden"
+                        class="form-label fw-semibold"
+                    >
+                        Orden
+                    </label>
+
+                    <select
+                        id="orden"
+                        name="orden"
+                        class="form-select"
+                    >
+                        <option
+                            value="desc"
+                            {% if orden_seleccionado == "desc" %}
+                                selected
+                            {% endif %}
+                        >
+                            Más recientes
+                        </option>
+
+                        <option
+                            value="asc"
+                            {% if orden_seleccionado == "asc" %}
+                                selected
+                            {% endif %}
+                        >
+                            Más antiguas
+                        </option>
+                    </select>
+                </div>
+
+
+                {# Botón que envía los filtros seleccionados #}
+                <div class="col-12 col-lg-2">
+                    <button
+                        type="submit"
+                        class="btn btn-primary w-100"
+                    >
+                        <i class="bi bi-funnel me-1"></i>
+                        Aplicar
+                    </button>
+                </div>
+            </form>
+
+
+            {# Muestra el botón limpiar solo si existe algún filtro activo #}
+            {% if busqueda or estado_seleccionado != "todas" or orden_seleccionado != "desc" %}
+                <div class="mt-3">
+                    <a
+                        href="{% url 'cuentas:lista' %}"
+                        class="btn btn-sm btn-outline-secondary"
+                    >
+                        <i class="bi bi-x-circle me-1"></i>
+                        Limpiar filtros
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+
+    {# ========================================================= #}
+    {# TABLA DE CUENTAS                                          #}
+    {# Solo se muestra cuando la consulta devuelve resultados.   #}
+    {# ========================================================= #}
+    {% if cuentas %}
+        <div class="card content-card">
+            <div class="card-body p-0">
+
+                {# Permite desplazamiento horizontal en pantallas pequeñas #}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+
+                        {# Encabezados de la tabla #}
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Cliente</th>
+                                <th>Concepto</th>
+                                <th>Monto</th>
+                                <th>Abonado</th>
+                                <th>Saldo</th>
+                                <th>Estado</th>
+                                <th>Vencimiento</th>
+                                <th class="text-end pe-4">
+                                    Acción
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for cuenta in cuentas %}
+                                <tr>
+
+                                    {# Datos principales del cliente #}
+                                    <td class="ps-4">
+                                        <strong>
+                                            {{ cuenta.cliente }}
+                                        </strong>
+
+                                        <small class="text-muted d-block">
+                                            {{ cuenta.cliente.telefono }}
+                                        </small>
+                                    </td>
+
+
+                                    {# Motivo o descripción de la deuda #}
+                                    <td>
+                                        {{ cuenta.concepto }}
+                                    </td>
+
+
+                                    {# Monto original de la cuenta #}
+                                    <td>
+                                        ${{ cuenta.monto_total|floatformat:2 }}
+                                    </td>
+
+
+                                    {# Total acumulado de todos los abonos #}
+                                    <td class="text-success">
+                                        ${{ cuenta.total_abonado|floatformat:2 }}
+                                    </td>
+
+
+                                    {# Saldo restante; rojo si todavía debe #}
+                                    <td>
+                                        <strong
+                                            class="
+                                                {% if cuenta.saldo_pendiente > 0 %}
+                                                    text-danger
+                                                {% else %}
+                                                    text-success
+                                                {% endif %}
+                                            "
+                                        >
+                                            ${{ cuenta.saldo_pendiente|floatformat:2 }}
+                                        </strong>
+                                    </td>
+
+
+                                    {# Etiqueta visual del estado #}
+                                    <td>
+                                        {% if cuenta.estado == "pagada" %}
+                                            <span class="badge text-bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>
+                                                Pagada
+                                            </span>
+                                        {% else %}
+                                            <span class="badge text-bg-warning">
+                                                <i class="bi bi-hourglass-split me-1"></i>
+                                                Pendiente
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+
+                                    {# Fecha de vencimiento opcional #}
+                                    <td>
+                                        {% if cuenta.fecha_vencimiento %}
+                                            {{ cuenta.fecha_vencimiento|date:"d/m/Y" }}
+                                        {% else %}
+                                            <span class="text-muted">
+                                                Sin fecha
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+
+                                    {# Acceso al detalle completo de la cuenta #}
+                                    <td class="text-end pe-4">
+                                        <a
+                                            href="{% url 'cuentas:detalle' cuenta.id %}"
+                                            class="btn btn-sm btn-outline-primary"
+                                        >
+                                            <i class="bi bi-eye me-1"></i>
+                                            Ver detalle
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+    {# ========================================================= #}
+    {# ESTADO VACÍO                                              #}
+    {# Se muestra cuando no existen cuentas o ningún filtro       #}
+    {# encuentra coincidencias.                                  #}
+    {# ========================================================= #}
+    {% else %}
+        <div class="card content-card">
+            <div class="card-body p-5 text-center">
+
+                <div class="fs-1 text-muted mb-3">
+                    <i class="bi bi-search"></i>
+                </div>
+
+                {# Caso: existen filtros, pero no hubo resultados #}
+                {% if busqueda or estado_seleccionado != "todas" %}
+                    <h2 class="h4">
+                        No se encontraron resultados
+                    </h2>
+
+                    <p class="text-muted">
+                        Prueba con otra búsqueda o cambia los filtros seleccionados.
+                    </p>
+
+                    <a
+                        href="{% url 'cuentas:lista' %}"
+                        class="btn btn-outline-primary"
+                    >
+                        Limpiar filtros
+                    </a>
+
+                {# Caso: todavía no se ha registrado ninguna cuenta #}
+                {% else %}
+                    <h2 class="h4">
+                        Todavía no hay cuentas
+                    </h2>
+
+                    <p class="text-muted">
+                        Registra una cuenta para comenzar a controlar deudas y abonos.
+                    </p>
+
+                    <a
+                        href="{% url 'cuentas:crear' %}"
+                        class="btn btn-primary"
+                    >
+                        Registrar cuenta
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h6>{{ producto.nombre }}</h6>
+    <p>Nombre: {{ producto.categoria }}</p>
+    <p>Precio: {{ producto.stock }}</p>
+    <p>Categoría: {{ producto.categoria.nombre }}</p>
+    <p>Created: {{ producto.creado_en }}</p>
+{% endblock %}
+hola
