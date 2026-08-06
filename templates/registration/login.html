@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar sesión{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-7 col-lg-5">
+        <div class="card content-card">
+            <div class="card-body p-4">
+                <h1 class="h3 mb-3">Iniciar sesión</h1>
+                {% if form.errors %}
+                    <div class="alert alert-danger">Usuario o contraseña incorrectos.</div>
+                {% endif %}
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ form.username.id_for_label }}">Usuario</label>
+                        <input class="form-control" type="text" name="username" autofocus required
+                               id="{{ form.username.id_for_label }}" autocomplete="username">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ form.password.id_for_label }}">Contraseña</label>
+                        <input class="form-control" type="password" name="password" required
+                               id="{{ form.password.id_for_label }}" autocomplete="current-password">
+                    </div>
+                    <button class="btn btn-primary w-100" type="submit">Entrar</button>
+                </form>
+                <p class="text-center mt-3 mb-0">
+                    ¿No tienes cuenta? <a href="{% url 'usuarios:registro' %}">Regístrate</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
