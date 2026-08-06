@@ -99,8 +99,23 @@
                             </p>
 
                             <h2 class="mb-0">
-                                ${{ total_por_cobrar }}
+                                ${{ total_por_cobrar| floatformat:2 }}
                             </h2>
+
+                                {% if total_por_cobrar_bs is not None %}
+                                    <p class="text-muted mb-0">
+                                        Bs. {{ total_por_cobrar_bs|floatformat:2 }}
+                                    </p>
+
+                                    <small class="text-muted">
+                                        Tasa aplicada:
+                                        {{ tasa_bcv.valor|floatformat:2 }}
+                                    </small>
+                                {% else %}
+                                    <small class="text-warning">
+                                        Tasa BCV no disponible
+                                    </small>
+                                {% endif %}
                         </div>
 
                         <div class="fs-2 text-danger">

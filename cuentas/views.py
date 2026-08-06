@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect, get_object_or_404
 from django.db.models import Sum, Q
 from django.contrib.auth.decorators import login_required
 
-from .models import CuentaPorCobrar
+from .models import CuentaPorCobrar, TasaCambio
 from .forms import CuentaPorCobrarForm, AbonoForm
 from clientes.models import Cliente
 
@@ -46,6 +46,21 @@ def dashboard(request):
         cuenta.saldo_pendiente
         for cuenta in cuentas
     )
+    # Obtiene la tasa USD más reciente almacenada.
+    tasa_bcv = (
+    TasaCambio.objects
+    .filter(moneda="USD")
+    .order_by("-fecha_vigencia", "-id")
+    .first()
+    )
+
+    # Calcula el total pendiente equivalente en bolívares.
+    total_por_cobrar_bs = None
+
+    if tasa_bcv:
+        total_por_cobrar_bs = (
+            total_por_cobrar * tasa_bcv.valor
+    )
 
     # Búsqueda del dashboard.
     busqueda = request.GET.get("buscar", "").strip()
@@ -70,6 +85,8 @@ def dashboard(request):
         "total_por_cobrar": total_por_cobrar,
         "busqueda": busqueda,
         "resultados": resultados,
+        "tasa_bcv": tasa_bcv,
+        "total_por_cobrar_bs": total_por_cobrar_bs,
     }
 
     return render(
