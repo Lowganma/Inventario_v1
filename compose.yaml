@@ -1,0 +1,15 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_DEBUG: "False"
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1"
+      SQLITE_PATH: "/app/data/db.sqlite3"
+      DJANGO_SECRET_KEY: "${DJANGO_SECRET_KEY:-cambiar-esta-clave-en-produccion}"
+    volumes:
+      - inventario_data:/app/data
+
+volumes:
+  inventario_data:
