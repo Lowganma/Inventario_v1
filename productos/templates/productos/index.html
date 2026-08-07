@@ -1,33 +1,74 @@
 {% extends "base.html" %}
 
+{% block title %}Inventario{% endblock %}
+
 {% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="mb-1">Inventario</h1>
+        <p class="text-body-secondary mb-0">Consulta y administra los productos de tu negocio.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-primary" href="{% url 'productos:categorias' %}">
+            <i class="bi bi-tags me-1"></i>Categorías
+        </a>
+        <a class="btn btn-primary" href="{% url 'productos:crear' %}">
+            <i class="bi bi-plus-lg me-1"></i>Nuevo producto
+        </a>
+    </div>
+</div>
 
-<h1>Productos</h1>
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-4"><div class="card h-100"><div class="card-body">
+        <div class="text-body-secondary">Productos registrados</div><div class="fs-3 fw-bold">{{ total }}</div>
+    </div></div></div>
+    <div class="col-12 col-md-4"><div class="card h-100"><div class="card-body">
+        <div class="text-body-secondary">Productos con stock bajo</div><div class="fs-3 fw-bold text-warning">{{ stock_bajo }}</div>
+    </div></div></div>
+    <div class="col-12 col-md-4"><div class="card h-100"><div class="card-body">
+        <div class="text-body-secondary">Valor total estimado</div><div class="fs-3 fw-bold">${{ valor_total|floatformat:2 }}</div>
+    </div></div></div>
+</div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Nombre</th>
-            <th>Stock</th>
-            <th>Puntaje</th>
-            <th>Categoria</th>
-        </tr>
-    </thead>
+<form method="get" class="card card-body mb-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-12 col-lg-7">
+            <label for="buscar" class="form-label">Buscar</label>
+            <input class="form-control" id="buscar" name="buscar" value="{{ buscar }}" placeholder="Nombre, código o categoría">
+        </div>
+        <div class="col-12 col-lg-3">
+            <label for="categoria" class="form-label">Categoría</label>
+            <select class="form-select" id="categoria" name="categoria">
+                <option value="">Todas las categorías</option>
+                {% for categoria in categorias %}
+                <option value="{{ categoria.id }}" {% if categoria_seleccionada == categoria.id|stringformat:"s" %}selected{% endif %}>{{ categoria.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12 col-lg-2 d-grid"><button class="btn btn-secondary" type="submit">Filtrar</button></div>
+    </div>
+</form>
 
-    <tbody>
-        {% for producto in productos %}
-            <tr>
-                <td>
-                    <a href="{% url 'productos:detalle' producto.id %}">
-                        {{ producto.nombre }}
-                    </a>
-                </td>
-                <td>{{ producto.stock }}</td>
-                <td>{{ producto.puntaje }}</td>
-                <td>{{ producto.categoria }}</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead><tr><th>Producto</th><th>Categoría</th><th>Stock</th><th>Stock mínimo</th><th>Costo</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody>
+            {% for producto in productos %}
+                <tr>
+                    <td><strong>{{ producto.nombre }}</strong>{% if producto.codigo %}<br><small class="text-body-secondary">{{ producto.codigo }}</small>{% endif %}</td>
+                    <td>{{ producto.categoria.nombre }}</td>
+                    <td>
+                        <span class="badge {% if producto.stock_bajo %}text-bg-warning{% else %}text-bg-success{% endif %}">{{ producto.stock }}</span>
+                        {% if producto.stock_bajo %}<small class="d-block text-warning-emphasis mt-1"><i class="bi bi-exclamation-triangle"></i> Stock bajo</small>{% endif %}
+                    </td>
+                    <td>{{ producto.stock_minimo }}</td><td>${{ producto.costo|floatformat:2 }}</td><td>${{ producto.precio_venta|floatformat:2 }}</td>
+                    <td><span class="badge {% if producto.activo %}text-bg-success{% else %}text-bg-secondary{% endif %}">{% if producto.activo %}Activo{% else %}Inactivo{% endif %}</span></td>
+                    <td class="text-nowrap"><a class="btn btn-sm btn-outline-primary" href="{% url 'productos:detalle' producto.id %}">Ver</a> <a class="btn btn-sm btn-outline-secondary" href="{% url 'productos:editar' producto.id %}">Editar</a></td>
+                </tr>
+            {% empty %}<tr><td colspan="8" class="text-center text-body-secondary py-5">No se encontraron productos.</td></tr>{% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}
