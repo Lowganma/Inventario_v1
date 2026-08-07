@@ -22,9 +22,7 @@ def lista_clientes(request):
 
     # FILTRO PRINCIPAL:
     # solo trae clientes del negocio del usuario actual.
-    clientes = Cliente.objects.filter(
-        negocio=request.user.negocio
-    )
+    clientes = Cliente.objects.filter(negocio=request.user.negocio)
 
     # Busca por nombre, apellido o teléfono.
     if busqueda:
@@ -91,8 +89,11 @@ def crear_cliente(request):
         contexto,
     )
 
+@login_required
 def editar_cliente(request, cliente_id):
-    cliente = get_object_or_404(Cliente, id=cliente_id)
+    cliente = get_object_or_404(
+        Cliente, id=cliente_id, negocio=request.user.negocio
+    )
 
     if request.method == "POST":
         formulario = ClienteForm(
@@ -118,8 +119,11 @@ def editar_cliente(request, cliente_id):
         contexto
     )
 
+@login_required
 def eliminar_cliente(request, cliente_id):
-    cliente = get_object_or_404(Cliente, id=cliente_id)
+    cliente = get_object_or_404(
+        Cliente, id=cliente_id, negocio=request.user.negocio
+    )
 
     if request.method == "POST":
         cliente.delete()

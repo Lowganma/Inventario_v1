@@ -15,11 +15,14 @@ def dashboard(request):
     pertenecientes al negocio del usuario autenticado.
     """
 
-    # Protege a usuarios antiguos que todavía no tengan negocio.
-    if not hasattr(request.user, "negocio"):
-        return redirect("usuarios:registro")
+    # Las cuentas anteriores a la función multiempresa también pueden entrar
+    # sin caer en un ciclo entre el dashboard y el registro.
+    from usuarios.models import Negocio
 
-    negocio = request.user.negocio
+    negocio, _ = Negocio.objects.get_or_create(
+        propietario=request.user,
+        defaults={"nombre": f"Negocio de {request.user.username}"},
+    )
 
     # Clientes exclusivos del negocio actual.
     clientes = Cliente.objects.filter(
@@ -238,6 +241,7 @@ def registrar_abono(request, cuenta_id):
     cuenta = get_object_or_404(
         CuentaPorCobrar,
         id=cuenta_id,
+        cliente__negocio=request.user.negocio,
     )
 
     if request.method == "POST":

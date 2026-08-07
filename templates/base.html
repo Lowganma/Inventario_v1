@@ -101,6 +101,7 @@
     {% endif %}
 </li>
                     
+                    {% if request.user.is_authenticated %}
                     <li class="nav-item">
                         <a
                             class="nav-link"
@@ -141,6 +142,25 @@
                             Nueva cuenta
                         </a>
                     </li>
+
+                    <li class="nav-item ms-lg-2">
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button class="btn btn-outline-light mt-2 mt-lg-0" type="submit">
+                                Cerrar sesión
+                            </button>
+                        </form>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-light mt-2 mt-lg-0" href="{% url 'usuarios:registro' %}">
+                            Registrarse
+                        </a>
+                    </li>
+                    {% endif %}
 
                     {# Interruptor para cambiar entre modo claro y oscuro #}
                     <li class="nav-item ms-lg-2">

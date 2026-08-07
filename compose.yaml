@@ -1,0 +1,17 @@
+services:
+  web:
+    build: .
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    environment:
+      DJANGO_DEBUG: "False"
+      DJANGO_ALLOWED_HOSTS: "${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}"
+      SQLITE_PATH: "/app/data/db.sqlite3"
+      DJANGO_SECRET_KEY: "${DJANGO_SECRET_KEY:?Copia .env.example como .env y configura DJANGO_SECRET_KEY}"
+      CSRF_TRUSTED_ORIGINS: "${CSRF_TRUSTED_ORIGINS:-}"
+    restart: unless-stopped
+    volumes:
+      - inventario_data:/app/data
+
+volumes:
+  inventario_data:
