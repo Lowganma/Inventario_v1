@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Compras
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+
+        <!-- ==================================================
+             ENCABEZADO
+        =================================================== -->
+
+        <div
+            class="
+                d-flex
+                flex-column
+                flex-md-row
+                justify-content-between
+                align-items-md-center
+                gap-3
+                mb-4
+            "
+        >
+
+            <div>
+                <h1 class="page-title mb-1">
+                    Compras
+                </h1>
+
+                <p class="page-subtitle mb-0">
+                    Consulta las reposiciones realizadas
+                    a tu inventario.
+                </p>
+            </div>
+
+
+            <a
+                href="{% url 'compras:crear' %}"
+                class="btn btn-primary"
+            >
+                <i class="bi bi-plus-circle me-2"></i>
+                Nueva compra
+            </a>
+
+        </div>
+
+
+        <!-- ==================================================
+             RESUMEN
+        =================================================== -->
+
+        <div class="row g-3 mb-4">
+
+            <div class="col-12 col-md-6">
+
+                <div class="card content-card h-100">
+
+                    <div class="card-body">
+
+                        <p class="text-muted mb-1">
+                            Compras registradas
+                        </p>
+
+                        <h2 class="mb-0">
+                            {{ compras|length }}
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-12 col-md-6">
+
+                <div class="card content-card h-100">
+
+                    <div class="card-body">
+
+                        <p class="text-muted mb-1">
+                            Última reposición
+                        </p>
+
+                        {% if compras %}
+
+                            <h5 class="mb-0">
+                                {{ compras.0.fecha|date:"d/m/Y" }}
+                            </h5>
+
+                        {% else %}
+
+                            <h5 class="mb-0 text-muted">
+                                Sin compras
+                            </h5>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             HISTORIAL
+        =================================================== -->
+
+        <div class="card content-card">
+
+            <div class="card-body p-4">
+
+                <div class="d-flex align-items-center mb-3">
+
+                    <i class="bi bi-cart-check fs-4 me-2"></i>
+
+                    <h2 class="h5 mb-0">
+                        Historial de compras
+                    </h2>
+
+                </div>
+
+
+                {% if compras %}
+
+                    <div class="table-responsive">
+
+                        <table class="table align-middle">
+
+                            <thead>
+
+                                <tr>
+                                    <th>
+                                        Compra
+                                    </th>
+
+                                    <th>
+                                        Fecha
+                                    </th>
+
+                                    <th>
+                                        Productos
+                                    </th>
+
+                                    <th>
+                                        Registrada por
+                                    </th>
+
+                                    <th class="text-end">
+                                        Total
+                                    </th>
+
+                                    <th class="text-end">
+                                        Acción
+                                    </th>
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                {% for compra in compras %}
+
+                                    <tr>
+
+                                        <td>
+                                            <strong>
+                                                #{{ compra.id }}
+                                            </strong>
+                                        </td>
+
+
+                                        <td>
+                                            {{ compra.fecha|date:"d/m/Y" }}
+                                        </td>
+
+
+                                        <td>
+
+                                            <span class="badge text-bg-secondary">
+
+                                                {{ compra.detalles.count }}
+
+                                                {% if compra.detalles.count == 1 %}
+                                                    producto
+                                                {% else %}
+                                                    productos
+                                                {% endif %}
+
+                                            </span>
+
+                                        </td>
+
+
+                                        <td>
+                                            {{ compra.usuario.username }}
+                                        </td>
+
+
+                                        <td class="text-end">
+
+                                            <strong>
+                                                ${{ compra.total|floatformat:2 }}
+                                            </strong>
+
+                                        </td>
+
+
+                                        <td class="text-end">
+
+                                            <a
+                                                href="{% url 'compras:detalle' compra.id %}"
+                                                class="btn btn-sm btn-outline-primary"
+                                            >
+                                                <i class="bi bi-eye me-1"></i>
+                                                Ver
+                                            </a>
+
+                                        </td>
+
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                {% else %}
+
+                    <!-- Estado vacío -->
+
+                    <div class="text-center py-5">
+
+                        <i
+                            class="
+                                bi
+                                bi-cart-plus
+                                display-4
+                                text-muted
+                            "
+                        ></i>
+
+                        <h3 class="h5 mt-3">
+                            Aún no hay compras
+                        </h3>
+
+                        <p class="text-muted">
+                            Registra tu primera reposición
+                            de inventario.
+                        </p>
+
+                        <a
+                            href="{% url 'compras:crear' %}"
+                            class="btn btn-primary"
+                        >
+                            <i class="bi bi-plus-circle me-2"></i>
+                            Registrar primera compra
+                        </a>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

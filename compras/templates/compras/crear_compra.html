@@ -1,0 +1,770 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Nueva compra
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+
+        <!-- ==================================================
+             ENCABEZADO
+        =================================================== -->
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+
+            <div>
+                <a
+                    href="{% url 'compras:lista' %}"
+                    class="text-decoration-none d-inline-flex align-items-center mb-2"
+                >
+                    <i class="bi bi-arrow-left me-2"></i>
+                    Volver a compras
+                </a>
+
+                <h1 class="page-title mb-1">
+                    Nueva compra
+                </h1>
+
+                <p class="page-subtitle mb-0">
+                    Registra los productos que ingresan a tu inventario.
+                </p>
+            </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             FORMULARIO
+        =================================================== -->
+
+        <form method="post" id="compraForm" novalidate>
+
+            {% csrf_token %}
+
+            <!--
+                Management form obligatorio para que Django
+                pueda procesar correctamente el formset.
+            -->
+            {{ detalles.management_form }}
+
+
+            <!-- ==================================================
+                 PRODUCTOS DE LA COMPRA
+            =================================================== -->
+
+            <div class="card content-card mb-4">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+
+                        <div>
+                            <h2 class="h5 mb-1">
+                                <i class="bi bi-box-seam me-2"></i>
+                                Productos
+                            </h2>
+
+                            <p class="text-muted mb-0">
+                                Agrega los productos recibidos en esta compra.
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            id="agregarProducto"
+                            class="btn btn-outline-primary"
+                        >
+                            <i class="bi bi-plus-lg me-1"></i>
+                            Agregar producto
+                        </button>
+
+                    </div>
+
+
+                    <!-- Contenedor dinámico de las filas -->
+
+                    <div id="detallesCompra">
+
+                        {% for detalle in detalles %}
+
+                           <div
+                                class="detalle-compra border rounded-3 p-3 mb-3
+                                    {% if detalle.DELETE.value %}d-none{% endif %}"
+                            >
+
+                                <div class="row g-3 align-items-end">
+
+                                    <!-- Producto -->
+
+                                    <div class="col-12 col-lg-4">
+
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                        <label
+                                            for="{{ detalle.producto.id_for_label }}"
+                                            class="form-label fw-semibold mb-0"
+                                        >
+                                            Producto
+                                        </label>
+
+                                        <a
+                                            href="{% url 'productos:crear' %}"
+                                            target="_blank"
+                                            class="btn btn-sm btn-outline-primary"
+                                            title="Crear producto"
+                                            aria-label="Crear nuevo producto"
+                                        >
+                                            <i class="bi bi-plus-lg"></i>
+                                        </a>
+
+                                    </div>
+
+                                    {{ detalle.producto }}
+
+                                    {% for error in detalle.producto.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ error }}
+                                        </div>
+                                    {% endfor %}
+
+                                </div>
+
+
+                                    <!-- Cantidad -->
+
+                                    <div class="col-6 col-lg-2">
+
+                                        <label
+                                            for="{{ detalle.cantidad.id_for_label }}"
+                                            class="form-label fw-semibold"
+                                        >
+                                            Cantidad
+                                        </label>
+
+                                        {{ detalle.cantidad }}
+
+                                        {% for error in detalle.cantidad.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+
+                                    </div>
+
+
+                                    <!-- Precio compra -->
+
+                                    <div class="col-6 col-lg-2">
+
+                                        <label
+                                            for="{{ detalle.precio_compra.id_for_label }}"
+                                            class="form-label fw-semibold"
+                                        >
+                                            Precio compra
+                                        </label>
+
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            {{ detalle.precio_compra }}
+                                        </div>
+
+                                        {% for error in detalle.precio_compra.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+
+                                    </div>
+
+
+                                    <!-- Precio venta -->
+
+                                    <div class="col-6 col-lg-2">
+
+                                        <label
+                                            for="{{ detalle.precio_venta.id_for_label }}"
+                                            class="form-label fw-semibold"
+                                        >
+                                            Precio venta
+                                        </label>
+
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            {{ detalle.precio_venta }}
+                                        </div>
+
+                                        {% for error in detalle.precio_venta.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+
+                                    </div>
+
+
+                                    <!-- Subtotal visual -->
+
+                                    <div class="col-6 col-lg-2">
+
+                                        <label class="form-label fw-semibold">
+                                            Subtotal
+                                        </label>
+
+                                        <div
+                                            class="form-control subtotal-linea fw-semibold"
+                                            data-subtotal
+                                        >
+                                            $0.00
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!--
+                                    Django utiliza este checkbox internamente
+                                    para eliminar formularios del formset.
+                                -->
+
+                                {% if detalle.DELETE %}
+                                    <div class="d-none">
+                                        {{ detalle.DELETE }}
+                                    </div>
+                                {% endif %}
+
+
+                                <div class="text-end mt-3">
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-danger eliminar-producto"
+                                    >
+                                        <i class="bi bi-trash me-1"></i>
+                                        Quitar
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- ==================================================
+                         FORMULARIO VACÍO PARA JAVASCRIPT
+                    =================================================== -->
+
+                    <template id="detalleVacio">
+
+                        <div class="detalle-compra border rounded-3 p-3 mb-3">
+
+                            <div class="row g-3 align-items-end">
+
+                                <div class="col-12 col-lg-4">
+
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                        <label class="form-label fw-semibold mb-0">
+                                            Producto
+                                        </label>
+
+                                        <a
+                                            href="{% url 'productos:crear' %}"
+                                            target="_blank"
+                                            class="btn btn-sm btn-outline-primary"
+                                            title="Crear producto"
+                                            aria-label="Crear nuevo producto"
+                                        >
+                                            <i class="bi bi-plus-lg"></i>
+                                        </a>
+
+                                    </div>
+
+                                    {{ detalles.empty_form.producto }}
+
+                                </div>
+
+
+                                <div class="col-6 col-lg-2">
+
+                                    <label class="form-label fw-semibold">
+                                        Cantidad
+                                    </label>
+
+                                    {{ detalles.empty_form.cantidad }}
+
+                                </div>
+
+
+                                <div class="col-6 col-lg-2">
+
+                                    <label class="form-label fw-semibold">
+                                        Precio compra
+                                    </label>
+
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        {{ detalles.empty_form.precio_compra }}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="col-6 col-lg-2">
+
+                                    <label class="form-label fw-semibold">
+                                        Precio venta
+                                    </label>
+
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        {{ detalles.empty_form.precio_venta }}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="col-6 col-lg-2">
+
+                                    <label class="form-label fw-semibold">
+                                        Subtotal
+                                    </label>
+
+                                    <div
+                                        class="form-control subtotal-linea fw-semibold"
+                                        data-subtotal
+                                    >
+                                        $0.00
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            {% if detalles.empty_form.DELETE %}
+
+                                <div class="d-none">
+                                    {{ detalles.empty_form.DELETE }}
+                                </div>
+
+                            {% endif %}
+
+
+                            <div class="text-end mt-3">
+
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-danger eliminar-producto"
+                                >
+                                    <i class="bi bi-trash me-1"></i>
+                                    Quitar
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </template>
+
+                </div>
+            </div>
+
+
+            <!-- ==================================================
+                 RESUMEN DE COMPRA
+            =================================================== -->
+
+            <div class="row g-4">
+
+                <div class="col-12 col-lg-7">
+
+                    <div class="card content-card h-100">
+
+                        <div class="card-body p-4">
+
+                            <h2 class="h5 mb-3">
+                                <i class="bi bi-journal-text me-2"></i>
+                                Notas
+                            </h2>
+
+                            {{ formulario.notas }}
+
+                            {% for error in formulario.notas.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-12 col-lg-5">
+
+                    <div class="card content-card h-100">
+
+                        <div class="card-body p-4">
+
+                            <h2 class="h5 mb-4">
+                                Resumen
+                            </h2>
+
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">
+                                    Productos
+                                </span>
+
+                                <strong id="totalProductos">
+                                    0
+                                </strong>
+                            </div>
+
+
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="text-muted">
+                                    Unidades
+                                </span>
+
+                                <strong id="totalUnidades">
+                                    0
+                                </strong>
+                            </div>
+
+
+                            <hr>
+
+
+                            <div class="d-flex justify-content-between align-items-center">
+
+                                <span class="fs-5 fw-semibold">
+                                    Total compra
+                                </span>
+
+                                <span
+                                    id="totalCompra"
+                                    class="fs-3 fw-bold text-primary"
+                                >
+                                    $0.00
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==================================================
+                 BOTONES
+            =================================================== -->
+
+            <div class="d-grid d-md-flex justify-content-md-end gap-2 mt-4">
+
+                <a
+                    href="{% url 'compras:lista' %}"
+                    class="btn btn-outline-secondary"
+                >
+                    Cancelar
+                </a>
+
+                <button
+                    type="submit"
+                    id="botonRegistrarCompra"
+                    class="btn btn-primary px-4"
+                >
+                    <i class="bi bi-check-circle me-2"></i>
+                    Registrar compra
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    // ========================================================
+    // ELEMENTOS PRINCIPALES DEL FORMSET
+    // ========================================================
+
+    const contenedor =
+        document.getElementById("detallesCompra");
+
+    const botonAgregar =
+        document.getElementById("agregarProducto");
+
+    const template =
+        document.getElementById("detalleVacio");
+
+    const totalForms =
+        document.getElementById("id_form-TOTAL_FORMS");
+
+
+    // ========================================================
+    // AGREGA UNA NUEVA FILA DE PRODUCTO
+    // ========================================================
+
+    botonAgregar.addEventListener("click", function () {
+
+        const indice = parseInt(totalForms.value);
+
+        /*
+         * Django utiliza __prefix__ en empty_form.
+         * Lo reemplazamos por el índice correspondiente.
+         */
+
+        const html =
+            template.innerHTML.replace(
+                /__prefix__/g,
+                indice
+            );
+
+        contenedor.insertAdjacentHTML(
+            "beforeend",
+            html
+        );
+
+        totalForms.value = indice + 1;
+
+        actualizarResumen();
+    });
+
+
+  // ========================================================
+// QUITAR PRODUCTO
+// ========================================================
+
+contenedor.addEventListener("click", function (event) {
+
+    const boton =
+        event.target.closest(".eliminar-producto");
+
+    if (!boton) {
+        return;
+    }
+
+    const fila =
+        boton.closest(".detalle-compra");
+
+    if (!fila) {
+        return;
+    }
+
+    /*
+     * Django FormSet utiliza el campo DELETE para saber
+     * que esta línea debe ignorarse al procesar el POST.
+     */
+    const deleteInput =
+        fila.querySelector(
+            'input[name$="-DELETE"]'
+        );
+
+    if (deleteInput) {
+        deleteInput.checked = true;
+    }
+
+    /*
+     * Deshabilitamos los campos comerciales de la fila.
+     *
+     * Así el navegador deja de validar sus atributos
+     * "required", pero mantenemos activo DELETE para que
+     * Django sepa que esta línea fue eliminada.
+     */
+    fila.querySelectorAll(
+        "input, select, textarea"
+    ).forEach(function (campo) {
+
+        if (
+            !campo.name ||
+            !campo.name.endsWith("-DELETE")
+        ) {
+            campo.disabled = true;
+            campo.required = false;
+        }
+    });
+
+    // La retiramos visualmente.
+    fila.classList.add("d-none");
+
+    actualizarResumen();
+});
+
+
+
+    // ========================================================
+// EVITAR DOBLE ENVÍO DE LA COMPRA
+// ========================================================
+
+const formularioCompra =
+    document.getElementById("compraForm");
+
+const botonRegistrar =
+    document.getElementById("botonRegistrarCompra");
+
+formularioCompra.addEventListener("submit", function () {
+
+    if (!formularioCompra.checkValidity()) {
+        return;
+    }
+
+    botonRegistrar.disabled = true;
+
+    botonRegistrar.innerHTML =
+        '<span class="spinner-border spinner-border-sm me-2"></span>' +
+        'Registrando...';
+});
+
+
+
+
+    // ========================================================
+    // ACTUALIZAR TOTALES EN TIEMPO REAL
+    // ========================================================
+
+    contenedor.addEventListener(
+        "input",
+        actualizarResumen
+    );
+
+    contenedor.addEventListener(
+        "change",
+        actualizarResumen
+    );
+
+
+    function actualizarResumen() {
+
+        const filas =
+            contenedor.querySelectorAll(
+                ".detalle-compra"
+            );
+
+        let productos = 0;
+        let unidades = 0;
+        let total = 0;
+
+
+        filas.forEach(function (fila) {
+
+            /*
+             * Ignoramos filas eliminadas.
+             */
+
+            if (fila.style.display === "none") {
+                return;
+            }
+
+
+            const producto =
+                fila.querySelector(
+                    'select[name$="-producto"]'
+                );
+
+            const cantidad =
+                fila.querySelector(
+                    'input[name$="-cantidad"]'
+                );
+
+            const precioCompra =
+                fila.querySelector(
+                    'input[name$="-precio_compra"]'
+                );
+
+            const subtotalElemento =
+                fila.querySelector(
+                    "[data-subtotal]"
+                );
+
+
+            const cantidadValor =
+                parseFloat(
+                    cantidad?.value || 0
+                );
+
+            const precioValor =
+                parseFloat(
+                    precioCompra?.value || 0
+                );
+
+
+            const subtotal =
+                cantidadValor * precioValor;
+
+
+            if (subtotalElemento) {
+
+                subtotalElemento.textContent =
+                    "$" + subtotal.toFixed(2);
+            }
+
+
+            if (producto && producto.value) {
+
+                productos += 1;
+
+                unidades +=
+                    Number.isFinite(cantidadValor)
+                        ? cantidadValor
+                        : 0;
+            }
+
+
+            total +=
+                Number.isFinite(subtotal)
+                    ? subtotal
+                    : 0;
+
+        });
+
+
+        document.getElementById(
+            "totalProductos"
+        ).textContent = productos;
+
+
+        document.getElementById(
+            "totalUnidades"
+        ).textContent = unidades;
+
+
+        document.getElementById(
+            "totalCompra"
+        ).textContent =
+            "$" + total.toFixed(2);
+    }
+
+
+    // Calcula el resumen al cargar la página.
+
+    actualizarResumen();
+
+});
+
+</script>
+
+{% endblock %}

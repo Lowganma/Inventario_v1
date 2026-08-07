@@ -99,7 +99,8 @@
             </span>
         </div>
     {% endif %}
-</li>
+
+        
                     
                     {% if request.user.is_authenticated %}
                     <li class="nav-item">
@@ -112,6 +113,18 @@
                         </a>
                     </li>
 
+                    <li class="nav-item">
+            <a
+                class="nav-link"
+                href="{% url 'compras:lista' %}"
+            >
+                                <i class="bi bi-cart-check me-1"></i>
+                                Compras
+                            </a>
+                        </li>
+                    
+                </li>
+                    
                     <li class="nav-item">
                         <a
                             class="nav-link"
@@ -194,6 +207,43 @@
     {# ===================================================== #}
     {# CONTENIDO PARTICULAR DE CADA PÁGINA                   #}
     {# ===================================================== #}
+
+    {% if messages %}
+    <div class="container main-container pt-3">
+        {% for message in messages %}
+
+            <div
+                class="
+                    alert
+                    {% if message.tags == 'success' %}
+                        alert-success
+                    {% elif message.tags == 'error' %}
+                        alert-danger
+                    {% elif message.tags == 'warning' %}
+                        alert-warning
+                    {% else %}
+                        alert-info
+                    {% endif %}
+                    alert-dismissible
+                    fade
+                    show
+                "
+                role="alert"
+            >
+                {{ message }}
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Cerrar"
+                ></button>
+            </div>
+
+        {% endfor %}
+    </div>
+{% endif %}
+
     <main class="container main-container py-4">
         {% block content %}
         {% endblock %}
