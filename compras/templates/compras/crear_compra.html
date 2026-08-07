@@ -44,6 +44,26 @@
 
             {% csrf_token %}
 
+            <div class="mb-3">
+
+    <label
+        for="{{ formulario.metodo_pago.id_for_label }}"
+        class="form-label fw-semibold"
+    >
+        Método de pago
+    </label>
+
+    {{ formulario.metodo_pago }}
+
+    {% for error in formulario.metodo_pago.errors %}
+        <div class="text-danger small mt-1">
+            {{ error }}
+        </div>
+    {% endfor %}
+
+</div>
+
+
             <!--
                 Management form obligatorio para que Django
                 pueda procesar correctamente el formset.

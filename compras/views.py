@@ -73,6 +73,7 @@ def crear_compra(request):
                 compra = registrar_compra(
                     negocio=negocio,
                     usuario=request.user,
+                    metodo_pago=formulario.cleaned_data["metodo_pago"],
                     notas=formulario.cleaned_data.get(
                         "notas",
                         "",

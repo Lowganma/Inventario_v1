@@ -42,5 +42,9 @@ urlpatterns = [
         "ventas/",
         include("ventas.urls"),
     ),
+    path(
+    "caja/",
+    include("caja.urls"),
+    ),
     
 ]

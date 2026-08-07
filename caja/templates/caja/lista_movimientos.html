@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}
+Movimientos de caja
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+
+        <div
+            class="
+                d-flex
+                flex-column
+                flex-md-row
+                justify-content-between
+                align-items-md-center
+                gap-3
+                mb-4
+            "
+        >
+
+            <div>
+                <a
+                    href="{% url 'caja:dashboard' %}"
+                    class="text-decoration-none d-inline-flex align-items-center mb-2"
+                >
+                    <i class="bi bi-arrow-left me-2"></i>
+                    Volver a caja
+                </a>
+
+                <h1 class="page-title mb-1">
+                    Movimientos de caja
+                </h1>
+
+                <p class="page-subtitle mb-0">
+                    Historial de entradas y salidas de dinero.
+                </p>
+            </div>
+
+            <a
+                href="{% url 'caja:crear_movimiento' %}"
+                class="btn btn-primary"
+            >
+                <i class="bi bi-plus-circle me-2"></i>
+                Nuevo movimiento
+            </a>
+
+        </div>
+
+
+        <div class="card content-card">
+
+            <div class="card-body p-4">
+
+                {% if movimientos %}
+
+                    <div class="table-responsive">
+
+                        <table class="table align-middle">
+
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Origen</th>
+                                    <th>Concepto</th>
+                                    <th>Método</th>
+                                    <th>Referencia</th>
+                                    <th class="text-end">Monto</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for movimiento in movimientos %}
+
+                                    <tr>
+
+                                        <td>
+                                            {{ movimiento.fecha|date:"d/m/Y H:i" }}
+                                        </td>
+
+                                        <td>
+                                            {% if movimiento.tipo == "ingreso" %}
+                                                <span class="badge text-bg-success">
+                                                    Ingreso
+                                                </span>
+                                            {% else %}
+                                                <span class="badge text-bg-danger">
+                                                    Egreso
+                                                </span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            {{ movimiento.get_origen_display }}
+                                        </td>
+
+                                        <td>
+                                            {{ movimiento.concepto }}
+                                        </td>
+
+                                        <td>
+                                            {{ movimiento.get_metodo_pago_display }}
+                                        </td>
+
+                                        <td>
+                                            {% if movimiento.referencia %}
+                                                {{ movimiento.referencia }}
+                                            {% else %}
+                                                <span class="text-muted">
+                                                    —
+                                                </span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td class="text-end">
+
+                                            {% if movimiento.tipo == "ingreso" %}
+
+                                                <strong class="text-success">
+                                                    + ${{ movimiento.monto|floatformat:2 }}
+                                                </strong>
+
+                                            {% else %}
+
+                                                <strong class="text-danger">
+                                                    - ${{ movimiento.monto|floatformat:2 }}
+                                                </strong>
+
+                                            {% endif %}
+
+                                        </td>
+
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="text-center py-5">
+
+                        <i class="bi bi-cash-stack display-5 text-muted"></i>
+
+                        <h3 class="h5 mt-3">
+                            No hay movimientos registrados
+                        </h3>
+
+                        <p class="text-muted">
+                            Los ingresos y egresos aparecerán aquí.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

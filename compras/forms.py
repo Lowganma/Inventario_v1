@@ -25,6 +25,7 @@ class CompraForm(forms.ModelForm):
         model = Compra
 
         fields = [
+            "metodo_pago",
             "notas",
         ]
 
@@ -38,7 +39,14 @@ class CompraForm(forms.ModelForm):
                     ),
                 }
             ),
+            "metodo_pago": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+),
         }
+
+        
 
 
 # ============================================================

@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Nuevo movimiento
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8 col-xl-6">
+
+        <div class="mb-4">
+
+            <a
+                href="{% url 'caja:dashboard' %}"
+                class="text-decoration-none"
+            >
+                <i class="bi bi-arrow-left me-2"></i>
+                Volver a caja
+            </a>
+
+            <h1 class="page-title mt-3 mb-1">
+                Nuevo movimiento
+            </h1>
+
+            <p class="page-subtitle">
+                Registra manualmente una entrada o salida de dinero.
+            </p>
+
+        </div>
+
+
+        <div class="card content-card">
+
+            <div class="card-body p-4">
+
+                <form method="post">
+
+                    {% csrf_token %}
+
+
+                    <div class="mb-3">
+
+                        <label
+                            for="{{ formulario.tipo.id_for_label }}"
+                            class="form-label fw-semibold"
+                        >
+                            Tipo de movimiento
+                        </label>
+
+                        {{ formulario.tipo }}
+
+                        {% for error in formulario.tipo.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label
+                            for="{{ formulario.monto.id_for_label }}"
+                            class="form-label fw-semibold"
+                        >
+                            Monto
+                        </label>
+
+                        <div class="input-group">
+
+                            <span class="input-group-text">
+                                $
+                            </span>
+
+                            {{ formulario.monto }}
+
+                        </div>
+
+                        {% for error in formulario.monto.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label
+                            for="{{ formulario.metodo_pago.id_for_label }}"
+                            class="form-label fw-semibold"
+                        >
+                            Método de pago
+                        </label>
+
+                        {{ formulario.metodo_pago }}
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label
+                            for="{{ formulario.concepto.id_for_label }}"
+                            class="form-label fw-semibold"
+                        >
+                            Concepto
+                        </label>
+
+                        {{ formulario.concepto }}
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label
+                            for="{{ formulario.referencia.id_for_label }}"
+                            class="form-label fw-semibold"
+                        >
+                            Referencia
+                        </label>
+
+                        {{ formulario.referencia }}
+
+                    </div>
+
+
+                    <div class="mb-4">
+
+                        <label
+                            for="{{ formulario.notas.id_for_label }}"
+                            class="form-label fw-semibold"
+                        >
+                            Notas
+                        </label>
+
+                        {{ formulario.notas }}
+
+                    </div>
+
+
+                    <div
+                        class="
+                            d-grid
+                            d-md-flex
+                            justify-content-md-end
+                            gap-2
+                        "
+                    >
+
+                        <a
+                            href="{% url 'caja:dashboard' %}"
+                            class="btn btn-outline-secondary"
+                        >
+                            Cancelar
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            <i class="bi bi-check-circle me-2"></i>
+                            Registrar movimiento
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

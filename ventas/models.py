@@ -105,6 +105,21 @@ class Venta(models.Model):
         blank=True,
     )
 
+    METODOS_PAGO = [
+    ("efectivo", "Efectivo"),
+    ("transferencia", "Transferencia"),
+    ("divisa", "Divisa"),
+    ("otro", "Otro"),
+    ]
+
+    metodo_pago = models.CharField(
+    max_length=20,
+    choices=METODOS_PAGO,
+    blank=True,
+)
+
+
+
     class Meta:
         ordering = [
             "-fecha",

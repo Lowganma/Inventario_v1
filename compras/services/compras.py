@@ -6,13 +6,14 @@ from django.db import transaction
 from productos.models import Producto
 
 from compras.models import Compra, DetalleCompra
-
+from caja.services.caja import registrar_movimiento
 
 @transaction.atomic
 def registrar_compra(
     *,
     negocio,
     usuario,
+    metodo_pago,
     notas,
     detalles,
 ):
@@ -27,6 +28,7 @@ def registrar_compra(
     compra = Compra.objects.create(
         negocio=negocio,
         usuario=usuario,
+        metodo_pago=metodo_pago,
         notas=notas or "",
         total=Decimal("0.00"),
     )
@@ -127,5 +129,25 @@ def registrar_compra(
             "total",
         ]
     )
+
+    # ============================================================
+# REGISTRO AUTOMÁTICO EN CAJA
+# ============================================================
+
+    registrar_movimiento(
+        negocio=negocio,
+        usuario=usuario,
+        tipo="egreso",
+        monto=total_compra,
+        metodo_pago=metodo_pago,
+        concepto=f"Compra #{compra.id}",
+        origen="compra",
+        referencia=f"COMPRA-{compra.id}",
+        notas="Egreso generado automáticamente desde Compras.",
+    )
+
+
+
+
 
     return compra

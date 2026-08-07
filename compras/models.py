@@ -30,6 +30,20 @@ class Compra(models.Model):
         related_name="compras_registradas",
     )
 
+    METODOS_PAGO = [
+    ("efectivo", "Efectivo"),
+    ("transferencia", "Transferencia"),
+    ("divisa", "Divisa"),
+    ("otro", "Otro"),
+]
+
+    metodo_pago = models.CharField(
+        max_length=20,
+        choices=METODOS_PAGO,
+        default="efectivo",
+    )
+
+
     fecha = models.DateField(
         auto_now_add=True,
     )
