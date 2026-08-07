@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
+from django.core.validators import RegexValidator
 from django.db import models
 
 from usuarios.models import Negocio
@@ -15,7 +16,16 @@ class Categoria(models.Model):
     )
     nombre = models.CharField(max_length=255)
     descripcion = models.TextField(blank=True)
-    color = models.CharField(max_length=7, default="#0d6efd")
+    color = models.CharField(
+        max_length=7,
+        default="#0d6efd",
+        validators=[
+            RegexValidator(
+                regex=r"^#[0-9A-Fa-f]{6}$",
+                message="Introduce un color hexadecimal válido (por ejemplo, #0d6efd).",
+            )
+        ],
+    )
     activa = models.BooleanField(default=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 

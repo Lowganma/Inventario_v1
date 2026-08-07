@@ -1,9 +1,14 @@
 from django import forms
+from django.db.models import Q
 
 from .models import Categoria, Producto
 
 
 class CategoriaForm(forms.ModelForm):
+    def __init__(self, *args, negocio=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.negocio = negocio
+
     class Meta:
         model = Categoria
         fields = ["nombre", "descripcion", "color", "activa"]
@@ -24,15 +29,32 @@ class CategoriaForm(forms.ModelForm):
             "activa": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
 
+    def clean_nombre(self):
+        """Valida la unicidad dentro de la empresa antes de llegar a la base de datos."""
+        nombre = self.cleaned_data["nombre"].strip()
+        categorias = Categoria.objects.filter(negocio=self.negocio, nombre__iexact=nombre)
+        if self.instance.pk:
+            categorias = categorias.exclude(pk=self.instance.pk)
+        if self.negocio and categorias.exists():
+            raise forms.ValidationError("Ya existe una categoría con este nombre.")
+        return nombre
+
 
 class ProductoForm(forms.ModelForm):
     def __init__(self, *args, negocio=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.negocio = negocio
         # La lista nunca expone categorías de otra empresa.
-        self.fields["categoria"].queryset = (
-            Categoria.objects.filter(negocio=negocio) if negocio else Categoria.objects.none()
-        )
+        categorias = Categoria.objects.none()
+        if negocio:
+            # Las altas solo ofrecen categorías activas. Al editar se conserva la
+            # categoría actual aunque posteriormente haya sido desactivada.
+            categorias = Categoria.objects.filter(negocio=negocio, activa=True)
+            if self.instance.pk and self.instance.categoria_id:
+                categorias = Categoria.objects.filter(negocio=negocio).filter(
+                    Q(activa=True) | Q(pk=self.instance.categoria_id)
+                )
+        self.fields["categoria"].queryset = categorias
 
     class Meta:
         model = Producto
@@ -81,3 +103,15 @@ class ProductoForm(forms.ModelForm):
         if not self.negocio or categoria.negocio_id != self.negocio.id:
             raise forms.ValidationError("Selecciona una categoría de tu negocio.")
         return categoria
+
+    def clean_codigo(self):
+        """Los códigos informados son únicos únicamente dentro del negocio."""
+        codigo = self.cleaned_data["codigo"].strip()
+        if not codigo or not self.negocio:
+            return codigo
+        productos = Producto.objects.filter(negocio=self.negocio, codigo=codigo)
+        if self.instance.pk:
+            productos = productos.exclude(pk=self.instance.pk)
+        if productos.exists():
+            raise forms.ValidationError("Ya existe un producto con este código.")
+        return codigo

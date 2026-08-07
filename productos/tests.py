@@ -80,3 +80,21 @@ class InventarioMultiempresaTests(TestCase):
         respuesta = views.crear_producto(self.request("post", reverse("productos:crear"), {"categoria": self.otra_categoria.id, "nombre": "Intruso", "stock": 0, "stock_minimo": 0, "costo": 0, "precio_venta": 0, "activo": "on"}))
         self.assertEqual(respuesta.status_code, 200)
         self.assertFalse(Producto.objects.filter(nombre="Intruso").exists())
+
+    def test_codigo_duplicado_muestra_error_sin_fallar(self):
+        self.producto.codigo = "B-01"
+        self.producto.save()
+        respuesta = views.crear_producto(self.request("post", reverse("productos:crear"), {"categoria": self.categoria.id, "codigo": "B-01", "nombre": "Agua", "stock": 1, "stock_minimo": 0, "costo": 1, "precio_venta": 2, "activo": "on"}))
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, "Ya existe un producto con este código.")
+
+    def test_nombre_de_categoria_duplicado_muestra_error(self):
+        respuesta = views.crear_categoria(self.request("post", reverse("productos:crear_categoria"), {"nombre": "Bebidas", "descripcion": "", "color": "#0d6efd", "activa": "on"}))
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, "Ya existe una categoría con este nombre.")
+
+    def test_categoria_inactiva_no_se_ofrece_al_crear_producto(self):
+        self.categoria.activa = False
+        self.categoria.save()
+        respuesta = views.crear_producto(self.request("get", reverse("productos:crear")))
+        self.assertNotContains(respuesta, "Bebidas")
