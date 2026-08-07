@@ -113,11 +113,16 @@ def lista_categorias(request):
 
 
 def _guardar_categoria(request, categoria=None):
-    formulario = CategoriaForm(request.POST or None, instance=categoria)
+    formulario = CategoriaForm(
+        request.POST or None,
+        instance=categoria,
+        negocio=request.user.negocio,
+    )
     if request.method == "POST" and formulario.is_valid():
         categoria = formulario.save(commit=False)
         # La empresa se asigna en servidor para impedir suplantación por POST.
         categoria.negocio = request.user.negocio
+        categoria.full_clean()
         categoria.save()
         messages.success(request, "Categoría guardada correctamente.")
         return redirect("productos:categorias")
