@@ -1,15 +1,11 @@
 {% extends "base.html" %}
-
-
+{% block title %}{% if producto %}Editar{% else %}Nuevo{% endif %} producto{% endblock %}
 {% block content %}
-    <h1>Formulario de Producto</h1>
-    <form 
-        novalidate
-        action="{% url 'productos:formulario' %}" 
-        method="post">
-        {%  csrf_token %}
-        {{ form }}
-        <input type= "submit" value="Enviar" />
-    </form>
-    
+<div class="row justify-content-center"><div class="col-xl-8">
+<h1>{% if producto %}Editar producto{% else %}Nuevo producto{% endif %}</h1>
+<p class="text-body-secondary">Registra sus existencias, costo y precio de venta.</p>
+<form method="post" novalidate class="card card-body">{% csrf_token %}
+    {% include "productos/form_snipet.html" with form=formulario %}
+    <div class="d-flex gap-2"><button class="btn btn-primary" type="submit">Guardar producto</button><a class="btn btn-outline-secondary" href="{% url 'productos:index' %}">Cancelar</a></div>
+</form></div></div>
 {% endblock %}
