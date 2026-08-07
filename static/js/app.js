@@ -67,3 +67,36 @@ function configurarTema() {
         }
     }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    const botones = document.querySelectorAll(".toggle-password");
+
+    botones.forEach(function (boton) {
+        boton.addEventListener("click", function () {
+            const targetId = boton.dataset.target;
+            const input = document.getElementById(targetId);
+            const icono = boton.querySelector("i");
+
+            if (!input) {
+                return;
+            }
+
+            const mostrar = input.type === "password";
+
+            input.type = mostrar ? "text" : "password";
+
+            if (icono) {
+                icono.className = mostrar
+                    ? "bi bi-eye-slash"
+                    : "bi bi-eye";
+            }
+
+            const texto = mostrar
+                ? "Ocultar contraseña"
+                : "Mostrar contraseña";
+
+            boton.title = texto;
+            boton.setAttribute("aria-label", texto);
+        });
+    });
+});

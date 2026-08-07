@@ -32,32 +32,54 @@
                             </div>
                         {% endif %}
 
-                        {% for field in formulario %}
-                            <div class="mb-3">
+                       {% for field in formulario %}
+                                <div class="mb-3">
 
-                                <label
-                                    for="{{ field.id_for_label }}"
-                                    class="form-label fw-semibold"
-                                >
-                                    {{ field.label }}
-                                </label>
+                                    <label
+                                        for="{{ field.id_for_label }}"
+                                        class="form-label fw-semibold"
+                                    >
+                                        {{ field.label }}
+                                    </label>
 
-                                {{ field }}
+                                    {% if field.name == "password1" or field.name == "password2" %}
 
-                                {% if field.help_text %}
-                                    <div class="form-text">
-                                        {{ field.help_text }}
-                                    </div>
-                                {% endif %}
+                                        <div class="input-group">
 
-                                {% for error in field.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {{ error }}
-                                    </div>
-                                {% endfor %}
+                                            {{ field }}
 
-                            </div>
-                        {% endfor %}
+                                            <button
+                                                type="button"
+                                                class="btn btn-outline-secondary toggle-password"
+                                                data-target="{{ field.id_for_label }}"
+                                                aria-label="Mostrar contraseña"
+                                                title="Mostrar contraseña"
+                                            >
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+
+                                        </div>
+
+                                    {% else %}
+
+                                        {{ field }}
+
+                                    {% endif %}
+
+                                    {% if field.help_text %}
+                                        <div class="form-text">
+                                            {{ field.help_text|safe }}
+                                        </div>
+                                    {% endif %}
+
+                                    {% for error in field.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ error }}
+                                        </div>
+                                    {% endfor %}
+
+                                </div>
+                            {% endfor %}
 
                         <div class="d-grid mt-4">
                             <button
