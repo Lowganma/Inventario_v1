@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     "cuentas.apps.CuentasConfig",
     "usuarios.apps.UsuariosConfig",
     "compras.apps.ComprasConfig",
+    "ventas.apps.VentasConfig",
 ]
 
 MIDDLEWARE = [

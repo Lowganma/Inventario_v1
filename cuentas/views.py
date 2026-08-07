@@ -222,12 +222,20 @@ def detalle_cuenta(request, cuenta_id):
         id=cuenta_id,
         cliente__negocio=request.user.negocio
     )
+    
+    venta_origen = getattr(
+        cuenta, 
+        "venta", 
+        None
+    )
+
 
     abonos = cuenta.abonos.all().order_by("-fecha_pago")
 
     contexto = {
         "cuenta": cuenta,
         "abonos": abonos,
+        "venta_origen": venta_origen,
     }
 
     return render(

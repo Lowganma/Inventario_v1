@@ -37,6 +37,10 @@ urlpatterns = [
     path(
         "compras/",
         include("compras.urls"),
-    )
+    ),
+    path(
+        "ventas/",
+        include("ventas.urls"),
+    ),
     
 ]

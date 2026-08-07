@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Ventas
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+
+        <!-- ==================================================
+             ENCABEZADO
+        =================================================== -->
+
+        <div
+            class="
+                d-flex
+                flex-column
+                flex-md-row
+                justify-content-between
+                align-items-md-center
+                gap-3
+                mb-4
+            "
+        >
+
+            <div>
+                <h1 class="page-title mb-1">
+                    Ventas
+                </h1>
+
+                <p class="page-subtitle mb-0">
+                    Consulta las ventas realizadas por tu negocio.
+                </p>
+            </div>
+
+            <a
+                href="{% url 'ventas:crear' %}"
+                class="btn btn-primary"
+            >
+                <i class="bi bi-cart-plus me-2"></i>
+                Nueva venta
+            </a>
+
+        </div>
+
+
+        <!-- ==================================================
+             RESUMEN
+        =================================================== -->
+
+        <div class="row g-3 mb-4">
+
+            <div class="col-12 col-md-4">
+
+                <div class="card content-card h-100">
+
+                    <div class="card-body">
+
+                        <p class="text-muted mb-1">
+                            Ventas registradas
+                        </p>
+
+                        <h2 class="mb-0">
+                            {{ ventas|length }}
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-12 col-md-4">
+
+                <div class="card content-card h-100">
+
+                    <div class="card-body">
+
+                        <p class="text-muted mb-1">
+                            Última venta
+                        </p>
+
+                        {% if ventas %}
+
+                            <h5 class="mb-0">
+                                {{ ventas.0.fecha|date:"d/m/Y H:i" }}
+                            </h5>
+
+                        {% else %}
+
+                            <h5 class="mb-0 text-muted">
+                                Sin ventas
+                            </h5>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-12 col-md-4">
+
+                <div class="card content-card h-100">
+
+                    <div class="card-body">
+
+                        <p class="text-muted mb-1">
+                            Última operación
+                        </p>
+
+                        {% if ventas %}
+
+                            <h5 class="mb-0">
+                                ${{ ventas.0.total|floatformat:2 }}
+                            </h5>
+
+                        {% else %}
+
+                            <h5 class="mb-0">
+                                $0.00
+                            </h5>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             HISTORIAL
+        =================================================== -->
+
+        <div class="card content-card">
+
+            <div class="card-body p-4">
+
+                <div class="d-flex align-items-center mb-3">
+
+                    <i class="bi bi-receipt fs-4 me-2"></i>
+
+                    <h2 class="h5 mb-0">
+                        Historial de ventas
+                    </h2>
+
+                </div>
+
+
+                {% if ventas %}
+
+                    <div class="table-responsive">
+
+                        <table class="table align-middle">
+
+                            <thead>
+
+                                <tr>
+                                    <th>
+                                        Venta
+                                    </th>
+
+                                    <th>
+                                        Fecha
+                                    </th>
+
+                                    <th>
+                                        Cliente
+                                    </th>
+
+                                    <th>
+                                        Productos
+                                    </th>
+
+                                    <th>
+                                        Pago
+                                    </th>
+
+                                    <th class="text-end">
+                                        Total
+                                    </th>
+
+                                    <th class="text-end">
+                                        Acción
+                                    </th>
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                {% for venta in ventas %}
+
+                                    <tr>
+
+                                        <td>
+                                            <strong>
+                                                #{{ venta.id }}
+                                            </strong>
+                                        </td>
+
+
+                                        <td>
+                                            {{ venta.fecha|date:"d/m/Y H:i" }}
+                                        </td>
+
+
+                                        <td>
+
+                                            {% if venta.cliente %}
+
+                                                {{ venta.cliente.nombre }}
+                                                {{ venta.cliente.apellido }}
+
+                                            {% else %}
+
+                                                <span class="text-muted">
+                                                    Consumidor final
+                                                </span>
+
+                                            {% endif %}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            <span class="badge text-bg-secondary">
+
+                                                {{ venta.detalles.count }}
+
+                                                {% if venta.detalles.count == 1 %}
+                                                    producto
+                                                {% else %}
+                                                    productos
+                                                {% endif %}
+
+                                            </span>
+
+                                        </td>
+
+
+                                        <td>
+
+                                            {% if venta.tipo_pago == "fiado" %}
+
+                                                <span class="badge text-bg-warning">
+                                                    <i class="bi bi-clock-history me-1"></i>
+                                                    Fiado
+                                                </span>
+
+                                            {% else %}
+
+                                                <span class="badge text-bg-success">
+                                                    <i class="bi bi-cash-coin me-1"></i>
+                                                    Pago inmediato
+                                                </span>
+
+                                            {% endif %}
+
+                                        </td>
+
+
+                                        <td class="text-end">
+
+                                            <strong>
+                                                ${{ venta.total|floatformat:2 }}
+                                            </strong>
+
+                                        </td>
+
+
+                                        <td class="text-end">
+
+                                            <a
+                                                href="{% url 'ventas:detalle' venta.id %}"
+                                                class="btn btn-sm btn-outline-primary"
+                                            >
+                                                <i class="bi bi-eye me-1"></i>
+                                                Ver
+                                            </a>
+
+                                        </td>
+
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="text-center py-5">
+
+                        <i
+                            class="
+                                bi
+                                bi-cart-x
+                                display-4
+                                text-muted
+                            "
+                        ></i>
+
+                        <h3 class="h5 mt-3">
+                            Aún no hay ventas
+                        </h3>
+
+                        <p class="text-muted">
+                            Registra tu primera venta
+                            para comenzar a llevar el historial.
+                        </p>
+
+                        <a
+                            href="{% url 'ventas:crear' %}"
+                            class="btn btn-primary"
+                        >
+                            <i class="bi bi-cart-plus me-2"></i>
+                            Registrar primera venta
+                        </a>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

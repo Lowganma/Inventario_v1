@@ -123,6 +123,16 @@
                             </a>
                         </li>
                     
+                        <li class="nav-item">
+    <a
+        class="nav-link"
+        href="{% url 'ventas:lista' %}"
+    >
+        <i class="bi bi-cart-check me-1"></i>
+        Ventas
+    </a>
+</li>
+
                 </li>
                     
                     <li class="nav-item">
@@ -152,16 +162,6 @@
                         </a>
                     </li>
 
-                    {# Acceso rápido para crear una cuenta #}
-                    <li class="nav-item ms-lg-2">
-                        <a
-                            class="btn btn-light mt-2 mt-lg-0"
-                            href="{% url 'cuentas:crear' %}"
-                        >
-                            <i class="bi bi-plus-lg me-1"></i>
-                            Nueva cuenta
-                        </a>
-                    </li>
 
                     <li class="nav-item ms-lg-2">
                         <form method="post" action="{% url 'logout' %}">

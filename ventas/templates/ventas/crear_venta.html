@@ -1,0 +1,1099 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Nueva venta
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+
+        {# ===================================================== #}
+        {# ENCABEZADO                                            #}
+        {# ===================================================== #}
+
+        <div
+            class="
+                d-flex
+                flex-column
+                flex-md-row
+                justify-content-between
+                align-items-md-center
+                gap-3
+                mb-4
+            "
+        >
+
+            <div>
+                <a
+                    href="{% url 'ventas:lista' %}"
+                    class="text-decoration-none d-inline-flex align-items-center mb-2"
+                >
+                    <i class="bi bi-arrow-left me-2"></i>
+                    Volver a ventas
+                </a>
+
+                <h1 class="page-title mb-1">
+                    Nueva venta
+                </h1>
+
+                <p class="page-subtitle mb-0">
+                    Selecciona los productos y registra la forma de pago.
+                </p>
+            </div>
+
+        </div>
+
+
+        <form
+            method="post"
+            id="ventaForm"
+            novalidate
+        >
+
+            {% csrf_token %}
+
+            {{ detalles.management_form }}
+
+
+            {# ================================================= #}
+            {# DATOS GENERALES                                   #}
+            {# ================================================= #}
+
+            <div class="card content-card mb-4">
+                <div class="card-body p-4">
+
+                    <h2 class="h5 mb-4">
+                        <i class="bi bi-receipt me-2"></i>
+                        Datos de la venta
+                    </h2>
+
+
+                    <div class="row g-4">
+
+                        {# Forma de pago #}
+
+                        <div class="col-12 col-lg-6">
+
+                            <label class="form-label fw-semibold d-block">
+                                Forma de pago
+                            </label>
+
+                            <div
+                                id="tipoPago"
+                                class="d-flex flex-column gap-2"
+                            >
+                                {{ formulario.tipo_pago }}
+                            </div>
+
+                            {% for error in formulario.tipo_pago.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+
+                        {# Cliente #}
+
+                        <div class="col-12 col-lg-6">
+
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                <label
+                                    for="{{ formulario.cliente.id_for_label }}"
+                                    class="form-label fw-semibold mb-0"
+                                >
+                                    Cliente
+                                </label>
+
+                                <a
+                                    href="{% url 'clientes:crear' %}"
+                                    target="_blank"
+                                    class="btn btn-sm btn-outline-primary"
+                                    title="Registrar nuevo cliente"
+                                >
+                                    <i class="bi bi-person-plus"></i>
+                                </a>
+
+                            </div>
+
+                            {{ formulario.cliente }}
+
+                            <div
+                                id="ayudaCliente"
+                                class="form-text"
+                            >
+                                Opcional para pago inmediato.
+                            </div>
+
+                            {% for error in formulario.cliente.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+
+                    {# Aviso de fiado #}
+
+                    <div
+                        id="avisoFiado"
+                        class="alert alert-warning mt-4 d-none"
+                    >
+                        <i class="bi bi-wallet2 me-2"></i>
+
+                        Esta venta se registrará como
+                        <strong>fiada</strong> y generará
+                        automáticamente una cuenta por cobrar
+                        para el cliente seleccionado.
+                    </div>
+
+                </div>
+            </div>
+
+
+            {# ================================================= #}
+            {# PRODUCTOS                                         #}
+            {# ================================================= #}
+
+            <div class="card content-card mb-4">
+
+                <div class="card-body p-4">
+
+                    <div
+                        class="
+                            d-flex
+                            flex-column
+                            flex-md-row
+                            justify-content-between
+                            align-items-md-center
+                            gap-3
+                            mb-4
+                        "
+                    >
+
+                        <div>
+                            <h2 class="h5 mb-1">
+                                <i class="bi bi-box-seam me-2"></i>
+                                Productos
+                            </h2>
+
+                            <p class="text-muted mb-0">
+                                Agrega los productos incluidos en la venta.
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            id="agregarProducto"
+                            class="btn btn-outline-primary"
+                        >
+                            <i class="bi bi-plus-lg me-1"></i>
+                            Agregar producto
+                        </button>
+
+                    </div>
+
+
+                    <div id="detallesVenta">
+
+                        {% for detalle in detalles %}
+
+                            <div
+                                class="
+                                    detalle-venta
+                                    border
+                                    rounded-3
+                                    p-3
+                                    mb-3
+                                    {% if detalle.DELETE.value %}
+                                        d-none
+                                    {% endif %}
+                                "
+                            >
+
+                                <div class="row g-3 align-items-end">
+
+                                    {# Producto #}
+
+                                    <div class="col-12 col-lg-5">
+
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                            <label
+                                                for="{{ detalle.producto.id_for_label }}"
+                                                class="form-label fw-semibold mb-0"
+                                            >
+                                                Producto
+                                            </label>
+
+                                            <a
+                                                href="{% url 'productos:crear' %}"
+                                                target="_blank"
+                                                class="btn btn-sm btn-outline-primary"
+                                                title="Crear producto"
+                                            >
+                                                <i class="bi bi-plus-lg"></i>
+                                            </a>
+
+                                        </div>
+
+                                        {{ detalle.producto }}
+
+                                        <div class="form-text stock-disponible">
+    Selecciona un producto para consultar existencias.
+                                        </div>
+
+                                        {% for error in detalle.producto.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+
+                                    </div>
+
+
+                                    {# Cantidad #}
+
+                                    <div class="col-6 col-lg-2">
+
+                                        <label
+                                            for="{{ detalle.cantidad.id_for_label }}"
+                                            class="form-label fw-semibold"
+                                        >
+                                            Cantidad
+                                        </label>
+
+                                        {{ detalle.cantidad }}
+
+                                        {% for error in detalle.cantidad.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+
+                                    </div>
+
+
+                                    {# Precio #}
+
+                                    <div class="col-6 col-lg-2">
+
+                                        <label
+                                            for="{{ detalle.precio_unitario.id_for_label }}"
+                                            class="form-label fw-semibold"
+                                        >
+                                            Precio
+                                        </label>
+
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                $
+                                            </span>
+
+                                            {{ detalle.precio_unitario }}
+                                        </div>
+
+                                        {% for error in detalle.precio_unitario.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+
+                                    </div>
+
+
+                                    {# Subtotal visual #}
+
+                                    <div class="col-6 col-lg-2">
+
+                                        <label class="form-label fw-semibold">
+                                            Subtotal
+                                        </label>
+
+                                        <div
+                                            class="form-control fw-semibold subtotal-linea"
+                                            data-subtotal
+                                        >
+                                            $0.00
+                                        </div>
+
+                                    </div>
+
+
+                                    {# Eliminar #}
+
+                                    <div class="col-6 col-lg-1">
+
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-danger w-100 eliminar-producto"
+                                            title="Quitar producto"
+                                        >
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+
+                                {% if detalle.DELETE %}
+                                    <div class="d-none">
+                                        {{ detalle.DELETE }}
+                                    </div>
+                                {% endif %}
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    {# ================================================= #}
+                    {# FORMULARIO VACÍO PARA AGREGAR FILAS              #}
+                    {# ================================================= #}
+
+                    <template id="detalleVacio">
+
+                        <div class="detalle-venta border rounded-3 p-3 mb-3">
+
+                            <div class="row g-3 align-items-end">
+
+                                <div class="col-12 col-lg-5">
+
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                        <label class="form-label fw-semibold mb-0">
+                                            Producto
+                                        </label>
+
+                                        <a
+                                            href="{% url 'productos:crear' %}"
+                                            target="_blank"
+                                            class="btn btn-sm btn-outline-primary"
+                                        >
+                                            <i class="bi bi-plus-lg"></i>
+                                        </a>
+
+                                    </div>
+
+                                    {{ detalles.empty_form.producto }}
+
+                                    <div class="form-text stock-disponible">
+    Selecciona un producto para consultar existencias.
+                                    </div>
+
+                                </div>
+
+
+                                <div class="col-6 col-lg-2">
+
+                                    <label class="form-label fw-semibold">
+                                        Cantidad
+                                    </label>
+
+                                    {{ detalles.empty_form.cantidad }}
+
+                                </div>
+
+
+                                <div class="col-6 col-lg-2">
+
+                                    <label class="form-label fw-semibold">
+                                        Precio
+                                    </label>
+
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            $
+                                        </span>
+
+                                        {{ detalles.empty_form.precio_unitario }}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="col-6 col-lg-2">
+
+                                    <label class="form-label fw-semibold">
+                                        Subtotal
+                                    </label>
+
+                                    <div
+                                        class="form-control fw-semibold"
+                                        data-subtotal
+                                    >
+                                        $0.00
+                                    </div>
+
+                                </div>
+
+
+                                <div class="col-6 col-lg-1">
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-danger w-100 eliminar-producto"
+                                    >
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+
+                            {% if detalles.empty_form.DELETE %}
+                                <div class="d-none">
+                                    {{ detalles.empty_form.DELETE }}
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+                    </template>
+
+                </div>
+            </div>
+
+
+            {# ================================================= #}
+            {# DESCUENTO, NOTAS Y RESUMEN                        #}
+            {# ================================================= #}
+
+            <div class="row g-4">
+
+                <div class="col-12 col-lg-7">
+
+                    <div class="card content-card h-100">
+
+                        <div class="card-body p-4">
+
+                            <div class="mb-4">
+
+                                <label
+                                    for="{{ formulario.descuento.id_for_label }}"
+                                    class="form-label fw-semibold"
+                                >
+                                    Descuento
+                                </label>
+
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        $
+                                    </span>
+
+                                    {{ formulario.descuento }}
+                                </div>
+
+                                {% for error in formulario.descuento.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+
+                            </div>
+
+
+                            <div>
+
+                                <label
+                                    for="{{ formulario.notas.id_for_label }}"
+                                    class="form-label fw-semibold"
+                                >
+                                    Notas
+                                </label>
+
+                                {{ formulario.notas }}
+
+                                {% for error in formulario.notas.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-12 col-lg-5">
+
+                    <div class="card content-card h-100">
+
+                        <div class="card-body p-4">
+
+                            <h2 class="h5 mb-4">
+                                Resumen
+                            </h2>
+
+
+                            <div class="d-flex justify-content-between mb-2">
+
+                                <span class="text-muted">
+                                    Productos
+                                </span>
+
+                                <strong id="totalProductos">
+                                    0
+                                </strong>
+
+                            </div>
+
+
+                            <div class="d-flex justify-content-between mb-2">
+
+                                <span class="text-muted">
+                                    Unidades
+                                </span>
+
+                                <strong id="totalUnidades">
+                                    0
+                                </strong>
+
+                            </div>
+
+
+                            <div class="d-flex justify-content-between mb-2">
+
+                                <span class="text-muted">
+                                    Subtotal
+                                </span>
+
+                                <strong id="subtotalVenta">
+                                    $0.00
+                                </strong>
+
+                            </div>
+
+
+                            <div class="d-flex justify-content-between mb-3">
+
+                                <span class="text-muted">
+                                    Descuento
+                                </span>
+
+                                <strong id="descuentoVenta">
+                                    $0.00
+                                </strong>
+
+                            </div>
+
+
+                            <hr>
+
+
+                            <div class="d-flex justify-content-between align-items-center">
+
+                                <span class="fs-5 fw-semibold">
+                                    Total
+                                </span>
+
+                                <span
+                                    id="totalVenta"
+                                    class="fs-3 fw-bold text-primary"
+                                >
+                                    $0.00
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {# ================================================= #}
+            {# BOTONES                                           #}
+            {# ================================================= #}
+
+            <div
+                class="
+                    d-grid
+                    d-md-flex
+                    justify-content-md-end
+                    gap-2
+                    mt-4
+                "
+            >
+
+                <a
+                    href="{% url 'ventas:lista' %}"
+                    class="btn btn-outline-secondary"
+                >
+                    Cancelar
+                </a>
+
+                <button
+                    type="submit"
+                    id="botonRegistrarVenta"
+                    class="btn btn-primary px-4"
+                >
+                    <i class="bi bi-cart-check me-2"></i>
+                    Registrar venta
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const contenedor =
+        document.getElementById("detallesVenta");
+
+    const botonAgregar =
+        document.getElementById("agregarProducto");
+
+    const template =
+        document.getElementById("detalleVacio");
+
+    const totalForms =
+        document.getElementById("id_form-TOTAL_FORMS");
+
+    const descuentoInput =
+        document.getElementById(
+            "{{ formulario.descuento.id_for_label }}"
+        );
+
+
+    // ========================================================
+    // AGREGAR PRODUCTO
+    // ========================================================
+
+    botonAgregar.addEventListener("click", function () {
+
+        const indice =
+            parseInt(totalForms.value);
+
+        const html =
+            template.innerHTML.replace(
+                /__prefix__/g,
+                indice
+            );
+
+        contenedor.insertAdjacentHTML(
+            "beforeend",
+            html
+        );
+
+        totalForms.value =
+            indice + 1;
+
+        actualizarResumen();
+    });
+
+
+    // ========================================================
+    // ELIMINAR PRODUCTO
+    // ========================================================
+
+    contenedor.addEventListener("click", function (event) {
+
+        const boton =
+            event.target.closest(
+                ".eliminar-producto"
+            );
+
+        if (!boton) {
+            return;
+        }
+
+        const fila =
+            boton.closest(".detalle-venta");
+
+        if (!fila) {
+            return;
+        }
+
+        const deleteInput =
+            fila.querySelector(
+                'input[name$="-DELETE"]'
+            );
+
+        if (deleteInput) {
+            deleteInput.checked = true;
+        }
+
+        /*
+         * Deshabilitamos los campos para evitar que el navegador
+         * siga validando campos required de una fila eliminada.
+         */
+        fila.querySelectorAll(
+            "input, select, textarea"
+        ).forEach(function (campo) {
+
+            if (
+                !campo.name ||
+                !campo.name.endsWith("-DELETE")
+            ) {
+                campo.disabled = true;
+                campo.required = false;
+            }
+
+        });
+
+        fila.classList.add("d-none");
+
+        actualizarResumen();
+    });
+
+
+    // ========================================================
+    // CÁLCULO DEL TOTAL
+    // ========================================================
+
+    function actualizarResumen() {
+
+        const filas =
+            contenedor.querySelectorAll(
+                ".detalle-venta"
+            );
+
+        let productos = 0;
+        let unidades = 0;
+        let subtotalGeneral = 0;
+
+
+        filas.forEach(function (fila) {
+
+            if (fila.classList.contains("d-none")) {
+                return;
+            }
+
+            const producto =
+                fila.querySelector(
+                    'select[name$="-producto"]'
+                );
+
+            const cantidad =
+                fila.querySelector(
+                    'input[name$="-cantidad"]'
+                );
+
+            const precio =
+                fila.querySelector(
+                    'input[name$="-precio_unitario"]'
+                );
+
+            const subtotalVisual =
+                fila.querySelector(
+                    "[data-subtotal]"
+                );
+
+
+            const cantidadValor =
+                parseFloat(
+                    cantidad?.value || 0
+                );
+
+            const precioValor =
+                parseFloat(
+                    precio?.value || 0
+                );
+
+
+            const subtotal =
+                cantidadValor * precioValor;
+
+
+            if (subtotalVisual) {
+                subtotalVisual.textContent =
+                    "$" + subtotal.toFixed(2);
+            }
+
+
+            if (producto && producto.value) {
+
+                productos += 1;
+
+                unidades +=
+                    Number.isFinite(cantidadValor)
+                        ? cantidadValor
+                        : 0;
+            }
+
+
+            subtotalGeneral +=
+                Number.isFinite(subtotal)
+                    ? subtotal
+                    : 0;
+
+        });
+
+
+        const descuento =
+            parseFloat(
+                descuentoInput?.value || 0
+            );
+
+
+        const descuentoSeguro =
+            Number.isFinite(descuento)
+                ? descuento
+                : 0;
+
+
+        const total =
+            Math.max(
+                subtotalGeneral - descuentoSeguro,
+                0
+            );
+
+
+        document.getElementById(
+            "totalProductos"
+        ).textContent = productos;
+
+
+        document.getElementById(
+            "totalUnidades"
+        ).textContent = unidades;
+
+
+        document.getElementById(
+            "subtotalVenta"
+        ).textContent =
+            "$" + subtotalGeneral.toFixed(2);
+
+
+        document.getElementById(
+            "descuentoVenta"
+        ).textContent =
+            "$" + descuentoSeguro.toFixed(2);
+
+
+        document.getElementById(
+            "totalVenta"
+        ).textContent =
+            "$" + total.toFixed(2);
+    }
+
+
+    contenedor.addEventListener(
+        "input",
+        actualizarResumen
+    );
+
+
+    descuentoInput?.addEventListener(
+        "input",
+        actualizarResumen
+    );
+
+
+    // ========================================================
+// OBTENER PRECIO Y STOCK DEL PRODUCTO
+// ========================================================
+
+async function cargarDatosProducto(select) {
+
+    const productoId = select.value;
+
+    const fila =
+        select.closest(".detalle-venta");
+
+    if (!fila) {
+        return;
+    }
+
+    const precioInput =
+        fila.querySelector(
+            'input[name$="-precio_unitario"]'
+        );
+
+    const stockTexto =
+        fila.querySelector(
+            ".stock-disponible"
+        );
+
+    if (!productoId) {
+
+        if (precioInput) {
+            precioInput.value = "";
+        }
+
+        if (stockTexto) {
+            stockTexto.textContent =
+                "Selecciona un producto para consultar existencias.";
+        }
+
+        actualizarResumen();
+
+        return;
+    }
+
+
+    try {
+
+        const respuesta = await fetch(
+            `/ventas/producto/${productoId}/datos/`
+        );
+
+        if (!respuesta.ok) {
+            throw new Error(
+                "No fue posible consultar el producto."
+            );
+        }
+
+        const datos =
+            await respuesta.json();
+
+
+        // Coloca automáticamente el precio vigente.
+        if (precioInput) {
+
+            precioInput.value =
+                Number(
+                    datos.precio_venta
+                ).toFixed(2);
+        }
+
+
+        // Muestra el stock disponible.
+        if (stockTexto) {
+
+            stockTexto.textContent =
+                `Stock disponible: ${datos.stock}`;
+        }
+
+
+        /*
+         * Guardamos el stock en la fila únicamente como
+         * información visual. La validación verdadera
+         * seguirá haciéndose en el backend.
+         */
+        fila.dataset.stock =
+            datos.stock;
+
+
+        actualizarResumen();
+
+    } catch (error) {
+
+        console.error(error);
+
+        if (stockTexto) {
+
+            stockTexto.textContent =
+                "No se pudo consultar el inventario.";
+        }
+    }
+}
+
+
+// ========================================================
+// ESCUCHAR CAMBIOS EN LOS PRODUCTOS
+// ========================================================
+
+contenedor.addEventListener(
+    "change",
+    function (event) {
+
+        if (
+            event.target.matches(
+                'select[name$="-producto"]'
+            )
+        ) {
+            cargarDatosProducto(
+                event.target
+            );
+        }
+
+        actualizarResumen();
+    }
+);
+
+
+
+    // ========================================================
+    // MOSTRAR AVISO CUANDO LA VENTA ES FIADA
+    // ========================================================
+
+    const avisoFiado =
+        document.getElementById("avisoFiado");
+
+    const ayudaCliente =
+        document.getElementById("ayudaCliente");
+
+
+    function actualizarTipoPago() {
+
+        const seleccionado =
+            document.querySelector(
+                'input[name="tipo_pago"]:checked'
+            );
+
+        const esFiado =
+            seleccionado?.value === "fiado";
+
+
+        avisoFiado.classList.toggle(
+            "d-none",
+            !esFiado
+        );
+
+
+        ayudaCliente.textContent =
+            esFiado
+                ? "Obligatorio para registrar una venta fiada."
+                : "Opcional para pago inmediato.";
+    }
+
+
+    document.querySelectorAll(
+        'input[name="tipo_pago"]'
+    ).forEach(function (radio) {
+
+        radio.addEventListener(
+            "change",
+            actualizarTipoPago
+        );
+
+    });
+
+
+    actualizarTipoPago();
+
+    document.querySelectorAll(
+    '#detallesVenta select[name$="-producto"]'
+).forEach(function (select) {
+
+    if (select.value) {
+        cargarDatosProducto(select);
+    }
+});
+    
+    actualizarResumen();
+
+
+});
+</script>
+
+{% endblock %}
