@@ -36,12 +36,60 @@ def dashboard_caja(request):
 
     saldo = ingresos - egresos
 
-    contexto = {
-        "ingresos": ingresos,
-        "egresos": egresos,
-        "saldo": saldo,
-        "ultimos_movimientos": movimientos[:10],
-    }
+
+
+    # --------------------------------------------------------
+# SALDOS POR MÉTODO DE PAGO
+# --------------------------------------------------------
+
+    metodos = [
+        ("efectivo", "Efectivo"),
+        ("transferencia", "Transferencia"),
+        ("divisa", "Divisa"),
+        ("otro", "Otro"),
+    ]
+
+    saldos_metodos = []
+
+    for codigo, nombre in metodos:
+
+        ingresos_metodo = (
+            movimientos
+            .filter(
+                tipo="ingreso",
+                metodo_pago=codigo,
+            )
+            .aggregate(total=Sum("monto"))["total"]
+            or Decimal("0.00")
+        )
+
+        egresos_metodo = (
+            movimientos
+            .filter(
+                tipo="egreso",
+                metodo_pago=codigo,
+            )
+            .aggregate(total=Sum("monto"))["total"]
+            or Decimal("0.00")
+        )
+
+        saldos_metodos.append(
+            {
+                "codigo": codigo,
+                "nombre": nombre,
+                "ingresos": ingresos_metodo,
+                "egresos": egresos_metodo,
+                "saldo": ingresos_metodo - egresos_metodo,
+            }
+        )
+
+        contexto = {
+            "ingresos": ingresos,
+            "egresos": egresos,
+            "saldo": saldo,
+            "saldos_metodos": saldos_metodos,
+            "ultimos_movimientos": movimientos[:5],
+        }
 
     return render(
         request,

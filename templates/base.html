@@ -103,15 +103,15 @@
         
                     
                     {% if request.user.is_authenticated %}
-                    <li class="nav-item">
-                        <a
-                            class="nav-link"
-                            href="{% url 'inicio' %}"
-                        >
-                            <i class="bi bi-house-door me-1"></i>
-                            Inicio
-                        </a>
-                    </li>
+                 <li class="nav-item">
+                    <a
+                        class="nav-link"
+                        href="{% url 'caja:dashboard' %}"
+                    >
+                        <i class="bi bi-cash-stack me-1"></i>
+                        Caja
+                    </a>
+                </li>
 
                     <li class="nav-item">
             <a

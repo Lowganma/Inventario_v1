@@ -27,6 +27,7 @@ class VentaForm(forms.ModelForm):
         fields = [
             "cliente",
             "tipo_pago",
+            "metodo_pago",
             "descuento",
             "notas",
         ]
@@ -39,6 +40,12 @@ class VentaForm(forms.ModelForm):
             ),
 
             "tipo_pago": forms.RadioSelect(),
+
+            "metodo_pago": forms.Select(
+                attrs = {
+                    "class": "form-select",
+                }
+            ),
 
             "descuento": forms.NumberInput(
                 attrs={
@@ -86,6 +93,7 @@ class VentaForm(forms.ModelForm):
         cleaned_data = super().clean()
 
         tipo_pago = cleaned_data.get("tipo_pago")
+        metodo_pago = cleaned_data.get("metodo_pago")
         cliente = cleaned_data.get("cliente")
 
         if cleaned_data.get("descuento") is None:
@@ -96,6 +104,16 @@ class VentaForm(forms.ModelForm):
                 "cliente",
                 "Debes seleccionar un cliente para registrar una venta fiada.",
             )
+
+        if tipo_pago != "fiado" and not metodo_pago:
+            self.add_error(
+                "metodo_pago",
+                "Selecciona el método de pago",
+            )
+
+        if tipo_pago == "fiado":
+            cleaned_data["metodo_pago"]=""
+
 
         return cleaned_data
 

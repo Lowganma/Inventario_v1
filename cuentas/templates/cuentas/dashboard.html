@@ -1,278 +1,1109 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Panel principal
+Panel principal
 {% endblock %}
 
+
 {% block content %}
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
-        <div>
-            <h1 class="page-title">Panel principal</h1>
-            <p class="page-subtitle">
-                Consulta rápidamente clientes, cuentas y saldos pendientes.
-            </p>
-        </div>
 
-        <a
-            href="{% url 'cuentas:crear' %}"
-            class="btn btn-primary"
+<div class="row justify-content-center">
+
+    <div class="col-12 col-xl-11">
+
+
+        <!-- =================================================
+             ENCABEZADO
+        ================================================== -->
+
+        <div
+            class="
+                d-flex
+                flex-column
+                flex-md-row
+                justify-content-between
+                align-items-md-center
+                gap-3
+                mb-4
+            "
         >
-            <i class="bi bi-plus-circle me-1"></i>
-            Nueva cuenta
-        </a>
-    </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card content-card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted mb-1">
-                                Clientes registrados
-                            </p>
+            <div>
 
-                            <h2 class="mb-0">
-                                {{ total_clientes }}
-                            </h2>
-                        </div>
+                <h1 class="page-title mb-1">
+                    Panel principal
+                </h1>
 
-                        <div class="fs-2 text-primary">
-                            <i class="bi bi-people"></i>
-                        </div>
-                    </div>
-                </div>
+                <p class="page-subtitle mb-0">
+                    Resumen general de tu negocio.
+                </p>
+
             </div>
+
+
+            <div class="text-md-end">
+
+                <span class="text-muted small">
+                    Hoy
+                </span>
+
+                <div class="fw-semibold">
+                    {{ hoy|date:"d/m/Y" }}
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card content-card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted mb-1">
-                                Cuentas pendientes
-                            </p>
 
-                            <h2 class="mb-0">
-                                {{ cuentas_pendientes }}
-                            </h2>
-                        </div>
+        <!-- =================================================
+             INDICADORES FINANCIEROS PRINCIPALES
+        ================================================== -->
 
-                        <div class="fs-2 text-warning">
-                            <i class="bi bi-hourglass-split"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="row g-3 mb-4">
 
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card content-card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted mb-1">
-                                Cuentas pagadas
-                            </p>
 
-                            <h2 class="mb-0">
-                                {{ cuentas_pagadas }}
-                            </h2>
-                        </div>
+            <!-- Ventas -->
 
-                        <div class="fs-2 text-success">
-                            <i class="bi bi-check-circle"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+            <div class="col-12 col-sm-6 col-xl-3">
 
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card content-card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted mb-1">
-                                Total por cobrar
-                            </p>
+                <div class="card content-card h-100">
 
-                            <h2 class="mb-0">
-                                ${{ total_por_cobrar| floatformat:2 }}
-                            </h2>
+                    <div class="card-body p-4">
 
-                                {% if total_por_cobrar_bs is not None %}
-                                    <p class="text-muted mb-0">
-                                        Bs. {{ total_por_cobrar_bs|floatformat:2 }}
-                                    </p>
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                align-items-start
+                            "
+                        >
 
-                                    <small class="text-muted">
-                                        Tasa aplicada:
-                                        {{ tasa_bcv.valor|floatformat:2 }}
-                                    </small>
-                                {% else %}
-                                    <small class="text-warning">
-                                        Tasa BCV no disponible
-                                    </small>
-                                {% endif %}
-                        </div>
-
-                        <div class="fs-2 text-danger">
-                            <i class="bi bi-cash-stack"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card content-card mb-4">
-        <div class="card-body p-4">
-            <h2 class="h4 mb-3">
-                <i class="bi bi-search me-2"></i>
-                Buscar cuentas
-            </h2>
-
-            <form method="get" class="row g-2">
-                <div class="col-12 col-md">
-                    <input
-                        type="text"
-                        name="buscar"
-                        value="{{ busqueda }}"
-                        class="form-control form-control-lg"
-                        placeholder="Nombre, teléfono o concepto"
-                    >
-                </div>
-
-                <div class="col-12 col-md-auto">
-                    <button
-                        type="submit"
-                        class="btn btn-primary btn-lg w-100"
-                    >
-                        Buscar
-                    </button>
-                </div>
-            </form>
-
-            {% if busqueda %}
-                <hr class="my-4">
-
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h3 class="h5 mb-0">
-                        Resultados para “{{ busqueda }}”
-                    </h3>
-
-                    <a href="{% url 'inicio' %}" class="btn btn-sm btn-outline-secondary">
-                        Limpiar
-                    </a>
-                </div>
-
-                {% for cuenta in resultados %}
-                    <div class="border rounded-3 p-3 mb-3">
-                        <div class="row g-3 align-items-center">
-                            <div class="col-12 col-md">
-                                <h4 class="h5 mb-1">
-                                    {{ cuenta.cliente }}
-                                </h4>
+                            <div>
 
                                 <p class="text-muted mb-1">
-                                    {{ cuenta.cliente.telefono }}
+                                    Ventas hoy
                                 </p>
 
-                                <p class="mb-0">
-                                    {{ cuenta.concepto }}
-                                </p>
-                            </div>
+                                <h2 class="mb-1">
+                                    ${{ total_ventas_hoy|floatformat:2 }}
+                                </h2>
 
-                            <div class="col-6 col-md-auto">
-                                <small class="text-muted d-block">
-                                    Saldo
+                                <small class="text-muted">
+                                    {{ cantidad_ventas_hoy }}
+                                    operación{{ cantidad_ventas_hoy|pluralize:"es" }}
                                 </small>
 
-                                <strong>
-                                    ${{ cuenta.saldo_pendiente }}
-                                </strong>
                             </div>
 
-                            <div class="col-6 col-md-auto">
-                                {% if cuenta.estado == "pagada" %}
-                                    <span class="badge text-bg-success">
-                                        Pagada
-                                    </span>
-                                {% else %}
-                                    <span class="badge text-bg-warning">
-                                        Pendiente
-                                    </span>
-                                {% endif %}
-                            </div>
+                            <i
+                                class="
+                                    bi bi-cart-check
+                                    fs-2
+                                    text-primary
+                                "
+                            ></i>
 
-                            <div class="col-12 col-md-auto">
-                                <a
-                                    href="{% url 'cuentas:detalle' cuenta.id %}"
-                                    class="btn btn-outline-primary w-100"
-                                >
-                                    Ver detalle
-                                </a>
-                            </div>
                         </div>
+
                     </div>
-                {% empty %}
-                    <div class="alert alert-light border mb-0">
-                        No se encontraron cuentas para “{{ busqueda }}”.
-                    </div>
-                {% endfor %}
-            {% endif %}
-        </div>
-    </div>
 
-    <div class="card content-card">
-        <div class="card-body p-4">
-            <h2 class="h4 mb-3">
-                Acciones rápidas
-            </h2>
-
-            <div class="row g-3">
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <a
-                        href="{% url 'clientes:crear' %}"
-                        class="btn btn-outline-primary w-100 py-3"
-                    >
-                        <i class="bi bi-person-plus d-block fs-3 mb-2"></i>
-                        Registrar cliente
-                    </a>
                 </div>
 
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <a
-                        href="{% url 'cuentas:crear' %}"
-                        class="btn btn-outline-primary w-100 py-3"
-                    >
-                        <i class="bi bi-file-earmark-plus d-block fs-3 mb-2"></i>
-                        Nueva cuenta
-                    </a>
-                </div>
-
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <a
-                        href="{% url 'clientes:lista' %}"
-                        class="btn btn-outline-secondary w-100 py-3"
-                    >
-                        <i class="bi bi-people d-block fs-3 mb-2"></i>
-                        Ver clientes
-                    </a>
-                </div>
-
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <a
-                        href="{% url 'cuentas:lista' %}"
-                        class="btn btn-outline-secondary w-100 py-3"
-                    >
-                        <i class="bi bi-receipt d-block fs-3 mb-2"></i>
-                        Ver cuentas
-                    </a>
-                </div>
             </div>
+
+
+            <!-- Ingresos -->
+
+            <div class="col-12 col-sm-6 col-xl-3">
+
+                <div class="card content-card h-100">
+
+                    <div class="card-body p-4">
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                align-items-start
+                            "
+                        >
+
+                            <div>
+
+                                <p class="text-muted mb-1">
+                                    Ingresos hoy
+                                </p>
+
+                                <h2 class="mb-1">
+                                    ${{ ingresos_hoy|floatformat:2 }}
+                                </h2>
+
+                                <small class="text-muted">
+                                    Dinero recibido
+                                </small>
+
+                            </div>
+
+                            <i
+                                class="
+                                    bi bi-arrow-down-circle
+                                    fs-2
+                                    text-success
+                                "
+                            ></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Egresos -->
+
+            <div class="col-12 col-sm-6 col-xl-3">
+
+                <div class="card content-card h-100">
+
+                    <div class="card-body p-4">
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                align-items-start
+                            "
+                        >
+
+                            <div>
+
+                                <p class="text-muted mb-1">
+                                    Egresos hoy
+                                </p>
+
+                                <h2 class="mb-1">
+                                    ${{ egresos_hoy|floatformat:2 }}
+                                </h2>
+
+                                <small class="text-muted">
+                                    Dinero utilizado
+                                </small>
+
+                            </div>
+
+                            <i
+                                class="
+                                    bi bi-arrow-up-circle
+                                    fs-2
+                                    text-danger
+                                "
+                            ></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Caja -->
+
+            <div class="col-12 col-sm-6 col-xl-3">
+
+                <a
+                    href="{% url 'caja:dashboard' %}"
+                    class="text-decoration-none"
+                >
+
+                    <div class="card content-card h-100">
+
+                        <div class="card-body p-4">
+
+                            <div
+                                class="
+                                    d-flex
+                                    justify-content-between
+                                    align-items-start
+                                "
+                            >
+
+                                <div>
+
+                                    <p class="text-muted mb-1">
+                                        Saldo de caja
+                                    </p>
+
+                                    <h2 class="mb-1">
+                                        ${{ saldo_caja|floatformat:2 }}
+                                    </h2>
+
+                                    <small class="text-muted">
+                                        Saldo registrado
+                                    </small>
+
+                                </div>
+
+                                <i
+                                    class="
+                                        bi bi-wallet2
+                                        fs-2
+                                        text-primary
+                                    "
+                                ></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
         </div>
+
+
+        <!-- =================================================
+             OPERACIÓN + CUENTAS POR COBRAR
+        ================================================== -->
+
+        <div class="row g-4 mb-4">
+
+
+            <!-- Resumen operativo -->
+
+            <div class="col-12 col-lg-7">
+
+                <div class="card content-card h-100">
+
+                    <div class="card-body p-4">
+
+                        <h2 class="h5 mb-4">
+
+                            <i class="bi bi-activity me-2"></i>
+
+                            Resumen de hoy
+
+                        </h2>
+
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                border-bottom
+                                py-2
+                            "
+                        >
+                            <span class="text-muted">
+                                Ventas realizadas
+                            </span>
+
+                            <strong>
+                                {{ cantidad_ventas_hoy }}
+                            </strong>
+                        </div>
+
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                border-bottom
+                                py-2
+                            "
+                        >
+                            <span class="text-muted">
+                                Unidades vendidas
+                            </span>
+
+                            <strong>
+                                {{ unidades_vendidas_hoy }}
+                            </strong>
+                        </div>
+
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                border-bottom
+                                py-2
+                            "
+                        >
+                            <span class="text-muted">
+                                Compras
+                            </span>
+
+                            <strong>
+                                ${{ total_compras_hoy|floatformat:2 }}
+                            </strong>
+                        </div>
+
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                border-bottom
+                                py-2
+                            "
+                        >
+                            <span class="text-muted">
+                                Abonos recibidos
+                            </span>
+
+                            <strong>
+                                ${{ abonos_hoy|floatformat:2 }}
+                            </strong>
+                        </div>
+
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                border-bottom
+                                py-2
+                            "
+                        >
+                            <span class="text-muted">
+                                Ventas fiadas
+                            </span>
+
+                            <strong>
+                                ${{ total_fiado_hoy|floatformat:2 }}
+                            </strong>
+                        </div>
+
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                pt-3
+                            "
+                        >
+                            <span>
+                                Flujo de caja del día
+                            </span>
+
+                            {% if flujo_hoy >= 0 %}
+
+                                <strong class="text-success">
+                                    +${{ flujo_hoy|floatformat:2 }}
+                                </strong>
+
+                            {% else %}
+
+                                <strong class="text-danger">
+                                    ${{ flujo_hoy|floatformat:2 }}
+                                </strong>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Cuentas por cobrar -->
+
+            <div class="col-12 col-lg-5">
+
+                <div class="card content-card h-100">
+
+                    <div class="card-body p-4">
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                align-items-start
+                                mb-4
+                            "
+                        >
+
+                            <div>
+
+                                <h2 class="h5 mb-1">
+                                    Cuentas por cobrar
+                                </h2>
+
+                                <p class="text-muted small mb-0">
+                                    Deudas pendientes de clientes
+                                </p>
+
+                            </div>
+
+                            <i
+                                class="
+                                    bi bi-receipt
+                                    fs-3
+                                    text-warning
+                                "
+                            ></i>
+
+                        </div>
+
+
+                        <h2 class="display-6 mb-1">
+                            ${{ total_por_cobrar|floatformat:2 }}
+                        </h2>
+
+
+                        {% if total_por_cobrar_bs is not None %}
+
+                            <p class="text-muted mb-4">
+                                Bs.
+                                {{ total_por_cobrar_bs|floatformat:2 }}
+                            </p>
+
+                        {% endif %}
+
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                py-2
+                                border-bottom
+                            "
+                        >
+                            <span>
+                                Pendientes
+                            </span>
+
+                            <strong>
+                                {{ cuentas_pendientes }}
+                            </strong>
+                        </div>
+
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                py-2
+                            "
+                        >
+                            <span>
+                                Vencidas
+                            </span>
+
+                            {% if cuentas_vencidas > 0 %}
+
+                                <strong class="text-danger">
+                                    {{ cuentas_vencidas }}
+                                </strong>
+
+                            {% else %}
+
+                                <strong>
+                                    0
+                                </strong>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="d-grid mt-3">
+
+                            <a
+                                href="{% url 'cuentas:lista' %}"
+                                class="btn btn-outline-primary"
+                            >
+                                Ver cuentas
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- =================================================
+             INVENTARIO + MOVIMIENTOS
+        ================================================== -->
+
+        <div class="row g-4 mb-4">
+
+
+            <!-- Inventario -->
+
+            <div class="col-12 col-lg-5">
+
+                <div class="card content-card h-100">
+
+                    <div class="card-body p-4">
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                align-items-start
+                                mb-4
+                            "
+                        >
+
+                            <div>
+
+                                <h2 class="h5 mb-1">
+                                    Inventario
+                                </h2>
+
+                                <p class="text-muted small mb-0">
+                                    Estado actual de existencias
+                                </p>
+
+                            </div>
+
+                            <i
+                                class="
+                                    bi bi-box-seam
+                                    fs-3
+                                    text-primary
+                                "
+                            ></i>
+
+                        </div>
+
+
+                        <div class="row g-3 mb-4">
+
+                            <div class="col-6">
+
+                                <span
+                                    class="
+                                        text-muted
+                                        small
+                                        d-block
+                                    "
+                                >
+                                    Productos
+                                </span>
+
+                                <strong class="fs-4">
+                                    {{ total_productos }}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="col-6">
+
+                                <span
+                                    class="
+                                        text-muted
+                                        small
+                                        d-block
+                                    "
+                                >
+                                    Unidades
+                                </span>
+
+                                <strong class="fs-4">
+                                    {{ unidades_inventario }}
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                border-bottom
+                                py-2
+                            "
+                        >
+
+                            <span>
+                                Stock bajo
+                            </span>
+
+                            {% if productos_stock_bajo > 0 %}
+
+                                <span class="badge text-bg-warning">
+                                    {{ productos_stock_bajo }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge text-bg-success">
+                                    0
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                border-bottom
+                                py-2
+                            "
+                        >
+
+                            <span>
+                                Agotados
+                            </span>
+
+                            {% if productos_agotados > 0 %}
+
+                                <span class="badge text-bg-danger">
+                                    {{ productos_agotados }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge text-bg-success">
+                                    0
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                py-2
+                            "
+                        >
+
+                            <span>
+                                Valor estimado
+                            </span>
+
+                            <strong>
+                                ${{ valor_inventario|floatformat:2 }}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="d-grid mt-3">
+
+                            <a
+                                href="{% url 'productos:index' %}"
+                                class="btn btn-outline-primary"
+                            >
+                                Ver inventario
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Últimos movimientos -->
+
+            <div class="col-12 col-lg-7">
+
+                <div class="card content-card h-100">
+
+                    <div class="card-body p-4">
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                align-items-center
+                                mb-4
+                            "
+                        >
+
+                            <div>
+
+                                <h2 class="h5 mb-1">
+                                    Últimos movimientos
+                                </h2>
+
+                                <p class="text-muted small mb-0">
+                                    Actividad financiera reciente
+                                </p>
+
+                            </div>
+
+
+                            <a
+                                href="{% url 'caja:movimientos' %}"
+                                class="
+                                    btn
+                                    btn-outline-primary
+                                    btn-sm
+                                "
+                            >
+                                Ver todos
+                            </a>
+
+                        </div>
+
+
+                        {% if ultimos_movimientos %}
+
+                            <div class="table-responsive">
+
+                                <table
+                                    class="
+                                        table
+                                        align-middle
+                                        mb-0
+                                    "
+                                >
+
+                                    <tbody>
+
+                                        {% for movimiento in ultimos_movimientos %}
+
+                                            <tr>
+
+                                                <td>
+
+                                                    <div class="fw-semibold">
+                                                        {{ movimiento.concepto }}
+                                                    </div>
+
+                                                    <small class="text-muted">
+                                                        {{ movimiento.fecha|date:"d/m H:i" }}
+                                                    </small>
+
+                                                </td>
+
+
+                                                <td>
+
+                                                    <span
+                                                        class="
+                                                            badge
+                                                            text-bg-secondary
+                                                        "
+                                                    >
+                                                        {{ movimiento.get_origen_display }}
+                                                    </span>
+
+                                                </td>
+
+
+                                                <td class="text-end">
+
+                                                    {% if movimiento.tipo == "ingreso" %}
+
+                                                        <strong class="text-success">
+                                                            +${{ movimiento.monto|floatformat:2 }}
+                                                        </strong>
+
+                                                    {% else %}
+
+                                                        <strong class="text-danger">
+                                                            -${{ movimiento.monto|floatformat:2 }}
+                                                        </strong>
+
+                                                    {% endif %}
+
+                                                </td>
+
+                                            </tr>
+
+                                        {% endfor %}
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        {% else %}
+
+                            <div class="text-center py-5">
+
+                                <i
+                                    class="
+                                        bi bi-clock-history
+                                        display-6
+                                        text-muted
+                                    "
+                                ></i>
+
+                                <p class="text-muted mt-3 mb-0">
+                                    No hay movimientos todavía.
+                                </p>
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- =================================================
+             ACCIONES RÁPIDAS
+        ================================================== -->
+
+        <div class="card content-card mb-4">
+
+            <div class="card-body p-4">
+
+                <h2 class="h5 mb-4">
+                    Acciones rápidas
+                </h2>
+
+
+                <div class="row g-3">
+
+
+                    <div class="col-12 col-sm-6 col-lg-3">
+
+                        <a
+                            href="{% url 'ventas:crear' %}"
+                            class="
+                                btn
+                                btn-outline-primary
+                                w-100
+                                py-4
+                            "
+                        >
+                            <i
+                                class="
+                                    bi bi-cart-plus
+                                    d-block
+                                    fs-3
+                                    mb-2
+                                "
+                            ></i>
+
+                            Nueva venta
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-12 col-sm-6 col-lg-3">
+
+                        <a
+                            href="{% url 'compras:crear' %}"
+                            class="
+                                btn
+                                btn-outline-primary
+                                w-100
+                                py-4
+                            "
+                        >
+                            <i
+                                class="
+                                    bi bi-box-arrow-in-down
+                                    d-block
+                                    fs-3
+                                    mb-2
+                                "
+                            ></i>
+
+                            Nueva compra
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-12 col-sm-6 col-lg-3">
+
+                        <a
+                            href="{% url 'clientes:crear' %}"
+                            class="
+                                btn
+                                btn-outline-primary
+                                w-100
+                                py-4
+                            "
+                        >
+                            <i
+                                class="
+                                    bi bi-person-plus
+                                    d-block
+                                    fs-3
+                                    mb-2
+                                "
+                            ></i>
+
+                            Nuevo cliente
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-12 col-sm-6 col-lg-3">
+
+                        <a
+                            href="{% url 'caja:crear_movimiento' %}"
+                            class="
+                                btn
+                                btn-outline-primary
+                                w-100
+                                py-4
+                            "
+                        >
+                            <i
+                                class="
+                                    bi bi-cash-stack
+                                    d-block
+                                    fs-3
+                                    mb-2
+                                "
+                            ></i>
+
+                            Movimiento de caja
+                        </a>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             BUSCADOR DE CUENTAS
+        ================================================== -->
+
+        <div class="card content-card mb-4">
+
+            <div class="card-body p-4">
+
+                <h2 class="h5 mb-3">
+
+                    <i class="bi bi-search me-2"></i>
+
+                    Buscar cuenta
+
+                </h2>
+
+
+                <form method="get">
+
+                    <div class="input-group">
+
+                        <input
+                            type="search"
+                            name="buscar"
+                            value="{{ busqueda }}"
+                            class="form-control"
+                            placeholder="Nombre, teléfono o concepto"
+                        >
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            Buscar
+                        </button>
+
+                    </div>
+
+                </form>
+
+
+                {% if busqueda %}
+
+                    <div class="mt-4">
+
+                        {% if resultados %}
+
+                            <div class="list-group">
+
+                                {% for cuenta in resultados %}
+
+                                    <a
+                                        href="{% url 'cuentas:detalle' cuenta.id %}"
+                                        class="
+                                            list-group-item
+                                            list-group-item-action
+                                            d-flex
+                                            justify-content-between
+                                            align-items-center
+                                        "
+                                    >
+
+                                        <div>
+
+                                            <strong>
+                                                {{ cuenta.cliente }}
+                                            </strong>
+
+                                            <div class="small text-muted">
+                                                {{ cuenta.concepto }}
+                                            </div>
+
+                                        </div>
+
+
+                                        <strong>
+                                            ${{ cuenta.saldo_pendiente|floatformat:2 }}
+                                        </strong>
+
+                                    </a>
+
+                                {% endfor %}
+
+                            </div>
+
+                        {% else %}
+
+                            <p class="text-muted mb-0">
+                                No encontramos cuentas con esa búsqueda.
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
     </div>
+
+</div>
+
 {% endblock %}

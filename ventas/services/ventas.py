@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
+from caja.services.caja import registrar_movimiento
 from cuentas.models import CuentaPorCobrar
 from productos.models import Producto
 
@@ -16,6 +17,7 @@ def registrar_venta(
     usuario,
     cliente,
     tipo_pago,
+    metodo_pago,
     descuento,
     notas,
     detalles,
@@ -48,6 +50,19 @@ def registrar_venta(
             )
 
 
+    ultima_venta = (
+        Venta.objects
+        .filter(negocio=negocio)
+        .order_by("-numero")
+        .first()
+)
+
+    siguiente_numero = (
+        ultima_venta.numero + 1
+        if ultima_venta and ultima_venta.numero
+        else 1
+)       
+
     # --------------------------------------------------------
     # CREAR CABECERA DE LA VENTA
     # --------------------------------------------------------
@@ -57,11 +72,13 @@ def registrar_venta(
         usuario=usuario,
         cliente=cliente,
         tipo_pago=tipo_pago,
+        metodo_pago=metodo_pago,
         descuento=descuento,
         notas=notas or "",
         subtotal=Decimal("0.00"),
         total=Decimal("0.00"),
         estado="completada",
+        numero=siguiente_numero,
     )
 
 
@@ -212,12 +229,12 @@ def registrar_venta(
 
         cuenta = CuentaPorCobrar.objects.create(
             cliente=cliente,
-            concepto=f"Venta #{venta.id}",
+            concepto=f"Venta #{venta.numero}",
             monto_total=total,
             estado="pendiente",
             notas=(
                 f"Cuenta generada automáticamente "
-                f"desde la venta #{venta.id}."
+                f"desde la venta #{venta.numero}."
             ),
         )
 
@@ -228,6 +245,25 @@ def registrar_venta(
                 "cuenta_por_cobrar",
             ]
         )
+
+
+            # ============================================================
+        # INTEGRACIÓN AUTOMÁTICA CON CAJA
+        # ============================================================
+
+    if tipo_pago != "fiado":
+
+        registrar_movimiento(
+                negocio=negocio,
+                usuario=usuario,
+                tipo="ingreso",
+                monto=total,
+                metodo_pago=metodo_pago,
+                concepto=f"Venta #{venta.numero}",
+                origen="venta",
+                referencia=f"VENTA-{venta.id}",
+                notas="Ingreso generado automáticamente desde Ventas.",
+            )
 
 
     return venta

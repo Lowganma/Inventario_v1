@@ -118,12 +118,27 @@ class Venta(models.Model):
     blank=True,
 )
 
+    numero = models.PositiveIntegerField(
+    null=True,
+    blank=True,
+)
+
 
 
     class Meta:
         ordering = [
             "-fecha",
             "-id",
+        ]
+
+        constraints = [
+            models.UniqueConstraint(
+            fields=[
+                "negocio",
+                "numero",
+            ],
+            name="venta_numero_unico_por_negocio",
+            ),
         ]
 
     def __str__(self):

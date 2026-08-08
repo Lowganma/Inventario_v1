@@ -103,6 +103,13 @@ def crear_venta(request):
                         ]
                     ),
 
+                    metodo_pago=(
+                        formulario.cleaned_data.get(
+                            "metodo_pago",
+                            "",
+                        )
+                    ),
+
                     descuento=(
                         formulario.cleaned_data.get(
                             "descuento"
