@@ -11,8 +11,22 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 from django.forms.renderers import TemplatesSetting
+
+# Django 4.1 antecede a Python 3.14; esta compatibilidad conserva la versión
+# fijada por el proyecto y permite que el cliente de pruebas copie contextos.
+if sys.version_info >= (3, 14):
+    from django.template.context import BaseContext
+
+    def _copiar_contexto(self):
+        duplicate = object.__new__(self.__class__)
+        duplicate.__dict__ = self.__dict__.copy()
+        duplicate.dicts = self.dicts[:]
+        return duplicate
+
+    BaseContext.__copy__ = _copiar_contexto
 
 class CustomFormRenderer(TemplatesSetting):
     form_template_name = 'productos/form_snipet.html'
@@ -76,6 +90,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'usuarios.middleware.EnsureNegocioMiddleware',
+    'usuarios.middleware.ModuleAccessMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -90,6 +105,7 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 "cuentas.context_processors.tasa_bcv_global",
+                "usuarios.context_processors.configuracion_negocio",
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -150,6 +166,9 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+if "test" in sys.argv:
+    # Las pruebas no ejecutan collectstatic ni deben depender de un manifiesto.
+    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",

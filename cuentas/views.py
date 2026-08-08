@@ -43,16 +43,13 @@ def dashboard(request):
     # NEGOCIO ACTUAL
     # ========================================================
 
-    # Conservamos compatibilidad con usuarios antiguos
-    # que pudieran no tener todavía un negocio asociado.
-    from usuarios.models import Negocio
-
-    negocio, _ = Negocio.objects.get_or_create(
-        propietario=request.user,
-        defaults={
-            "nombre": f"Negocio de {request.user.username}",
-        },
-    )
+    # El middleware resuelve propietarios y empleados dentro del mismo ámbito.
+    negocio = request.negocio
+    from usuarios.permisos import modulo_esta_activo
+    activos = {
+        codigo: modulo_esta_activo(negocio, codigo)
+        for codigo in ("clientes", "cuentas", "inventario", "compras", "ventas", "caja")
+    }
 
     hoy = timezone.localdate()
 
@@ -62,7 +59,7 @@ def dashboard(request):
 
     clientes = Cliente.objects.filter(
         negocio=negocio,
-    )
+    ) if activos["clientes"] else Cliente.objects.none()
 
     cuentas = (
         CuentaPorCobrar.objects
@@ -70,24 +67,24 @@ def dashboard(request):
             cliente__negocio=negocio,
         )
         .select_related("cliente")
-    )
+    ) if activos["cuentas"] else CuentaPorCobrar.objects.none()
 
     ventas = Venta.objects.filter(
         negocio=negocio,
-    )
+    ) if activos["ventas"] else Venta.objects.none()
 
     compras = Compra.objects.filter(
         negocio=negocio,
-    )
+    ) if activos["compras"] else Compra.objects.none()
 
     productos = Producto.objects.filter(
         negocio=negocio,
         activo=True,
-    )
+    ) if activos["inventario"] else Producto.objects.none()
 
     movimientos = MovimientoCaja.objects.filter(
         negocio=negocio,
-    )
+    ) if activos["caja"] else MovimientoCaja.objects.none()
 
     # ========================================================
     # VENTAS DE HOY

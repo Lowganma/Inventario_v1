@@ -1,187 +1,88 @@
-from decimal import Decimal
 from django.contrib import messages
-
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
-from django.shortcuts import render, redirect
+from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
-from .models import MovimientoCaja
-from .services.caja import registrar_movimiento
-from .forms import MovimientoCajaForm
+from usuarios.permisos import admin_required
+
+from .forms import AbrirCajaForm, CerrarCajaForm, MovimientoCajaForm
+from .models import CajaDiaria, MovimientoCaja
+from .services.caja import abrir_caja, cerrar_caja, obtener_resumen_caja, registrar_movimiento
 
 
 @login_required
 def dashboard_caja(request):
-    """
-    Presenta el resumen financiero básico del negocio.
-    """
-
-    movimientos = MovimientoCaja.objects.filter(
-        negocio=request.user.negocio,
-    )
-
-    ingresos = (
-        movimientos
-        .filter(tipo="ingreso")
-        .aggregate(total=Sum("monto"))["total"]
-        or Decimal("0.00")
-    )
-
-    egresos = (
-        movimientos
-        .filter(tipo="egreso")
-        .aggregate(total=Sum("monto"))["total"]
-        or Decimal("0.00")
-    )
-
-    saldo = ingresos - egresos
+    caja = CajaDiaria.objects.filter(negocio=request.user.negocio, fecha=timezone.localdate()).first()
+    resumen = obtener_resumen_caja(caja) if caja else None
+    return render(request, "caja/dashboard.html", {"caja": caja, "resumen": resumen})
 
 
+@login_required
+def abrir_caja_view(request):
+    formulario = AbrirCajaForm(request.POST or None)
+    if request.method == "POST" and formulario.is_valid():
+        try:
+            abrir_caja(negocio=request.user.negocio, usuario=request.user, **formulario.cleaned_data)
+        except ValidationError as error:
+            formulario.add_error(None, error)
+        else:
+            messages.success(request, "Caja abierta correctamente.")
+            return redirect("caja:dashboard")
+    return render(request, "caja/abrir_caja.html", {"formulario": formulario})
 
-    # --------------------------------------------------------
-# SALDOS POR MÉTODO DE PAGO
-# --------------------------------------------------------
 
-    metodos = [
-        ("efectivo", "Efectivo"),
-        ("transferencia", "Transferencia"),
-        ("divisa", "Divisa"),
-        ("otro", "Otro"),
-    ]
+@login_required
+@admin_required
+def cerrar_caja_view(request):
+    caja = get_object_or_404(CajaDiaria, negocio=request.user.negocio, fecha=timezone.localdate(), estado="abierta")
+    resumen = obtener_resumen_caja(caja)
+    formulario = CerrarCajaForm(request.POST or None)
+    if request.method == "POST" and formulario.is_valid():
+        try:
+            cerrar_caja(caja=caja, usuario=request.user, **formulario.cleaned_data)
+        except ValidationError as error:
+            formulario.add_error(None, error)
+        else:
+            messages.success(request, "Caja cerrada correctamente.")
+            return redirect("caja:detalle_cierre", caja_id=caja.id)
+    return render(request, "caja/cerrar_caja.html", {"caja": caja, "resumen": resumen, "formulario": formulario})
 
-    saldos_metodos = []
 
-    for codigo, nombre in metodos:
+@login_required
+@admin_required
+def lista_cierres(request):
+    cajas = CajaDiaria.objects.filter(negocio=request.user.negocio)
+    filas = [{"caja": caja, "resumen": obtener_resumen_caja(caja)} for caja in cajas]
+    return render(request, "caja/lista_cierres.html", {"filas": filas})
 
-        ingresos_metodo = (
-            movimientos
-            .filter(
-                tipo="ingreso",
-                metodo_pago=codigo,
-            )
-            .aggregate(total=Sum("monto"))["total"]
-            or Decimal("0.00")
-        )
 
-        egresos_metodo = (
-            movimientos
-            .filter(
-                tipo="egreso",
-                metodo_pago=codigo,
-            )
-            .aggregate(total=Sum("monto"))["total"]
-            or Decimal("0.00")
-        )
-
-        saldos_metodos.append(
-            {
-                "codigo": codigo,
-                "nombre": nombre,
-                "ingresos": ingresos_metodo,
-                "egresos": egresos_metodo,
-                "saldo": ingresos_metodo - egresos_metodo,
-            }
-        )
-
-        contexto = {
-            "ingresos": ingresos,
-            "egresos": egresos,
-            "saldo": saldo,
-            "saldos_metodos": saldos_metodos,
-            "ultimos_movimientos": movimientos[:5],
-        }
-
-    return render(
-        request,
-        "caja/dashboard.html",
-        contexto,
-    )
+@login_required
+@admin_required
+def detalle_cierre(request, caja_id):
+    caja = get_object_or_404(CajaDiaria, id=caja_id, negocio=request.user.negocio)
+    return render(request, "caja/detalle_cierre.html", {"caja": caja, "resumen": obtener_resumen_caja(caja)})
 
 
 @login_required
 def lista_movimientos(request):
-    """
-    Muestra el historial financiero del negocio.
-    """
-
-    movimientos = (
-        MovimientoCaja.objects
-        .filter(
-            negocio=request.user.negocio,
-        )
-        .select_related(
-            "usuario",
-        )
-    )
-
-    return render(
-        request,
-        "caja/lista_movimientos.html",
-        {
-            "movimientos": movimientos,
-        },
-    )
+    movimientos = MovimientoCaja.objects.filter(negocio=request.user.negocio).select_related("usuario")
+    return render(request, "caja/lista_movimientos.html", {"movimientos": movimientos})
 
 
 @login_required
 def crear_movimiento(request):
-    """
-    Registra manualmente un ingreso o egreso de caja.
-
-    Los movimientos automáticos producidos por ventas,
-    compras y abonos se procesarán desde sus servicios.
-    """
-
-    if request.method == "POST":
-
-        formulario = MovimientoCajaForm(
-            request.POST,
-        )
-
-        if formulario.is_valid():
-
-            movimiento = registrar_movimiento(
-                negocio=request.user.negocio,
-                usuario=request.user,
-                tipo=formulario.cleaned_data["tipo"],
-                monto=formulario.cleaned_data["monto"],
-                metodo_pago=formulario.cleaned_data[
-                    "metodo_pago"
-                ],
-                concepto=formulario.cleaned_data[
-                    "concepto"
-                ],
-                origen="manual",
-                referencia=formulario.cleaned_data.get(
-                    "referencia",
-                    "",
-                ),
-                notas=formulario.cleaned_data.get(
-                    "notas",
-                    "",
-                ),
-            )
-
-            messages.success(
-                request,
-                (
-                    f"Movimiento #{movimiento.id} "
-                    "registrado correctamente."
-                ),
-            )
-
-            return redirect(
-                "caja:dashboard"
-            )
-
-    else:
-
-        formulario = MovimientoCajaForm()
-
-    return render(
-        request,
-        "caja/crear_movimiento.html",
-        {
-            "formulario": formulario,
-        },
-    )
+    caja = CajaDiaria.objects.filter(negocio=request.user.negocio, fecha=timezone.localdate(), estado="abierta").first()
+    if caja is None:
+        messages.error(request, "Debes abrir la caja de hoy; una caja cerrada no admite movimientos.")
+        return redirect("caja:dashboard")
+    formulario = MovimientoCajaForm(request.POST or None)
+    if request.method == "POST" and formulario.is_valid():
+        try:
+            movimiento = registrar_movimiento(negocio=request.user.negocio, usuario=request.user, origen="manual", **formulario.cleaned_data)
+        except ValidationError as error:
+            formulario.add_error(None, error)
+        else:
+            messages.success(request, f"Movimiento #{movimiento.id} registrado correctamente.")
+            return redirect("caja:dashboard")
+    return render(request, "caja/crear_movimiento.html", {"formulario": formulario})

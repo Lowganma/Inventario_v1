@@ -3,7 +3,25 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.db import transaction
 
-from .models import Negocio
+from .models import MODULOS_DISPONIBLES, Negocio, PerfilUsuario
+
+
+class ModulosNegocioForm(forms.Form):
+    modulos = forms.MultipleChoiceField(choices=MODULOS_DISPONIBLES, required=False, widget=forms.CheckboxSelectMultiple)
+
+
+class EmpleadoForm(UserCreationForm):
+    rol = forms.ChoiceField(choices=PerfilUsuario.ROLES, widget=forms.Select(attrs={"class": "form-select"}))
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ("username", "email", "rol")
+
+
+class RolUsuarioForm(forms.ModelForm):
+    class Meta:
+        model = PerfilUsuario
+        fields = ("rol",)
 
 
 class RegistroForm(UserCreationForm):
