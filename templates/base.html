@@ -103,7 +103,7 @@
         
                     
                     {% if request.user.is_authenticated %}
-                 <li class="nav-item">
+                 {% if modulos_activos.caja %}<li class="nav-item">
                     <a
                         class="nav-link"
                         href="{% url 'caja:dashboard' %}"
@@ -111,9 +111,9 @@
                         <i class="bi bi-cash-stack me-1"></i>
                         Caja
                     </a>
-                </li>
+                </li>{% endif %}
 
-                    <li class="nav-item">
+                    {% if modulos_activos.compras %}<li class="nav-item">
             <a
                 class="nav-link"
                 href="{% url 'compras:lista' %}"
@@ -121,9 +121,9 @@
                                 <i class="bi bi-cart-check me-1"></i>
                                 Compras
                             </a>
-                        </li>
+                        </li>{% endif %}
                     
-                        <li class="nav-item">
+                        {% if modulos_activos.ventas %}<li class="nav-item">
     <a
         class="nav-link"
         href="{% url 'ventas:lista' %}"
@@ -131,11 +131,11 @@
         <i class="bi bi-cart-check me-1"></i>
         Ventas
     </a>
-</li>
+</li>{% endif %}
 
                 </li>
                     
-                    <li class="nav-item">
+                    {% if modulos_activos.clientes %}<li class="nav-item">
                         <a
                             class="nav-link"
                             href="{% url 'clientes:lista' %}"
@@ -143,9 +143,9 @@
                             <i class="bi bi-people me-1"></i>
                             Clientes
                         </a>
-                    </li>
+                    </li>{% endif %}
 
-                    <li class="nav-item">
+                    {% if modulos_activos.cuentas %}<li class="nav-item">
                         <a
                             class="nav-link"
                             href="{% url 'cuentas:lista' %}"
@@ -153,14 +153,24 @@
                             <i class="bi bi-receipt me-1"></i>
                             Cuentas
                         </a>
-                    </li>
+                    </li>{% endif %}
 
-                    <li class="nav-item">
+                    {% if modulos_activos.inventario %}<li class="nav-item">
                         <a class="nav-link" href="{% url 'productos:index' %}">
                             <i class="bi bi-box-seam me-1"></i>
                             Inventario
                         </a>
+                    </li>{% endif %}
+
+                    {% if usuario_es_admin %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Configuración</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'usuarios:lista' %}">Usuarios</a></li>
+                            <li><a class="dropdown-item" href="{% url 'configuracion_modulos' %}">Módulos</a></li>
+                        </ul>
                     </li>
+                    {% endif %}
 
 
                     <li class="nav-item ms-lg-2">

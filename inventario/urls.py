@@ -17,8 +17,10 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
 from cuentas import views as cuentas_views
+from usuarios import views as usuarios_views
 
 urlpatterns = [
+    path("configuracion/modulos/", usuarios_views.configurar_modulos, name="configuracion_modulos"),
     path("", cuentas_views.dashboard, name="inicio"),
     path('admin/', admin.site.urls),
     path(
