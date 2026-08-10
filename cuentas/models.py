@@ -7,6 +7,7 @@ class CuentaPorCobrar(models.Model):
     ESTADOS = [
         ("pendiente", "Pendiente"),
         ("pagada", "Pagada"),
+        ("anulada","Anulada"),
     ]
 
     cliente = models.ForeignKey(

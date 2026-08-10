@@ -1,5 +1,5 @@
 from .models import MODULOS_DISPONIBLES
-from .permisos import obtener_negocio, usuario_es_admin
+from .permisos import obtener_negocio, usuario_es_dueno
 
 
 def configuracion_negocio(request):
@@ -8,4 +8,4 @@ def configuracion_negocio(request):
     if request.user.is_authenticated:
         negocio = obtener_negocio(request.user)
         activos.update({fila.modulo: fila.activo for fila in negocio.modulos.all()})
-    return {"modulos_activos": activos, "usuario_es_admin": usuario_es_admin(request.user)}
+    return {"modulos_activos": activos, "usuario_es_dueno": usuario_es_dueno(request.user)}

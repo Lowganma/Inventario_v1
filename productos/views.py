@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count, DecimalField, ExpressionWrapper, F, Q, Sum
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404, redirect, render
+from django.http import JsonResponse
+from usuarios.permisos import dueno_required
 
 from .forms import CategoriaForm, ProductoForm
 from .models import Categoria, Producto
@@ -88,11 +90,13 @@ def _guardar_producto(request, producto=None):
 
 
 @login_required
+@dueno_required
 def crear_producto(request):
     return _guardar_producto(request)
 
 
 @login_required
+@dueno_required
 def editar_producto(request, producto_id):
     producto = get_object_or_404(
         Producto, id=producto_id, negocio=request.user.negocio
@@ -144,3 +148,26 @@ def editar_categoria(request, categoria_id):
         Categoria, id=categoria_id, negocio=request.user.negocio
     )
     return _guardar_categoria(request, categoria)
+
+@login_required
+def datos_producto(request, producto_id):
+    """
+    Devuelve información comercial del producto para
+    formularios dinámicos, respetando el negocio del usuario.
+    """
+
+    producto = get_object_or_404(
+        Producto,
+        id=producto_id,
+        negocio=request.user.negocio,
+    )
+
+    return JsonResponse(
+        {
+            "id": producto.id,
+            "nombre": producto.nombre,
+            "stock": producto.stock,
+            "costo": str(producto.costo),
+            "precio_venta": str(producto.precio_venta),
+        }
+    )

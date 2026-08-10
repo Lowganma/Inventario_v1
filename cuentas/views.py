@@ -10,6 +10,8 @@ from django.db.models import (
     Q,
     Sum,
 )
+from usuarios.permisos import usuario_es_dueno
+
 from django.shortcuts import (
     get_object_or_404,
     redirect,
@@ -17,6 +19,7 @@ from django.shortcuts import (
 )
 from django.utils import timezone
 
+from usuarios.permisos import dueno_required
 from caja.models import MovimientoCaja
 from clientes.models import Cliente
 from compras.models import Compra
@@ -408,11 +411,35 @@ def lista_cuentas(request):
     # FILTRO PRINCIPAL:
     # solo trae cuentas cuyos clientes pertenecen
     # al negocio del usuario actual.
-    cuentas = CuentaPorCobrar.objects.select_related(
-        "cliente"
-    ).filter(
-        cliente__negocio=request.user.negocio
-    )
+    # El middleware ya resolvió el negocio tanto para
+# propietarios como para empleados.
+    negocio = request.negocio
+
+# Queryset general del negocio.
+    cuentas_negocio = (
+        CuentaPorCobrar.objects
+        .select_related("cliente")
+        .filter(
+            cliente__negocio=negocio
+        )
+)
+
+# --------------------------------------------------------
+# TOTAL GENERAL POR COBRAR
+# --------------------------------------------------------
+# Este indicador no depende de los filtros visuales
+# aplicados posteriormente a la tabla.
+    total_por_cobrar = sum(
+    (
+        cuenta.saldo_pendiente
+        for cuenta in cuentas_negocio.filter(
+            estado="pendiente"
+        )
+    ),
+    Decimal("0.00"),
+)
+
+    cuentas = cuentas_negocio
 
     # Búsqueda por datos del cliente o concepto.
     if busqueda:
@@ -451,6 +478,14 @@ def lista_cuentas(request):
         "busqueda": busqueda,
         "estado_seleccionado": estado,
         "orden_seleccionado": orden,
+
+        # Indicadores
+        "total_por_cobrar": total_por_cobrar,
+
+        # Solo el propietario real del negocio puede anular.
+        "usuario_es_dueno": usuario_es_dueno(
+         request.user
+    ),
     }
 
     return render(
@@ -615,19 +650,28 @@ def registrar_abono(request, cuenta_id):
 
 @login_required
 def pagar_cuenta_completa(request, cuenta_id):
+
     cuenta = get_object_or_404(
         CuentaPorCobrar,
         id=cuenta_id,
-        cliente__negocio=request.user.negocio
+        cliente__negocio=request.user.negocio,
     )
 
+    # Si ya no existe saldo pendiente,
+    # regresamos al detalle.
     if cuenta.saldo_pendiente <= 0:
         return redirect(
             "cuentas:detalle",
             cuenta_id=cuenta.id,
         )
 
+
+    # ========================================================
+    # POST - PROCESAR EL PAGO COMPLETO
+    # ========================================================
+
     if request.method == "POST":
+
         formulario = AbonoForm(
             request.POST,
             cuenta=cuenta,
@@ -635,52 +679,115 @@ def pagar_cuenta_completa(request, cuenta_id):
 
         if formulario.is_valid():
 
-            registrar_abono_cuenta(
-                cuenta=cuenta,
-                usuario=request.user,
+            try:
 
-                monto_pagado=formulario.cleaned_data[
-                    "monto_pagado"
-                ],
+                registrar_abono_cuenta(
+                    cuenta=cuenta,
+                    usuario=request.user,
 
-                fecha_pago=formulario.cleaned_data[
-                    "fecha_pago"
-                ],
+                    monto_pagado=formulario.cleaned_data[
+                        "monto_pagado"
+                    ],
 
-                metodo=formulario.cleaned_data[
-                    "metodo"
-                ],
+                    fecha_pago=formulario.cleaned_data[
+                        "fecha_pago"
+                    ],
 
-                referencia=formulario.cleaned_data.get(
-                    "referencia",
-                    "",
-                ),
+                    metodo=formulario.cleaned_data[
+                        "metodo"
+                    ],
 
-                notas=formulario.cleaned_data.get(
-                    "notas",
-                    "",
-                ),
-            )
+                    referencia=formulario.cleaned_data.get(
+                        "referencia",
+                        "",
+                    ),
 
-            return redirect(
-                "cuentas:detalle",
-                cuenta_id=cuenta.id,
-            )
-
-        else:
-            formulario = AbonoForm(
-                cuenta=cuenta,
-                initial={
-                    "monto_pagado": cuenta.saldo_pendiente,
-                },
+                    notas=formulario.cleaned_data.get(
+                        "notas",
+                        "",
+                    ),
                 )
-        contexto = {
-            "cuenta": cuenta,
-            "formulario": formulario,
-        }
 
-        return render(
-            request,
-            "cuentas/pagar_cuenta_completa.html",
-            contexto,
+            except ValidationError as error:
+
+                formulario.add_error(
+                    "monto_pagado",
+                    error.messages[0],
+                )
+
+            else:
+
+                messages.success(
+                    request,
+                    "Cuenta pagada completamente.",
+                )
+
+                return redirect(
+                    "cuentas:detalle",
+                    cuenta_id=cuenta.id,
+                )
+
+
+    # ========================================================
+    # GET - MOSTRAR FORMULARIO
+    # ========================================================
+
+    else:
+
+        formulario = AbonoForm(
+            cuenta=cuenta,
+            initial={
+                "monto_pagado": cuenta.saldo_pendiente,
+            },
         )
+
+
+    contexto = {
+        "cuenta": cuenta,
+        "formulario": formulario,
+    }
+
+    return render(
+        request,
+        "cuentas/pagar_cuenta_completa.html",
+        contexto,
+    )
+
+@login_required
+@dueno_required
+def anular_cuenta(request, cuenta_id):
+    """
+    Permite al dueño anular una cuenta por cobrar
+    sin eliminar su historial.
+    """
+
+    cuenta = get_object_or_404(
+        CuentaPorCobrar,
+        id=cuenta_id,
+        cliente__negocio=request.negocio,
+    )
+
+    if request.method == "POST":
+        cuenta.estado = "anulada"
+        cuenta.save(
+            update_fields=[
+                "estado",
+            ]
+        )
+
+        messages.success(
+            request,
+            "Cuenta anulada correctamente.",
+        )
+
+        return redirect(
+            "cuentas:lista",
+        )
+
+    return render(
+        request,
+        "cuentas/anular_cuenta.html",
+        {
+            "cuenta": cuenta,
+        },
+    )

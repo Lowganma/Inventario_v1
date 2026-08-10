@@ -5,17 +5,33 @@
 {% block content %}
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
-        <h1 class="mb-1">Inventario</h1>
+        <h1 class="mb-1">Productos</h1>
         <p class="text-body-secondary mb-0">Consulta y administra los productos de tu negocio.</p>
     </div>
-    <div class="d-flex gap-2">
-        <a class="btn btn-outline-primary" href="{% url 'productos:categorias' %}">
-            <i class="bi bi-tags me-1"></i>Categorías
+
+    {% if usuario_es_dueno %}
+
+    <div class="d-flex flex-column flex-sm-row gap-2">
+
+        <a
+            href="{% url 'productos:categorias' %}"
+            class="btn btn-outline-primary"
+        >
+            <i class="bi bi-tags me-1"></i>
+            Categorías
         </a>
-        <a class="btn btn-primary" href="{% url 'productos:crear' %}">
-            <i class="bi bi-plus-lg me-1"></i>Nuevo producto
+
+        <a
+            href="{% url 'productos:crear' %}"
+            class="btn btn-primary"
+        >
+            <i class="bi bi-plus-lg me-1"></i>
+            Nuevo producto
         </a>
     </div>
+
+    {% endif %}
+
 </div>
 
 <div class="row g-3 mb-4">
@@ -64,7 +80,36 @@
                     </td>
                     <td>{{ producto.stock_minimo }}</td><td>${{ producto.costo|floatformat:2 }}</td><td>${{ producto.precio_venta|floatformat:2 }}</td>
                     <td><span class="badge {% if producto.activo %}text-bg-success{% else %}text-bg-secondary{% endif %}">{% if producto.activo %}Activo{% else %}Inactivo{% endif %}</span></td>
-                    <td class="text-nowrap"><a class="btn btn-sm btn-outline-primary" href="{% url 'productos:detalle' producto.id %}">Ver</a> <a class="btn btn-sm btn-outline-secondary" href="{% url 'productos:editar' producto.id %}">Editar</a></td>
+                        <td>
+
+                            <div class="d-flex gap-2">
+
+                                {# Todos pueden consultar el producto #}
+                                <a
+                                    href="{% url 'productos:detalle' producto.id %}"
+                                    class="btn btn-sm btn-outline-primary"
+                                >
+                                    <i class="bi bi-eye me-1"></i>
+                                    Ver
+                                </a>
+
+
+                                {# Solo el dueño puede modificarlo #}
+                                {% if usuario_es_dueno %}
+
+                                    <a
+                                        href="{% url 'productos:editar' producto.id %}"
+                                        class="btn btn-sm btn-outline-secondary"
+                                    >
+                                        <i class="bi bi-pencil me-1"></i>
+                                        Editar
+                                    </a>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
                 </tr>
             {% empty %}<tr><td colspan="8" class="text-center text-body-secondary py-5">No se encontraron productos.</td></tr>{% endfor %}
             </tbody>

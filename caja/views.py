@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from usuarios.permisos import admin_required
+from usuarios.permisos import dueno_required
 
 from .forms import AbrirCajaForm, CerrarCajaForm, MovimientoCajaForm
 from .models import CajaDiaria, MovimientoCaja
@@ -33,7 +33,7 @@ def abrir_caja_view(request):
 
 
 @login_required
-@admin_required
+@dueno_required
 def cerrar_caja_view(request):
     caja = get_object_or_404(CajaDiaria, negocio=request.user.negocio, fecha=timezone.localdate(), estado="abierta")
     resumen = obtener_resumen_caja(caja)
@@ -50,7 +50,7 @@ def cerrar_caja_view(request):
 
 
 @login_required
-@admin_required
+@dueno_required
 def lista_cierres(request):
     cajas = CajaDiaria.objects.filter(negocio=request.user.negocio)
     filas = [{"caja": caja, "resumen": obtener_resumen_caja(caja)} for caja in cajas]
@@ -58,7 +58,7 @@ def lista_cierres(request):
 
 
 @login_required
-@admin_required
+@dueno_required
 def detalle_cierre(request, caja_id):
     caja = get_object_or_404(CajaDiaria, id=caja_id, negocio=request.user.negocio)
     return render(request, "caja/detalle_cierre.html", {"caja": caja, "resumen": obtener_resumen_caja(caja)})

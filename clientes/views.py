@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 
 from .forms import ClienteForm
 from .models import Cliente
+from decimal import Decimal
+from usuarios.permisos import dueno_required
 
 # Create your views here.
 
@@ -40,13 +42,24 @@ def lista_clientes(request):
 
     # Calcula las cuentas y el saldo de cada cliente.
     for cliente in clientes:
-        cuentas = cliente.cuentas.all()
 
-        cliente.total_cuentas = cuentas.count()
+        # Solo tomamos en cuenta las cuentas que siguen pendientes.
+        cuentas_pendientes = cliente.cuentas.filter(
+            estado="pendiente"
+        )
 
+        # Cantidad real de cuentas pendientes del cliente.
+        cliente.total_cuentas = (
+            cuentas_pendientes.count()
+        )
+
+        # Saldo total pendiente, excluyendo cuentas pagadas y anuladas.
         cliente.total_pendiente = sum(
-            cuenta.saldo_pendiente
-            for cuenta in cuentas
+            (
+                cuenta.saldo_pendiente
+                for cuenta in cuentas_pendientes
+            ),
+            Decimal("0.00"),
         )
 
     contexto = {
@@ -120,6 +133,7 @@ def editar_cliente(request, cliente_id):
     )
 
 @login_required
+@dueno_required
 def eliminar_cliente(request, cliente_id):
     cliente = get_object_or_404(
         Cliente, id=cliente_id, negocio=request.user.negocio

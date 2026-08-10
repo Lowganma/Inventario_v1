@@ -36,6 +36,7 @@ def obtener_resumen_caja(caja):
         "egresos_manuales": movimientos.filter(origen="manual", tipo="egreso").aggregate(total=Sum("monto"))["total"] or cero,
         "por_metodo": por_metodo,
     }
+from usuarios.permisos import modulo_esta_activo
 
 
 @transaction.atomic
@@ -85,8 +86,16 @@ def registrar_movimiento(
     entre Caja y los demás módulos del sistema.
     """
 
+
+    if not modulo_esta_activo(
+        negocio,
+        "caja",
+    ):
+        return None
+
     monto = Decimal(monto)
 
+    
     if monto <= 0:
         raise ValidationError(
             "El monto del movimiento debe ser mayor que cero."

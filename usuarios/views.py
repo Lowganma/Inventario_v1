@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import EmpleadoForm, ModulosNegocioForm, RegistroForm, RolUsuarioForm
 from .models import MODULOS_DISPONIBLES, PerfilUsuario
-from .permisos import admin_required
+from .permisos import dueno_required
 from .services import actualizar_modulos
 
 
@@ -45,7 +45,7 @@ def registro(request):
 
 
 @login_required
-@admin_required
+@dueno_required
 def configurar_modulos(request):
     negocio = request.user.negocio
     actuales = set(negocio.modulos.filter(activo=True).values_list("modulo", flat=True))
@@ -62,14 +62,14 @@ def configurar_modulos(request):
 
 
 @login_required
-@admin_required
+@dueno_required
 def lista_usuarios(request):
     miembros = PerfilUsuario.objects.filter(negocio=request.user.negocio).select_related("usuario")
     return render(request, "usuarios/lista.html", {"miembros": miembros, "propietario": request.user.negocio.propietario})
 
 
 @login_required
-@admin_required
+@dueno_required
 def crear_usuario(request):
     formulario = EmpleadoForm(request.POST or None)
     if request.method == "POST" and formulario.is_valid():
@@ -81,7 +81,7 @@ def crear_usuario(request):
 
 
 @login_required
-@admin_required
+@dueno_required
 def editar_rol(request, perfil_id):
     # El filtro empresarial evita modificar miembros mediante identificadores ajenos.
     perfil = get_object_or_404(PerfilUsuario, id=perfil_id, negocio=request.user.negocio)

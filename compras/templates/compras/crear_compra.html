@@ -672,9 +672,160 @@ formularioCompra.addEventListener("submit", function () {
     );
 
     contenedor.addEventListener(
-        "change",
-        actualizarResumen
-    );
+    "change",
+    async function (event) {
+
+        // Detecta si lo que cambió fue el selector de producto.
+        if (
+            event.target.matches(
+                'select[name$="-producto"]'
+            )
+        ) {
+
+            await cargarDatosProducto(
+                event.target
+            );
+        }
+
+        actualizarResumen();
+    }
+);
+
+    // ========================================================
+// CARGAR DATOS DEL PRODUCTO SELECCIONADO
+// ========================================================
+
+async function cargarDatosProducto(selectProducto) {
+
+    const productoId = selectProducto.value;
+
+    if (!productoId) {
+        return;
+    }
+
+    /*
+     * Buscamos la fila concreta donde se encuentra
+     * el producto seleccionado.
+     */
+    const fila =
+        selectProducto.closest(
+            ".detalle-compra"
+        );
+
+    if (!fila) {
+        return;
+    }
+
+    /*
+     * Dentro de esa misma fila buscamos
+     * el campo Precio venta.
+     */
+    const precioVentaInput =
+        fila.querySelector(
+            'input[name$="-precio_venta"]'
+        );
+
+    if (!precioVentaInput) {
+        return;
+    }
+
+
+    try {
+
+        /*
+         * Consultamos los datos actuales
+         * del producto en Inventario.
+         */
+        const respuesta = await fetch(
+            `/productos/${productoId}/datos/`
+        );
+
+        if (!respuesta.ok) {
+            throw new Error(
+                "No se pudieron obtener los datos del producto."
+            );
+        }
+
+        const datos =
+            await respuesta.json();
+
+
+        /*
+         * Colocamos automáticamente en la compra
+         * el precio de venta actualmente guardado
+         * en Inventario.
+         */
+        precioVentaInput.value =
+            datos.precio_venta || "0.00";
+
+
+        actualizarResumen();
+
+    } catch (error) {
+
+        console.error(
+            "Error cargando datos del producto:",
+            error
+        );
+    }
+}
+
+    // ========================================================
+// CARGAR PRECIO DE VENTA DEL INVENTARIO
+// ========================================================
+
+async function cargarDatosProducto(selectProducto) {
+
+    const productoId = selectProducto.value;
+
+    if (!productoId) {
+        return;
+    }
+
+    const fila =
+        selectProducto.closest(
+            ".detalle-compra"
+        );
+
+    if (!fila) {
+        return;
+    }
+
+    const precioVentaInput =
+        fila.querySelector(
+            'input[name$="-precio_venta"]'
+        );
+
+    if (!precioVentaInput) {
+        return;
+    }
+
+    try {
+
+        const respuesta = await fetch(
+            `/productos/${productoId}/datos/`
+        );
+
+        if (!respuesta.ok) {
+            throw new Error(
+                "No se pudieron obtener los datos del producto."
+            );
+        }
+
+        const datos =
+            await respuesta.json();
+
+        precioVentaInput.value =
+            datos.precio_venta || "0.00";
+
+    } catch (error) {
+
+        console.error(
+            "Error cargando el producto:",
+            error
+        );
+    }
+}
 
 
     function actualizarResumen() {

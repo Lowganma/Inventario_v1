@@ -16,27 +16,50 @@ def obtener_negocio(usuario):
             raise PermissionDenied("El usuario no pertenece a un negocio.") from error
 
 
-def usuario_es_admin(usuario):
+def usuario_es_dueno(usuario):
+    """
+    Indica si el usuario autenticado es el propietario
+    del negocio actual.
+    """
+
     if not usuario.is_authenticated:
         return False
+
     try:
-        obtener_negocio(usuario)
+        negocio = obtener_negocio(usuario)
     except PermissionDenied:
         return False
-    negocio = obtener_negocio(usuario)
-    if negocio.propietario_id == usuario.id:
-        return True
-    return getattr(getattr(usuario, "perfil_negocio", None), "rol", None) == "admin"
 
+    return negocio.propietario_id == usuario.id
+
+def dueno_required(vista):
+    @wraps(vista)
+    def protegida(request, *args, **kwargs):
+
+        if not usuario_es_dueno(request.user):
+            raise PermissionDenied(
+                "Esta función está reservada para el dueño del negocio."
+            )
+
+        return vista(
+            request,
+            *args,
+            **kwargs,
+        )
+
+    return protegida
 
 def modulo_esta_activo(negocio, modulo):
     return ModuloNegocio.objects.filter(negocio=negocio, modulo=modulo, activo=True).exists()
 
 
-def admin_required(vista):
+def dueno_required(vista):
     @wraps(vista)
     def protegida(request, *args, **kwargs):
-        if not usuario_es_admin(request.user):
+        if not usuario_es_dueno(request.user):
             raise PermissionDenied("Esta función está reservada para administradores.")
         return vista(request, *args, **kwargs)
     return protegida
+
+usuario_es_admin = usuario_es_dueno
+admin_required = dueno_required

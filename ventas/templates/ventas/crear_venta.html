@@ -70,29 +70,11 @@
                     </h2>
 
 
-                    <div class="row g-4">
+                        <div class="row g-4">
 
-                        <div
-                            id="contenedorMetodoPago"
-                            class="mb-3"
-                        >
-                            <label
-                                for="{{ formulario.metodo_pago.id_for_label }}"
-                                class="form-label fw-semibold"
-                            >
-                                Método de pago
-                            </label>
-
-                            {{ formulario.metodo_pago }}
-
-                            {% for error in formulario.metodo_pago.errors %}
-                                <div class="text-danger small mt-1">
-                                    {{ error }}
-                                </div>
-                            {% endfor %}
-                        </div>
-
-                        {# Forma de pago #}
+    {# ===================================================== #}
+    {# FORMA DE PAGO                                         #}
+    {# ===================================================== #}
 
                         <div class="col-12 col-lg-6">
 
@@ -116,11 +98,20 @@
                         </div>
 
 
-                        {# Cliente #}
+                        {# ===================================================== #}
+                        {# CLIENTE                                               #}
+                        {# ===================================================== #}
 
                         <div class="col-12 col-lg-6">
 
-                            <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div
+                                class="
+                                    d-flex
+                                    justify-content-between
+                                    align-items-center
+                                    mb-2
+                                "
+                            >
 
                                 <label
                                     for="{{ formulario.cliente.id_for_label }}"
@@ -157,8 +148,34 @@
 
                         </div>
 
-                    </div>
 
+                        {# ===================================================== #}
+                        {# MÉTODO DE PAGO                                        #}
+                        {# ===================================================== #}
+
+                        <div
+                            id="contenedorMetodoPago"
+                            class="col-12"
+                        >
+
+                            <label
+                                for="{{ formulario.metodo_pago.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                Método de pago
+                            </label>
+
+                            {{ formulario.metodo_pago }}
+
+                            {% for error in formulario.metodo_pago.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
 
                     {# Aviso de fiado #}
 
@@ -221,255 +238,311 @@
                     </div>
 
 
-                    <div id="detallesVenta">
+                    <div class="table-responsive">
 
-                        {% for detalle in detalles %}
+    <table
+        class="
+            table
+            table-hover
+            align-middle
+            mb-0
+        "
+    >
 
-                            <div
-                                class="
-                                    detalle-venta
-                                    border
-                                    rounded-3
-                                    p-3
-                                    mb-3
-                                    {% if detalle.DELETE.value %}
-                                        d-none
-                                    {% endif %}
-                                "
-                            >
+        <thead>
 
-                                <div class="row g-3 align-items-end">
+            <tr>
 
-                                    {# Producto #}
+                <th style="min-width: 280px;">
+                    Producto
+                </th>
 
-                                    <div class="col-12 col-lg-5">
+                <th style="min-width: 120px;">
+                    Cantidad
+                </th>
 
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                <th style="min-width: 150px;">
+                    Precio
+                </th>
 
-                                            <label
-                                                for="{{ detalle.producto.id_for_label }}"
-                                                class="form-label fw-semibold mb-0"
-                                            >
-                                                Producto
-                                            </label>
+                <th style="min-width: 130px;">
+                    Subtotal
+                </th>
 
-                                            <a
-                                                href="{% url 'productos:crear' %}"
-                                                target="_blank"
-                                                class="btn btn-sm btn-outline-primary"
-                                                title="Crear producto"
-                                            >
-                                                <i class="bi bi-plus-lg"></i>
-                                            </a>
+                <th
+                    style="width: 70px;"
+                    class="text-center"
+                >
+                    Acción
+                </th>
 
-                                        </div>
+            </tr>
 
-                                        {{ detalle.producto }}
-
-                                        <div class="form-text stock-disponible">
-    Selecciona un producto para consultar existencias.
-                                        </div>
-
-                                        {% for error in detalle.producto.errors %}
-                                            <div class="text-danger small mt-1">
-                                                {{ error }}
-                                            </div>
-                                        {% endfor %}
-
-                                    </div>
+        </thead>
 
 
-                                    {# Cantidad #}
+        <tbody id="detallesVenta">
 
-                                    <div class="col-6 col-lg-2">
+            {% for detalle in detalles %}
 
-                                        <label
-                                            for="{{ detalle.cantidad.id_for_label }}"
-                                            class="form-label fw-semibold"
-                                        >
-                                            Cantidad
-                                        </label>
+                <tr
+                    class="
+                        detalle-venta
+                        {% if detalle.DELETE.value %}
+                            d-none
+                        {% endif %}
+                    "
+                >
 
-                                        {{ detalle.cantidad }}
+                    {# ====================================== #}
+                    {# PRODUCTO                               #}
+                    {# ====================================== #}
 
-                                        {% for error in detalle.cantidad.errors %}
-                                            <div class="text-danger small mt-1">
-                                                {{ error }}
-                                            </div>
-                                        {% endfor %}
+                    <td>
 
-                                    </div>
+                        <div
+                            class="
+                                d-flex
+                                align-items-start
+                                gap-2
+                            "
+                        >
 
+                            <div class="flex-grow-1">
 
-                                    {# Precio #}
+                                {{ detalle.producto }}
 
-                                    <div class="col-6 col-lg-2">
-
-                                        <label
-                                            for="{{ detalle.precio_unitario.id_for_label }}"
-                                            class="form-label fw-semibold"
-                                        >
-                                            Precio
-                                        </label>
-
-                                        <div class="input-group">
-                                            <span class="input-group-text">
-                                                $
-                                            </span>
-
-                                            {{ detalle.precio_unitario }}
-                                        </div>
-
-                                        {% for error in detalle.precio_unitario.errors %}
-                                            <div class="text-danger small mt-1">
-                                                {{ error }}
-                                            </div>
-                                        {% endfor %}
-
-                                    </div>
-
-
-                                    {# Subtotal visual #}
-
-                                    <div class="col-6 col-lg-2">
-
-                                        <label class="form-label fw-semibold">
-                                            Subtotal
-                                        </label>
-
-                                        <div
-                                            class="form-control fw-semibold subtotal-linea"
-                                            data-subtotal
-                                        >
-                                            $0.00
-                                        </div>
-
-                                    </div>
-
-
-                                    {# Eliminar #}
-
-                                    <div class="col-6 col-lg-1">
-
-                                        <button
-                                            type="button"
-                                            class="btn btn-outline-danger w-100 eliminar-producto"
-                                            title="Quitar producto"
-                                        >
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-
-                                    </div>
-
+                                <div
+                                    class="
+                                        form-text
+                                        stock-disponible
+                                    "
+                                >
+                                    Selecciona un producto para consultar existencias.
                                 </div>
 
-
-                                {% if detalle.DELETE %}
-                                    <div class="d-none">
-                                        {{ detalle.DELETE }}
+                                {% for error in detalle.producto.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
                                     </div>
-                                {% endif %}
+                                {% endfor %}
 
                             </div>
 
+
+                            <a
+                                href="{% url 'productos:crear' %}"
+                                target="_blank"
+                                class="btn btn-sm btn-outline-primary"
+                                title="Crear producto"
+                            >
+                                <i class="bi bi-plus-lg"></i>
+                            </a>
+
+                        </div>
+
+                    </td>
+
+
+                                {# ====================================== #}
+                                {# CANTIDAD                               #}
+                                {# ====================================== #}
+
+                                <td>
+
+                                    {{ detalle.cantidad }}
+
+                                    {% for error in detalle.cantidad.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ error }}
+                                        </div>
+                                    {% endfor %}
+
+                                </td>
+
+
+                                {# ====================================== #}
+                                {# PRECIO                                 #}
+                                {# ====================================== #}
+
+                                <td>
+
+                                    <div class="input-group">
+
+                                        <span class="input-group-text">
+                                            $
+                                        </span>
+
+                                        {{ detalle.precio_unitario }}
+
+                                    </div>
+
+                                    {% for error in detalle.precio_unitario.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ error }}
+                                        </div>
+                                    {% endfor %}
+
+                                </td>
+
+
+                                {# ====================================== #}
+                                {# SUBTOTAL                               #}
+                                {# ====================================== #}
+
+                                <td>
+
+                                    <strong
+                                        class="subtotal-linea"
+                                        data-subtotal
+                                    >
+                                        $0.00
+                                    </strong>
+
+                                </td>
+
+
+                                {# ====================================== #}
+                                {# ELIMINAR                               #}
+                                {# ====================================== #}
+
+                                <td class="text-center">
+
+                                    <button
+                                        type="button"
+                                        class="
+                                            btn
+                                            btn-sm
+                                            btn-outline-danger
+                                            eliminar-producto
+                                        "
+                                        title="Quitar producto"
+                                    >
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+
+                                    {% if detalle.DELETE %}
+                                        <div class="d-none">
+                                            {{ detalle.DELETE }}
+                                        </div>
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
                         {% endfor %}
 
-                    </div>
+                    </tbody>
+
+                </table>
+
+            </div>
 
 
                     {# ================================================= #}
                     {# FORMULARIO VACÍO PARA AGREGAR FILAS              #}
                     {# ================================================= #}
 
-                    <template id="detalleVacio">
+                   <template id="detalleVacio">
 
-                        <div class="detalle-venta border rounded-3 p-3 mb-3">
+                    <tr class="detalle-venta">
 
-                            <div class="row g-3 align-items-end">
+                        {# Producto #}
 
-                                <div class="col-12 col-lg-5">
+                        <td>
 
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div
+                                class="
+                                    d-flex
+                                    align-items-start
+                                    gap-2
+                                "
+                            >
 
-                                        <label class="form-label fw-semibold mb-0">
-                                            Producto
-                                        </label>
-
-                                        <a
-                                            href="{% url 'productos:crear' %}"
-                                            target="_blank"
-                                            class="btn btn-sm btn-outline-primary"
-                                        >
-                                            <i class="bi bi-plus-lg"></i>
-                                        </a>
-
-                                    </div>
+                                <div class="flex-grow-1">
 
                                     {{ detalles.empty_form.producto }}
 
-                                    <div class="form-text stock-disponible">
-    Selecciona un producto para consultar existencias.
-                                    </div>
-
-                                </div>
-
-
-                                <div class="col-6 col-lg-2">
-
-                                    <label class="form-label fw-semibold">
-                                        Cantidad
-                                    </label>
-
-                                    {{ detalles.empty_form.cantidad }}
-
-                                </div>
-
-
-                                <div class="col-6 col-lg-2">
-
-                                    <label class="form-label fw-semibold">
-                                        Precio
-                                    </label>
-
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            $
-                                        </span>
-
-                                        {{ detalles.empty_form.precio_unitario }}
-                                    </div>
-
-                                </div>
-
-
-                                <div class="col-6 col-lg-2">
-
-                                    <label class="form-label fw-semibold">
-                                        Subtotal
-                                    </label>
-
                                     <div
-                                        class="form-control fw-semibold"
-                                        data-subtotal
+                                        class="
+                                            form-text
+                                            stock-disponible
+                                        "
                                     >
-                                        $0.00
+                                        Selecciona un producto para consultar existencias.
                                     </div>
 
                                 </div>
 
 
-                                <div class="col-6 col-lg-1">
-
-                                    <button
-                                        type="button"
-                                        class="btn btn-outline-danger w-100 eliminar-producto"
-                                    >
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-
-                                </div>
+                                <a
+                                    href="{% url 'productos:crear' %}"
+                                    target="_blank"
+                                    class="btn btn-sm btn-outline-primary"
+                                    title="Crear producto"
+                                >
+                                    <i class="bi bi-plus-lg"></i>
+                                </a>
 
                             </div>
+
+                        </td>
+
+
+                        {# Cantidad #}
+
+                        <td>
+
+                            {{ detalles.empty_form.cantidad }}
+
+                        </td>
+
+
+                        {# Precio #}
+
+                        <td>
+
+                            <div class="input-group">
+
+                                <span class="input-group-text">
+                                    $
+                                </span>
+
+                                {{ detalles.empty_form.precio_unitario }}
+
+                            </div>
+
+                        </td>
+
+
+                        {# Subtotal #}
+
+                        <td>
+
+                            <strong data-subtotal>
+                                $0.00
+                            </strong>
+
+                        </td>
+
+
+                        {# Eliminar #}
+
+                        <td class="text-center">
+
+                            <button
+                                type="button"
+                                class="
+                                    btn
+                                    btn-sm
+                                    btn-outline-danger
+                                    eliminar-producto
+                                "
+                                title="Quitar producto"
+                            >
+                                <i class="bi bi-trash"></i>
+                            </button>
 
 
                             {% if detalles.empty_form.DELETE %}
@@ -478,9 +551,11 @@
                                 </div>
                             {% endif %}
 
-                        </div>
+                        </td>
 
-                    </template>
+                    </tr>
+
+                </template>
 
                 </div>
             </div>

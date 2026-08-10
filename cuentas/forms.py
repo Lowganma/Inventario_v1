@@ -12,7 +12,6 @@ class CuentaPorCobrarForm(forms.ModelForm):
             "concepto",
             "monto_total",
             "fecha_vencimiento",
-            "estado",
             "notas",
         ]
 

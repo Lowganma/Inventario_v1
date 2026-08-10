@@ -7,22 +7,30 @@ from cuentas.services.tasa_bcv import (
 
 
 class Command(BaseCommand):
-    help = (
-        "Consulta exclusivamente la tasa USD oficial del BCV "
-        "y la guarda en la base de datos."
-    )
+    """
+    Actualiza manualmente la tasa USD/VES utilizada
+    como referencia por el sistema.
+    """
+
+    help = "Consulta y actualiza la tasa BCV del dólar."
+
 
     def handle(self, *args, **options):
+
         try:
+
             tasa, creada = actualizar_tasa_dolar_bcv()
 
         except ErrorConsultaBCV as error:
+
             self.stderr.write(
                 self.style.ERROR(
-                    f"No se actualizó la tasa: {error}"
+                    f"No fue posible actualizar la tasa: {error}"
                 )
             )
+
             return
+
 
         accion = (
             "creada"
@@ -32,10 +40,8 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                (
-                    f"Tasa USD {accion}: "
-                    f"Bs. {tasa.valor} | "
-                    f"Vigencia: {tasa.fecha_vigencia}"
-                )
+                f"Tasa BCV {accion}: "
+                f"1 USD = {tasa.valor} Bs. "
+                f"({tasa.fecha_vigencia})"
             )
         )

@@ -27,4 +27,9 @@ urlpatterns = [
         views.detalle_cuenta,
         name="detalle",
     ),
+    path(
+    "<int:cuenta_id>/anular/",
+    views.anular_cuenta,
+    name="anular",
+    ),
 ]
