@@ -9,8 +9,8 @@
     <div class="col-md-6"><small class="text-body-secondary">Código</small><div>{{ producto.codigo|default:"Sin código" }}</div></div>
     <div class="col-md-6"><small class="text-body-secondary">Categoría</small><div>{{ producto.categoria.nombre }}</div></div>
     <div class="col-12"><small class="text-body-secondary">Descripción</small><div>{{ producto.descripcion|default:"Sin descripción"|linebreaksbr }}</div></div>
-    <div class="col-md-3"><small class="text-body-secondary">Stock actual</small><div class="fs-5">{{ producto.stock }} {% if producto.stock_bajo %}<span class="badge text-bg-warning">Stock bajo</span>{% endif %}</div></div>
-    <div class="col-md-3"><small class="text-body-secondary">Stock mínimo</small><div class="fs-5">{{ producto.stock_minimo }}</div></div>
+    <div class="col-md-3"><small class="text-body-secondary">Stock actual</small><div class="fs-5">{{ producto.stock_con_unidad }} {% if producto.stock_bajo %}<span class="badge text-bg-warning">Stock bajo</span>{% endif %}</div></div>
+    <div class="col-md-3"><small class="text-body-secondary">Stock mínimo</small><div class="fs-5">{{ producto.stock_minimo_con_unidad }}</div></div>
     <div class="col-md-3"><small class="text-body-secondary">Costo</small><div class="fs-5">${{ producto.costo|floatformat:2 }}</div></div>
     <div class="col-md-3"><small class="text-body-secondary">Precio de venta</small><div class="fs-5">${{ producto.precio_venta|floatformat:2 }}</div></div>
     <div class="col-md-4"><small class="text-body-secondary">Valor estimado de existencias</small><div class="fs-5 fw-bold">${{ producto.valor_inventario|floatformat:2 }}</div></div>

@@ -63,6 +63,7 @@ class ProductoForm(forms.ModelForm):
             "codigo",
             "nombre",
             "descripcion",
+            "unidad_base",
             "stock",
             "stock_minimo",
             "costo",
@@ -80,6 +81,17 @@ class ProductoForm(forms.ModelForm):
             "descripcion": forms.Textarea(
                 attrs={"class": "form-control", "rows": 3, "placeholder": "Opcional"}
             ),
+            "tipo": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+
+            "unidad_base": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
             "stock": forms.NumberInput(attrs={"class": "form-control", "min": 0}),
             "stock_minimo": forms.NumberInput(
                 attrs={"class": "form-control", "min": 0}
@@ -92,9 +104,17 @@ class ProductoForm(forms.ModelForm):
             ),
             "activo": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
-        labels = {"precio_venta": "Precio de venta", "stock_minimo": "Stock mínimo"}
+        labels = {
+            "precio_venta": "Precio de venta", 
+            "stock_minimo": "Stock mínimo",
+            "tipo": "Tipo",
+            "unidad_base": "Unidad de inventario",
+            "precio_venta": "Precio de venta",
+            "stock_minimo": "Stock mínimo",
+            }
         help_texts = {
             "codigo": "Opcional. Si lo indicas, no podrá repetirse en tu negocio.",
+             "unidad_base":"Unidad mínima en la que controlarás las existencias.",
             "stock_minimo": "Se avisará cuando el stock sea igual o menor a este valor.",
         }
 
@@ -115,3 +135,26 @@ class ProductoForm(forms.ModelForm):
         if productos.exists():
             raise forms.ValidationError("Ya existe un producto con este código.")
         return codigo
+
+    def clean_nombre(self):
+        nombre = self.cleaned_data["nombre"].strip()
+
+        if not self.negocio:
+            return nombre
+
+        productos = Producto.objects.filter(
+            negocio=self.negocio,
+            nombre__iexact=nombre,
+        )
+
+        if self.instance.pk:
+            productos = productos.exclude(
+                pk=self.instance.pk
+            )
+
+        if productos.exists():
+            raise forms.ValidationError(
+                "Ya existe un producto con este nombre."
+            )
+
+        return nombre

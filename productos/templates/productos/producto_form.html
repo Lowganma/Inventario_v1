@@ -1,11 +1,893 @@
 {% extends "base.html" %}
-{% block title %}{% if producto %}Editar{% else %}Nuevo{% endif %} producto{% endblock %}
+
+{% block title %}
+    {% if producto %}
+        Editar producto
+    {% else %}
+        Nuevo producto
+    {% endif %}
+{% endblock %}
+
+
 {% block content %}
-<div class="row justify-content-center"><div class="col-xl-8">
-<h1>{% if producto %}Editar producto{% else %}Nuevo producto{% endif %}</h1>
-<p class="text-body-secondary">Registra sus existencias, costo y precio de venta.</p>
-<form method="post" novalidate class="card card-body">{% csrf_token %}
-    {% include "productos/form_snipet.html" with form=formulario %}
-    <div class="d-flex gap-2"><button class="btn btn-primary" type="submit">Guardar producto</button><a class="btn btn-outline-secondary" href="{% url 'productos:index' %}">Cancelar</a></div>
-</form></div></div>
+
+<div class="row justify-content-center">
+
+    <div class="col-xl-8">
+
+        <!-- =====================================================
+             ENCABEZADO
+        ====================================================== -->
+
+        <h1>
+            {% if producto %}
+                Editar producto
+            {% else %}
+                Nuevo producto
+            {% endif %}
+        </h1>
+
+        <p class="text-body-secondary">
+            Registra sus existencias, costo y precio de venta.
+        </p>
+
+
+        <!-- =====================================================
+             FORMULARIO
+        ====================================================== -->
+
+        <form
+            method="post"
+            class="card card-body"
+            id="producto-form"
+        >
+
+            {% csrf_token %}
+
+
+            <!-- =================================================
+                 ERRORES GENERALES
+            ================================================== -->
+
+            {% if formulario.non_field_errors %}
+
+                <div class="alert alert-danger">
+
+                    {% for error in formulario.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- =================================================
+                 CATEGORÍA
+            ================================================== -->
+
+            <div class="mb-3">
+
+                {{ formulario.categoria.label_tag }}
+
+                {{ formulario.categoria }}
+
+
+                {% if formulario.categoria.help_text %}
+                    <div class="form-text">
+                        {{ formulario.categoria.help_text }}
+                    </div>
+                {% endif %}
+
+
+                {% for error in formulario.categoria.errors %}
+                    <div class="text-danger small">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+
+                <!-- =============================================
+                     CREACIÓN RÁPIDA DE CATEGORÍA
+                ============================================== -->
+
+                <div
+                    id="nueva-categoria-container"
+                    class="mt-2 d-none"
+                >
+
+                    <div class="input-group">
+
+                        <input
+                            type="text"
+                            id="nueva-categoria-nombre"
+                            class="form-control"
+                            placeholder="Nombre de la nueva categoría"
+                            maxlength="255"
+                            autocomplete="off"
+                        >
+
+                        <button
+                            type="button"
+                            id="crear-categoria-btn"
+                            class="btn btn-outline-primary"
+                        >
+                            Crear
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="categoria-error"
+                        class="text-danger small mt-1"
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 RESTO DE CAMPOS
+            ================================================== -->
+
+            {% for field in formulario %}
+
+                {% if field.name != "categoria" %}
+
+                    <div
+                        class="mb-3
+                        {% if field.field.widget.input_type == 'checkbox' %}
+                            form-check
+                        {% endif %}"
+                        id="campo-{{ field.name }}"
+                    >
+
+                        {% if field.field.widget.input_type == "checkbox" %}
+
+                            {{ field }}
+
+                            {{ field.label_tag }}
+
+                        {% else %}
+
+                            {{ field.label_tag }}
+
+                            {{ field }}
+
+                        {% endif %}
+
+
+                        {% if field.help_text %}
+
+                            <div class="form-text">
+                                {{ field.help_text }}
+                            </div>
+
+                        {% endif %}
+
+
+                        {% for error in field.errors %}
+
+                            <div class="text-danger small">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+
+                        <!-- Error dinámico del precio -->
+
+                        {% if field.name == "precio_venta" %}
+
+                            <div
+                                id="precio-error"
+                                class="text-danger small mt-1"
+                            ></div>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endif %}
+
+            {% endfor %}
+
+
+            <!-- =================================================
+                 BOTONES
+            ================================================== -->
+
+            <div class="d-flex gap-2">
+
+                <button
+                    class="btn btn-primary"
+                    type="submit"
+                >
+                    {% if producto %}
+                        Guardar cambios
+                    {% else %}
+                        Guardar producto
+                    {% endif %}
+                </button>
+
+
+                <a
+                    class="btn btn-outline-secondary"
+                    href="{% url 'productos:index' %}"
+                >
+                    Cancelar
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+
+<!-- =============================================================
+     JAVASCRIPT
+============================================================== -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    // =========================================================
+    // ELEMENTOS GENERALES
+    // =========================================================
+
+    const formulario =
+        document.getElementById("producto-form");
+
+
+    // =========================================================
+    // CATEGORÍA
+    // =========================================================
+
+    const selectorCategoria =
+        document.getElementById("id_categoria");
+
+    const nuevaCategoriaContainer =
+        document.getElementById(
+            "nueva-categoria-container"
+        );
+
+    const inputNuevaCategoria =
+        document.getElementById(
+            "nueva-categoria-nombre"
+        );
+
+    const botonCrearCategoria =
+        document.getElementById(
+            "crear-categoria-btn"
+        );
+
+    const errorCategoria =
+        document.getElementById(
+            "categoria-error"
+        );
+
+
+    // =========================================================
+    // AGREGAR OPCIÓN "+ NUEVA CATEGORÍA"
+    // =========================================================
+
+    let opcionNuevaCategoria = null;
+
+
+    if (selectorCategoria) {
+
+        opcionNuevaCategoria =
+            document.createElement("option");
+
+        opcionNuevaCategoria.value =
+            "__nueva__";
+
+        opcionNuevaCategoria.textContent =
+            "+ Agregar nueva categoría";
+
+        selectorCategoria.appendChild(
+            opcionNuevaCategoria
+        );
+
+    }
+
+
+    // =========================================================
+    // MOSTRAR / OCULTAR CREACIÓN RÁPIDA
+    // =========================================================
+
+    function actualizarSelectorCategoria() {
+
+        if (!selectorCategoria) {
+            return;
+        }
+
+
+        if (
+            selectorCategoria.value
+            === "__nueva__"
+        ) {
+
+            nuevaCategoriaContainer
+                .classList
+                .remove("d-none");
+
+            inputNuevaCategoria.focus();
+
+        } else {
+
+            nuevaCategoriaContainer
+                .classList
+                .add("d-none");
+
+            errorCategoria.textContent = "";
+
+        }
+
+    }
+
+
+    if (selectorCategoria) {
+
+        selectorCategoria.addEventListener(
+            "change",
+            actualizarSelectorCategoria
+        );
+
+    }
+
+
+    // =========================================================
+    // CREAR CATEGORÍA CON AJAX
+    // =========================================================
+
+    async function crearCategoriaRapida() {
+
+        const nombre =
+            inputNuevaCategoria.value.trim();
+
+
+        // -----------------------------------------------------
+        // Validación básica
+        // -----------------------------------------------------
+
+        if (!nombre) {
+
+            errorCategoria.textContent =
+                "Escribe el nombre de la categoría.";
+
+            inputNuevaCategoria.focus();
+
+            return;
+
+        }
+
+
+        botonCrearCategoria.disabled = true;
+
+        botonCrearCategoria.textContent =
+            "Creando...";
+
+        errorCategoria.textContent = "";
+
+
+        // -----------------------------------------------------
+        // Datos enviados a Django
+        // -----------------------------------------------------
+
+        const datos =
+            new FormData();
+
+        datos.append(
+            "nombre",
+            nombre
+        );
+
+        datos.append(
+            "descripcion",
+            ""
+        );
+
+        datos.append(
+            "color",
+            "#0d6efd"
+        );
+
+        datos.append(
+            "activa",
+            "on"
+        );
+
+
+        try {
+
+            const respuesta =
+                await fetch(
+
+                    "{% url 'productos:crear_categoria_rapida' %}",
+
+                    {
+                        method: "POST",
+
+                        headers: {
+
+                            "X-CSRFToken":
+                                document.querySelector(
+                                    "[name=csrfmiddlewaretoken]"
+                                ).value
+
+                        },
+
+                        body: datos
+                    }
+
+                );
+
+
+            const resultado =
+                await respuesta.json();
+
+
+            // -------------------------------------------------
+            // Errores enviados por Django
+            // -------------------------------------------------
+
+            if (!respuesta.ok) {
+
+                let mensaje =
+                    "No se pudo crear la categoría.";
+
+
+                if (
+                    resultado.errores
+                    &&
+                    resultado.errores.nombre
+                ) {
+
+                    mensaje =
+                        resultado
+                            .errores
+                            .nombre[0];
+
+                }
+
+
+                errorCategoria.textContent =
+                    mensaje;
+
+                return;
+
+            }
+
+
+            // -------------------------------------------------
+            // Crear opción nueva
+            // -------------------------------------------------
+
+            const nuevaOpcion =
+                document.createElement("option");
+
+
+            nuevaOpcion.value =
+                resultado.categoria.id;
+
+
+            nuevaOpcion.textContent =
+                resultado.categoria.nombre;
+
+
+            // Se coloca antes de
+            // "+ Agregar nueva categoría"
+
+            selectorCategoria.insertBefore(
+                nuevaOpcion,
+                opcionNuevaCategoria
+            );
+
+
+            // -------------------------------------------------
+            // Seleccionar automáticamente
+            // -------------------------------------------------
+
+            selectorCategoria.value =
+                resultado.categoria.id;
+
+
+            // -------------------------------------------------
+            // Limpiar formulario rápido
+            // -------------------------------------------------
+
+            inputNuevaCategoria.value = "";
+
+            errorCategoria.textContent = "";
+
+            nuevaCategoriaContainer
+                .classList
+                .add("d-none");
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            errorCategoria.textContent =
+                "Ocurrió un problema al comunicarse "
+                + "con el servidor.";
+
+        } finally {
+
+            botonCrearCategoria.disabled =
+                false;
+
+            botonCrearCategoria.textContent =
+                "Crear";
+
+        }
+
+    }
+
+
+    if (botonCrearCategoria) {
+
+        botonCrearCategoria.addEventListener(
+            "click",
+            crearCategoriaRapida
+        );
+
+    }
+
+
+    // =========================================================
+    // ENTER CREA LA CATEGORÍA
+    // =========================================================
+
+    if (inputNuevaCategoria) {
+
+        inputNuevaCategoria.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (event.key === "Enter") {
+
+                    event.preventDefault();
+
+                    crearCategoriaRapida();
+
+                }
+
+            }
+        );
+
+    }
+
+
+
+    // =========================================================
+    // UNIDADES DE INVENTARIO
+    // =========================================================
+
+    const unidadBase =
+        document.getElementById(
+            "id_unidad_base"
+        );
+
+    const stock =
+        document.getElementById(
+            "id_stock"
+        );
+
+    const stockMinimo =
+        document.getElementById(
+            "id_stock_minimo"
+        );
+
+
+    // Unidades que físicamente
+    // no admiten fracciones.
+
+    const unidadesEnteras = [
+        "unidad",
+        "hoja"
+    ];
+
+
+    function configurarUnidadInventario() {
+
+        if (
+            !unidadBase
+            ||
+            !stock
+            ||
+            !stockMinimo
+        ) {
+            return;
+        }
+
+
+        const requiereEntero =
+            unidadesEnteras.includes(
+                unidadBase.value
+            );
+
+
+        if (requiereEntero) {
+
+            stock.step = "1";
+
+            stockMinimo.step = "1";
+
+            stock.setAttribute(
+                "inputmode",
+                "numeric"
+            );
+
+            stockMinimo.setAttribute(
+                "inputmode",
+                "numeric"
+            );
+
+        } else {
+
+            stock.step = "0.001";
+
+            stockMinimo.step = "0.001";
+
+            stock.setAttribute(
+                "inputmode",
+                "decimal"
+            );
+
+            stockMinimo.setAttribute(
+                "inputmode",
+                "decimal"
+            );
+
+        }
+
+    }
+
+
+    if (unidadBase) {
+
+        unidadBase.addEventListener(
+            "change",
+            configurarUnidadInventario
+        );
+
+
+        // Configuración inicial
+        configurarUnidadInventario();
+
+    }
+
+
+
+    // =========================================================
+    // COSTO Y PRECIO DE VENTA
+    // =========================================================
+
+    const costo =
+        document.getElementById(
+            "id_costo"
+        );
+
+    const precioVenta =
+        document.getElementById(
+            "id_precio_venta"
+        );
+
+    const precioError =
+        document.getElementById(
+            "precio-error"
+        );
+
+
+    // =========================================================
+    // CONVERTIR VALOR MONETARIO A NÚMERO
+    // =========================================================
+
+    function obtenerNumero(valor) {
+
+        if (!valor) {
+            return NaN;
+        }
+
+
+        return parseFloat(
+            valor
+                .toString()
+                .replace(",", ".")
+        );
+
+    }
+
+
+    // =========================================================
+    // VALIDAR PRECIO
+    // =========================================================
+
+    function validarPrecioVenta() {
+
+        if (
+            !costo
+            ||
+            !precioVenta
+        ) {
+
+            return true;
+
+        }
+
+
+        const costoValor =
+            obtenerNumero(
+                costo.value
+            );
+
+        const precioValor =
+            obtenerNumero(
+                precioVenta.value
+            );
+
+
+        // Si todavía no hay números,
+        // no mostramos error.
+
+        if (
+            isNaN(costoValor)
+            ||
+            isNaN(precioValor)
+        ) {
+
+            precioVenta
+                .setCustomValidity("");
+
+            precioError.textContent = "";
+
+            return true;
+
+        }
+
+
+        // -----------------------------------------------------
+        // Precio menor al costo
+        // -----------------------------------------------------
+
+        if (
+            precioValor
+            < costoValor
+        ) {
+
+            const mensaje =
+                "El precio de venta no puede "
+                + "ser menor que el costo.";
+
+
+            precioVenta.setCustomValidity(
+                mensaje
+            );
+
+            precioError.textContent =
+                mensaje;
+
+            return false;
+
+        }
+
+
+        // -----------------------------------------------------
+        // Precio válido
+        // -----------------------------------------------------
+
+        precioVenta.setCustomValidity("");
+
+        precioError.textContent = "";
+
+        return true;
+
+    }
+
+
+    if (costo) {
+
+        costo.addEventListener(
+            "input",
+            validarPrecioVenta
+        );
+
+        costo.addEventListener(
+            "change",
+            validarPrecioVenta
+        );
+
+    }
+
+
+    if (precioVenta) {
+
+        precioVenta.addEventListener(
+            "input",
+            validarPrecioVenta
+        );
+
+        precioVenta.addEventListener(
+            "change",
+            validarPrecioVenta
+        );
+
+    }
+
+
+
+    // =========================================================
+    // VALIDACIÓN FINAL ANTES DE GUARDAR
+    // =========================================================
+
+    if (formulario) {
+
+        formulario.addEventListener(
+            "submit",
+            function (event) {
+
+                // ---------------------------------------------
+                // No permitir guardar con
+                // "+ Agregar nueva categoría"
+                // seleccionado.
+                // ---------------------------------------------
+
+                if (
+                    selectorCategoria
+                    &&
+                    selectorCategoria.value
+                    === "__nueva__"
+                ) {
+
+                    event.preventDefault();
+
+                    errorCategoria.textContent =
+                        "Crea la categoría antes "
+                        + "de guardar el producto.";
+
+                    inputNuevaCategoria.focus();
+
+                    return;
+
+                }
+
+
+                // ---------------------------------------------
+                // Precio
+                // ---------------------------------------------
+
+                const precioValido =
+                    validarPrecioVenta();
+
+
+                if (!precioValido) {
+
+                    event.preventDefault();
+
+                    precioVenta.focus();
+
+                    precioVenta.reportValidity();
+
+                }
+
+            }
+        );
+
+    }
+
+});
+
+</script>
+
+
 {% endblock %}

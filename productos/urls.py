@@ -10,6 +10,11 @@ urlpatterns = [
     path("categorias/", views.lista_categorias, name="categorias"),
     path("categorias/nueva/", views.crear_categoria, name="crear_categoria"),
     path(
+    "categorias/crear-rapida/",
+    views.crear_categoria_rapida,
+    name="crear_categoria_rapida",
+    ),
+    path(
         "categorias/<int:categoria_id>/editar/",
         views.editar_categoria,
         name="editar_categoria",

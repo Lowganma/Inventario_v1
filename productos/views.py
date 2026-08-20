@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, DecimalField, ExpressionWrapper, F, Q, Sum
@@ -148,6 +149,45 @@ def editar_categoria(request, categoria_id):
         Categoria, id=categoria_id, negocio=request.user.negocio
     )
     return _guardar_categoria(request, categoria)
+
+@login_required
+@dueno_required
+@require_POST
+def crear_categoria_rapida(request):
+    formulario = CategoriaForm(
+        request.POST,
+        negocio=request.user.negocio,
+    )
+
+    if not formulario.is_valid():
+        errores = {}
+
+        for campo, mensajes in formulario.errors.items():
+            errores[campo] = [str(mensaje) for mensaje in mensajes]
+
+        return JsonResponse(
+            {
+                "ok": False,
+                "errores": errores,
+            },
+            status=400,
+        )
+
+    categoria = formulario.save(commit=False)
+
+    categoria.negocio = request.user.negocio
+    categoria.full_clean()
+    categoria.save()
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "categoria": {
+                "id": categoria.id,
+                "nombre": categoria.nombre,
+            },
+        }
+    )
 
 @login_required
 def datos_producto(request, producto_id):
