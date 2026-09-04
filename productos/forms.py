@@ -1,7 +1,7 @@
 from django import forms
 from django.db.models import Q
 
-from .models import Categoria, Producto
+from .models import Categoria, Producto, PresentacionProducto
 
 
 class CategoriaForm(forms.ModelForm):
@@ -63,6 +63,7 @@ class ProductoForm(forms.ModelForm):
             "codigo",
             "nombre",
             "descripcion",
+            "imagen",
             "unidad_base",
             "stock",
             "stock_minimo",
@@ -80,6 +81,12 @@ class ProductoForm(forms.ModelForm):
             ),
             "descripcion": forms.Textarea(
                 attrs={"class": "form-control", "rows": 3, "placeholder": "Opcional"}
+            ),
+            "imagen": forms.ClearableFileInput(
+                attrs={
+                    "class": "form-control",
+                    "accept": "image/*",
+                }
             ),
             "tipo": forms.Select(
                 attrs={
@@ -158,3 +165,47 @@ class ProductoForm(forms.ModelForm):
             )
 
         return nombre
+
+
+class PresentacionProductoForm(forms.ModelForm):
+
+    class Meta:
+        model = PresentacionProducto
+
+        fields = [
+            "nombre",
+            "cantidad_unidades",
+            "precio_venta",
+        ]
+
+        widgets = {
+            "nombre": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Ejemplo: Docena, Resma, Caja x24",
+                }
+            ),
+
+            "cantidad_unidades": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": "0.001",
+                    "step": "0.001",
+                }
+            ),
+
+            "precio_venta": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": "0",
+                    "step": "0.01",
+                    "placeholder": "Opcional",
+                }
+            ),
+        }
+
+        labels = {
+            "nombre": "Nombre",
+            "cantidad_unidades": "Contiene",
+            "precio_venta": "Precio de venta",
+        }

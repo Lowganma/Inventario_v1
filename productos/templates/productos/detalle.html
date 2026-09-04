@@ -1,21 +1,776 @@
 {% extends "base.html" %}
-{% block title %}{{ producto.nombre }} | Inventario{% endblock %}
+
+{% block title %}
+    {{ producto.nombre }} | Inventario
+{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-start gap-3 mb-4">
-    <div><h1>{{ producto.nombre }}</h1><p class="text-body-secondary mb-0">Detalle del producto</p></div>
-    <span class="badge {% if producto.activo %}text-bg-success{% else %}text-bg-secondary{% endif %}">{% if producto.activo %}Activo{% else %}Inactivo{% endif %}</span>
+
+<!-- =========================================================
+     NAVEGACIÓN Y ACCIONES
+========================================================= -->
+
+<div
+    class="
+        d-flex
+        flex-column
+        flex-md-row
+        justify-content-between
+        align-items-md-center
+        gap-3
+        mb-4
+    "
+>
+
+    <a
+        href="{% url 'productos:index' %}"
+        class="text-decoration-none"
+    >
+        <i class="bi bi-arrow-left me-1"></i>
+        Volver al inventario
+    </a>
+
+
+    {% if usuario_es_dueno %}
+
+        <a
+            href="{% url 'productos:editar' producto.id %}"
+            class="btn btn-primary"
+        >
+            <i class="bi bi-pencil me-1"></i>
+            Editar producto
+        </a>
+
+    {% endif %}
+
 </div>
-<div class="card"><div class="card-body"><div class="row g-4">
-    <div class="col-md-6"><small class="text-body-secondary">Código</small><div>{{ producto.codigo|default:"Sin código" }}</div></div>
-    <div class="col-md-6"><small class="text-body-secondary">Categoría</small><div>{{ producto.categoria.nombre }}</div></div>
-    <div class="col-12"><small class="text-body-secondary">Descripción</small><div>{{ producto.descripcion|default:"Sin descripción"|linebreaksbr }}</div></div>
-    <div class="col-md-3"><small class="text-body-secondary">Stock actual</small><div class="fs-5">{{ producto.stock_con_unidad }} {% if producto.stock_bajo %}<span class="badge text-bg-warning">Stock bajo</span>{% endif %}</div></div>
-    <div class="col-md-3"><small class="text-body-secondary">Stock mínimo</small><div class="fs-5">{{ producto.stock_minimo_con_unidad }}</div></div>
-    <div class="col-md-3"><small class="text-body-secondary">Costo</small><div class="fs-5">${{ producto.costo|floatformat:2 }}</div></div>
-    <div class="col-md-3"><small class="text-body-secondary">Precio de venta</small><div class="fs-5">${{ producto.precio_venta|floatformat:2 }}</div></div>
-    <div class="col-md-4"><small class="text-body-secondary">Valor estimado de existencias</small><div class="fs-5 fw-bold">${{ producto.valor_inventario|floatformat:2 }}</div></div>
-    <div class="col-md-4"><small class="text-body-secondary">Fecha de creación</small><div>{{ producto.fecha_creacion|date:"d/m/Y H:i" }}</div></div>
-    <div class="col-md-4"><small class="text-body-secondary">Última actualización</small><div>{{ producto.fecha_actualizacion|date:"d/m/Y H:i" }}</div></div>
-</div></div></div>
-<div class="d-flex gap-2 mt-4"><a class="btn btn-primary" href="{% url 'productos:editar' producto.id %}">Editar producto</a><a class="btn btn-outline-secondary" href="{% url 'productos:index' %}">Volver al inventario</a></div>
+
+
+<!-- =========================================================
+     INFORMACIÓN PRINCIPAL
+========================================================= -->
+
+<div class="card mb-4">
+
+    <div class="card-body p-4">
+
+        <div class="row g-4 align-items-center">
+
+
+            <!-- IMAGEN -->
+
+            <div class="col-12 col-md-auto">
+
+                {% if producto.imagen %}
+
+                    <img
+                        src="{{ producto.imagen.url }}"
+                        alt="{{ producto.nombre }}"
+                        class="rounded border"
+                        style="
+                            width: 150px;
+                            height: 150px;
+                            object-fit: contain;
+                        "
+                    >
+
+                {% else %}
+
+                    <div
+                        class="
+                            border
+                            rounded
+                            d-flex
+                            align-items-center
+                            justify-content-center
+                            text-body-secondary
+                        "
+                        style="
+                            width: 150px;
+                            height: 150px;
+                        "
+                    >
+
+                        <i
+                            class="bi bi-image"
+                            style="font-size: 2.5rem;"
+                        ></i>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- IDENTIFICACIÓN -->
+
+            <div class="col">
+
+                <div
+                    class="
+                        d-flex
+                        flex-wrap
+                        align-items-center
+                        gap-2
+                        mb-2
+                    "
+                >
+
+                    <h1 class="mb-0">
+                        {{ producto.nombre }}
+                    </h1>
+
+
+                    <span
+                        class="
+                            badge
+                            {% if producto.activo %}
+                                text-bg-success
+                            {% else %}
+                                text-bg-secondary
+                            {% endif %}
+                        "
+                    >
+
+                        {% if producto.activo %}
+                            Activo
+                        {% else %}
+                            Inactivo
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <!-- CATEGORÍA -->
+
+                <div
+                    class="
+                        d-flex
+                        align-items-center
+                        gap-2
+                        mb-3
+                    "
+                >
+
+                    <span
+                        style="
+                            width: 12px;
+                            height: 12px;
+                            border-radius: 50%;
+                            display: inline-block;
+                            background-color:
+                                {{ producto.categoria.color }};
+                        "
+                    ></span>
+
+                    <span class="text-body-secondary">
+                        {{ producto.categoria.nombre }}
+                    </span>
+
+                </div>
+
+
+                <!-- DESCRIPCIÓN -->
+
+                <p class="mb-3">
+
+                    {{ producto.descripcion|default:"Sin descripción"|linebreaksbr }}
+
+                </p>
+
+
+                <!-- CÓDIGO -->
+
+                <div class="small text-body-secondary">
+
+                    <i class="bi bi-upc-scan me-1"></i>
+
+                    Código:
+
+                    <span class="text-body">
+                        {{ producto.codigo|default:"Sin código" }}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     EXISTENCIAS
+========================================================= -->
+
+<div class="card mb-4">
+
+    <div class="card-header">
+
+        <strong>
+            <i class="bi bi-box-seam me-2"></i>
+            Existencias
+        </strong>
+
+    </div>
+
+
+    <div class="card-body">
+
+        <div class="row g-3">
+
+
+            <!-- STOCK ACTUAL -->
+
+            <div class="col-12 col-md-4">
+
+                <div class="p-3 border rounded h-100">
+
+                    <div
+                        class="
+                            text-body-secondary
+                            small
+                            mb-1
+                        "
+                    >
+                        Stock actual
+                    </div>
+
+
+                    <div class="fs-3 fw-bold">
+
+                        {{ producto.stock_con_unidad }}
+
+                    </div>
+
+
+                    {% if producto.stock_bajo %}
+
+                        <div class="mt-2">
+
+                            <span class="badge text-bg-warning">
+
+                                <i
+                                    class="
+                                        bi
+                                        bi-exclamation-triangle
+                                        me-1
+                                    "
+                                ></i>
+
+                                Stock bajo
+
+                            </span>
+
+                        </div>
+
+                    {% else %}
+
+                        <div
+                            class="
+                                small
+                                text-success
+                                mt-2
+                            "
+                        >
+
+                            <i
+                                class="
+                                    bi
+                                    bi-check-circle
+                                    me-1
+                                "
+                            ></i>
+
+                            Existencias suficientes
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- STOCK MÍNIMO -->
+
+            <div class="col-12 col-md-4">
+
+                <div class="p-3 border rounded h-100">
+
+                    <div
+                        class="
+                            text-body-secondary
+                            small
+                            mb-1
+                        "
+                    >
+                        Stock mínimo
+                    </div>
+
+                    <div class="fs-3 fw-bold">
+
+                        {{ producto.stock_minimo_con_unidad }}
+
+                    </div>
+
+                    <div
+                        class="
+                            small
+                            text-body-secondary
+                            mt-2
+                        "
+                    >
+                        Nivel para generar alerta
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- VALOR INVENTARIO -->
+
+            <div class="col-12 col-md-4">
+
+                <div class="p-3 border rounded h-100">
+
+                    <div
+                        class="
+                            text-body-secondary
+                            small
+                            mb-1
+                        "
+                    >
+                        Valor en inventario
+                    </div>
+
+                    <div class="fs-3 fw-bold">
+
+                        ${{ producto.valor_inventario|floatformat:2 }}
+
+                    </div>
+
+                    <div
+                        class="
+                            small
+                            text-body-secondary
+                            mt-2
+                        "
+                    >
+                        Stock actual × costo
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     PRECIOS
+========================================================= -->
+
+<div class="card mb-4">
+
+    <div class="card-header">
+
+        <strong>
+            <i class="bi bi-currency-dollar me-2"></i>
+            Precios
+        </strong>
+
+    </div>
+
+
+    <div class="card-body">
+
+        <div class="row g-3">
+
+
+            <!-- COSTO -->
+
+            <div class="col-12 col-md-6">
+
+                <div class="p-3 border rounded">
+
+                    <div
+                        class="
+                            text-body-secondary
+                            small
+                            mb-1
+                        "
+                    >
+                        Costo unitario
+                    </div>
+
+                    <div class="fs-3 fw-bold">
+
+                        ${{ producto.costo|floatformat:2 }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- PRECIO -->
+
+            <div class="col-12 col-md-6">
+
+                <div class="p-3 border rounded">
+
+                    <div
+                        class="
+                            text-body-secondary
+                            small
+                            mb-1
+                        "
+                    >
+                        Precio de venta
+                    </div>
+
+                    <div class="fs-3 fw-bold">
+
+                        ${{ producto.precio_venta|floatformat:2 }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     PRESENTACIONES
+========================================================= -->
+
+<div class="card mb-4">
+
+    <div
+        class="
+            card-header
+            d-flex
+            justify-content-between
+            align-items-center
+            gap-3
+        "
+    >
+
+        <strong>
+            <i class="bi bi-boxes me-2"></i>
+            Presentaciones
+        </strong>
+
+
+        {% if usuario_es_dueno %}
+
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-primary"
+                data-bs-toggle="collapse"
+                data-bs-target="#nueva-presentacion"
+            >
+                <i class="bi bi-plus-lg me-1"></i>
+                Agregar presentación
+            </button>
+
+        {% endif %}
+
+    </div>
+
+
+    <div class="card-body">
+
+        <!-- FORMULARIO -->
+
+        {% if usuario_es_dueno %}
+
+            <div
+                class="collapse mb-4"
+                id="nueva-presentacion"
+            >
+
+                <div class="border rounded p-3">
+
+                    <h6 class="mb-3">
+                        Nueva presentación
+                    </h6>
+
+
+                    <form
+                        method="post"
+                        action="{% url 'productos:crear_presentacion' producto.id %}"
+                    >
+
+                        {% csrf_token %}
+
+
+                        <div class="row g-3">
+
+                            <div class="col-12 col-md-5">
+
+                                <label class="form-label">
+                                    Nombre
+                                </label>
+
+                                {{ formulario_presentacion.nombre }}
+
+                                <div class="form-text">
+                                    Ejemplo: Docena, Resma o Caja x24.
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-12 col-md-3">
+
+                                <label class="form-label">
+                                    Contiene
+                                </label>
+
+                                {{ formulario_presentacion.cantidad_unidades }}
+
+                                <div class="form-text">
+
+                                    {{ producto.get_unidad_base_display }}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-12 col-md-4">
+
+                                <label class="form-label">
+                                    Precio de venta
+                                </label>
+
+                                {{ formulario_presentacion.precio_venta }}
+
+                                <div class="form-text">
+                                    Opcional.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="mt-3">
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                            >
+                                Guardar presentación
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+
+        <!-- LISTADO -->
+
+        {% if producto.presentaciones.all %}
+
+            <div class="table-responsive">
+
+                <table
+                    class="
+                        table
+                        table-hover
+                        align-middle
+                        mb-0
+                    "
+                >
+
+                    <thead>
+
+                        <tr>
+                            <th>Presentación</th>
+                            <th>Contiene</th>
+                            <th>Precio</th>
+                            <th>Estado</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for presentacion in producto.presentaciones.all %}
+
+                            <tr>
+
+                                <td>
+
+                                    <strong>
+                                        {{ presentacion.nombre }}
+                                    </strong>
+
+                                </td>
+
+
+                                <td>
+
+                                    {{ presentacion.cantidad_unidades|floatformat:"0" }}
+
+                                    {{ producto.get_unidad_base_display }}
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if presentacion.precio_venta != None %}
+
+                                        ${{ presentacion.precio_venta|floatformat:2 }}
+
+                                    {% else %}
+
+                                        <span class="text-body-secondary">
+                                            Precio base
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    <span
+                                        class="
+                                            badge
+                                            {% if presentacion.activa %}
+                                                text-bg-success
+                                            {% else %}
+                                                text-bg-secondary
+                                            {% endif %}
+                                        "
+                                    >
+
+                                        {% if presentacion.activa %}
+                                            Activa
+                                        {% else %}
+                                            Inactiva
+                                        {% endif %}
+
+                                    </span>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div
+                class="
+                    text-center
+                    text-body-secondary
+                    py-4
+                "
+            >
+
+                <i
+                    class="bi bi-boxes d-block mb-2"
+                    style="font-size: 2rem;"
+                ></i>
+
+                Este producto todavía no tiene
+                presentaciones adicionales.
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+<!-- =========================================================
+     INFORMACIÓN DEL REGISTRO
+========================================================= -->
+
+<div class="card">
+
+    <div class="card-header">
+
+        <strong>
+            <i class="bi bi-info-circle me-2"></i>
+            Información del registro
+        </strong>
+
+    </div>
+
+
+    <div class="card-body">
+
+        <div class="row g-4">
+
+            <div class="col-12 col-md-6">
+
+                <div class="text-body-secondary small">
+                    Fecha de creación
+                </div>
+
+                <div>
+                    {{ producto.fecha_creacion|date:"d/m/Y H:i" }}
+                </div>
+
+            </div>
+
+
+            <div class="col-12 col-md-6">
+
+                <div class="text-body-secondary small">
+                    Última actualización
+                </div>
+
+                <div>
+                    {{ producto.fecha_actualizacion|date:"d/m/Y H:i" }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 {% endblock %}

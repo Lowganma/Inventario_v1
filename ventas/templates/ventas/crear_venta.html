@@ -257,6 +257,10 @@
                     Producto
                 </th>
 
+                <th style="min-width: 180px;">
+                    Presentación
+                </th>
+
                 <th style="min-width: 120px;">
                     Cantidad
                 </th>
@@ -340,6 +344,24 @@
                             </a>
 
                         </div>
+
+                    </td>
+
+                    <td>
+
+                        {{ detalle.presentacion }}
+
+                        <div
+                            class="form-text detalle-presentacion"
+                        >
+                            Selecciona primero un producto.
+                        </div>
+
+                        {% for error in detalle.presentacion.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
 
                     </td>
 
@@ -485,6 +507,18 @@
                                     <i class="bi bi-plus-lg"></i>
                                 </a>
 
+                            </div>
+
+                        </td>
+
+                        <td>
+
+                            {{ detalles.empty_form.presentacion }}
+
+                            <div
+                                class="form-text detalle-presentacion"
+                            >
+                                Selecciona primero un producto.
                             </div>
 
                         </td>
@@ -823,6 +857,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const fila =
             boton.closest(".detalle-venta");
 
+
         if (!fila) {
             return;
         }
@@ -1018,6 +1053,16 @@ async function cargarDatosProducto(select) {
         return;
     }
 
+    const presentacionSelect =
+        fila.querySelector(
+            'select[name$="-presentacion"]'
+        );
+
+    const presentacionTexto =
+        fila.querySelector(
+            ".detalle-presentacion"
+        );
+
     const precioInput =
         fila.querySelector(
             'input[name$="-precio_unitario"]'
@@ -1059,6 +1104,66 @@ async function cargarDatosProducto(select) {
 
         const datos =
             await respuesta.json();
+
+            if (presentacionSelect) {
+
+        presentacionSelect.innerHTML = "";
+
+        const opcionBase =
+            document.createElement("option");
+
+        opcionBase.value = "";
+
+        opcionBase.textContent =
+            datos.unidad_base;
+
+        opcionBase.dataset.cantidad =
+            "1";
+
+        opcionBase.dataset.precio =
+            datos.precio_venta;
+
+        presentacionSelect.appendChild(
+            opcionBase
+        );
+
+
+        datos.presentaciones.forEach(
+            function (presentacion) {
+
+                const opcion =
+                    document.createElement(
+                        "option"
+                    );
+
+                opcion.value =
+                    presentacion.id;
+
+                opcion.textContent =
+                    presentacion.nombre;
+
+                opcion.dataset.cantidad =
+                    presentacion.cantidad;
+
+                opcion.dataset.precio =
+                    presentacion.precio || "";
+
+                presentacionSelect.appendChild(
+                    opcion
+                );
+
+            }
+        );
+
+
+        if (presentacionTexto) {
+
+            presentacionTexto.textContent =
+                "Selecciona la presentación de venta.";
+
+        }
+
+    }
 
 
         // Coloca automáticamente el precio vigente.
@@ -1102,6 +1207,75 @@ async function cargarDatosProducto(select) {
     }
 }
 
+function actualizarPresentacion(select) {
+
+    const fila =
+        select.closest(
+            ".detalle-venta"
+        );
+
+    if (!fila) {
+        return;
+    }
+
+
+    const opcion =
+        select.options[
+            select.selectedIndex
+        ];
+
+
+    const precioInput =
+        fila.querySelector(
+            'input[name$="-precio_unitario"]'
+        );
+
+
+    const texto =
+        fila.querySelector(
+            ".detalle-presentacion"
+        );
+
+
+    const factor =
+        parseFloat(
+            opcion?.dataset.cantidad || 1
+        );
+
+
+    fila.dataset.factorPresentacion =
+        factor;
+
+
+    const precio =
+        parseFloat(
+            opcion?.dataset.precio
+        );
+
+
+    if (
+        precioInput
+        &&
+        Number.isFinite(precio)
+    ) {
+
+        precioInput.value =
+            precio.toFixed(2);
+
+    }
+
+
+    if (texto) {
+
+        texto.textContent =
+            `Contiene ${factor} unidades base`;
+
+    }
+
+
+    actualizarResumen();
+}
+
 
 // ========================================================
 // ESCUCHAR CAMBIOS EN LOS PRODUCTOS
@@ -1119,6 +1293,18 @@ contenedor.addEventListener(
             cargarDatosProducto(
                 event.target
             );
+        }
+
+        if (
+            event.target.matches(
+                'select[name$="-presentacion"]'
+            )
+        ) {
+
+            actualizarPresentacion(
+                event.target
+            );
+
         }
 
         actualizarResumen();

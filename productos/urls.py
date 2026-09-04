@@ -20,6 +20,11 @@ urlpatterns = [
         name="editar_categoria",
     ),
     path(
+    "<int:producto_id>/presentaciones/nueva/",
+    views.crear_presentacion,
+    name="crear_presentacion",
+    ),
+    path(
     "<int:producto_id>/datos/",
     views.datos_producto,
     name="datos_producto",

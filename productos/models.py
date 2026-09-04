@@ -42,12 +42,7 @@ class Categoria(models.Model):
             models.UniqueConstraint(
                 fields=["negocio", "nombre"],
                 name="categoria_nombre_unico_por_negocio",
-            ),
-            models.UniqueConstraint(
-            fields=["negocio", "nombre"],
-            name="producto_nombre_unico_por_negocio",
-        ),
-
+            )
         ]
 
     def __str__(self):
@@ -119,6 +114,11 @@ class Producto(models.Model):
     descripcion = models.TextField(
         blank=True,
     )
+    imagen = models.ImageField(
+    upload_to="productos/",
+    blank=True,
+    null=True,
+)
 
     # =========================================================
     # INVENTARIO
@@ -187,6 +187,12 @@ class Producto(models.Model):
                 condition=~models.Q(codigo=""),
                 name="producto_codigo_unico_por_negocio",
             ),
+
+            models.UniqueConstraint(
+                    fields=["negocio", "nombre"],
+                    name="producto_nombre_unico_por_negocio",
+            ),
+            
 
             models.CheckConstraint(
                 check=models.Q(stock__gte=0),
@@ -371,3 +377,62 @@ class Producto(models.Model):
 
     def __str__(self):
         return self.nombre
+
+class PresentacionProducto(models.Model):
+    producto = models.ForeignKey(
+         Producto,
+         on_delete=models.CASCADE,
+         related_name="presentaciones",
+        )
+
+    nombre = models.CharField(
+            max_length=100,
+        )
+
+    cantidad_unidades = models.DecimalField(
+            max_digits=12,
+            decimal_places=3,
+            validators=[
+                MinValueValidator(Decimal("0.001")),
+            ],
+        )
+
+    precio_venta = models.DecimalField(
+            max_digits=12,
+            decimal_places=2,
+            null=True,
+            blank=True,
+            validators=[
+                MinValueValidator(Decimal("0.00")),
+            ],
+        )
+
+    activa = models.BooleanField(
+            default=True,
+        )
+
+    fecha_creacion = models.DateTimeField(
+            auto_now_add=True,
+        )
+
+    class Meta:
+            ordering = [
+                "cantidad_unidades",
+                "nombre",
+            ]
+
+            constraints = [
+                models.UniqueConstraint(
+                    fields=[
+                        "producto",
+                        "nombre",
+                    ],
+                    name="presentacion_nombre_unico_por_producto",
+                ),
+            ]
+
+    def __str__(self):
+            return (
+                f"{self.producto.nombre} - "
+                f"{self.nombre}"
+            )

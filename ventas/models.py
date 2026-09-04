@@ -8,7 +8,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from clientes.models import Cliente
-from productos.models import Producto
+from productos.models import ( Producto,PresentacionProducto)
 from usuarios.models import Negocio
 from cuentas.models import CuentaPorCobrar
 
@@ -165,6 +165,14 @@ class DetalleVenta(models.Model):
         on_delete=models.PROTECT,
         related_name="detalles_venta",
     )
+    
+    presentacion = models.ForeignKey(
+        PresentacionProducto,
+        on_delete=models.PROTECT,
+        related_name="detalles_venta",
+        null=True,
+        blank=True,
+    )
 
     cantidad = models.PositiveIntegerField(
         validators=[
@@ -201,6 +209,11 @@ class DetalleVenta(models.Model):
         return self.cantidad * self.precio_unitario
 
     def __str__(self):
+        if self.presentacion:
+            return (
+                f"{self.presentacion.nombre} "
+                f"x {self.cantidad}"
+            )
         return (
             f"{self.producto.nombre} "
             f"x {self.cantidad}"

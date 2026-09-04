@@ -38,6 +38,7 @@
 
         <form
             method="post"
+            enctype="multipart/form-data"
             class="card card-body"
             id="producto-form"
         >
@@ -96,26 +97,46 @@
                     class="mt-2 d-none"
                 >
 
-                    <div class="input-group">
+                    <div class="row g-2">
 
-                        <input
-                            type="text"
-                            id="nueva-categoria-nombre"
-                            class="form-control"
-                            placeholder="Nombre de la nueva categoría"
-                            maxlength="255"
-                            autocomplete="off"
-                        >
+    <div class="col-12 col-md">
 
-                        <button
-                            type="button"
-                            id="crear-categoria-btn"
-                            class="btn btn-outline-primary"
-                        >
-                            Crear
-                        </button>
+        <input
+            type="text"
+            id="nueva-categoria-nombre"
+            class="form-control"
+            placeholder="Nombre de la nueva categoría"
+            maxlength="255"
+            autocomplete="off"
+        >
 
-                    </div>
+    </div>
+
+        <div class="col-8 col-md-3">
+
+            <input
+                type="color"
+                id="nueva-categoria-color"
+                class="form-control form-control-color w-100"
+                value="#0d6efd"
+                title="Seleccionar color"
+            >
+
+        </div>
+
+        <div class="col-4 col-md-auto">
+
+            <button
+                type="button"
+                id="crear-categoria-btn"
+                class="btn btn-outline-primary w-100"
+            >
+                Crear
+            </button>
+
+        </div>
+
+    </div>
 
 
                     <div
@@ -262,6 +283,11 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById(
             "nueva-categoria-nombre"
         );
+    
+    const inputColorCategoria =
+    document.getElementById(
+        "nueva-categoria-color"
+    );
 
     const botonCrearCategoria =
         document.getElementById(
@@ -397,7 +423,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         datos.append(
             "color",
-            "#0d6efd"
+            inputColorCategoria.value
         );
 
         datos.append(
@@ -505,6 +531,9 @@ document.addEventListener("DOMContentLoaded", function () {
             // -------------------------------------------------
 
             inputNuevaCategoria.value = "";
+
+            inputColorCategoria.value =
+                "#0d6efd";
 
             errorCategoria.textContent = "";
 

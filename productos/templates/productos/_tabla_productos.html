@@ -1,0 +1,373 @@
+<div class="card">
+
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0">
+
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Stock</th>
+                    <th>Stock mínimo</th>
+                    <th>Costo</th>
+                    <th>Precio</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for producto in productos %}
+
+                    <tr>
+
+                        <td>
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            {% if producto.imagen %}
+
+                                <img
+                                    src="{{ producto.imagen.url }}"
+                                    alt="{{ producto.nombre }}"
+                                    style="
+                                        width: 48px;
+                                        height: 48px;
+                                        object-fit: cover;
+                                        border-radius: 8px;
+                                    "
+                                >
+
+                            {% else %}
+
+                                <div
+                                    class="
+                                        d-flex
+                                        align-items-center
+                                        justify-content-center
+                                        border
+                                        rounded
+                                        text-body-secondary
+                                    "
+                                    style="
+                                        width: 48px;
+                                        height: 48px;
+                                        min-width: 48px;
+                                    "
+                                >
+                                    <i class="bi bi-image"></i>
+                                </div>
+
+                            {% endif %}
+
+
+                            <div>
+
+                                <strong>
+                                    {{ producto.nombre }}
+                                </strong>
+
+                                {% if producto.codigo %}
+
+                                    <br>
+
+                                    <small class="text-body-secondary">
+                                        {{ producto.codigo }}
+                                    </small>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                        <td>
+
+                            <div class="d-flex align-items-center gap-2">
+
+                                <span
+                                    style="
+                                        width: 12px;
+                                        height: 12px;
+                                        min-width: 12px;
+                                        border-radius: 50%;
+                                        display: inline-block;
+                                        background-color: {{ producto.categoria.color }};
+                                    "
+                                ></span>
+
+                                {{ producto.categoria.nombre }}
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <span
+                                class="badge
+                                {% if producto.stock_bajo %}
+                                    text-bg-warning
+                                {% else %}
+                                    text-bg-success
+                                {% endif %}"
+                            >
+                                {{ producto.stock_con_unidad }}
+                            </span>
+
+                            {% if producto.stock_bajo %}
+
+                                <small
+                                    class="
+                                        d-block
+                                        text-warning-emphasis
+                                        mt-1
+                                    "
+                                >
+                                    <i
+                                        class="
+                                            bi
+                                            bi-exclamation-triangle
+                                        "
+                                    ></i>
+
+                                    Stock bajo
+                                </small>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+                            {{ producto.stock_minimo_con_unidad }}
+                        </td>
+
+                        <td>
+                            ${{ producto.costo|floatformat:2 }}
+                        </td>
+
+                        <td>
+                            ${{ producto.precio_venta|floatformat:2 }}
+                        </td>
+
+                        <td>
+
+                            <span
+                                class="badge
+                                {% if producto.activo %}
+                                    text-bg-success
+                                {% else %}
+                                    text-bg-secondary
+                                {% endif %}"
+                            >
+                                {% if producto.activo %}
+                                    Activo
+                                {% else %}
+                                    Inactivo
+                                {% endif %}
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="d-flex gap-2">
+
+                                <a
+                                    href="
+                                        {% url 'productos:detalle' producto.id %}
+                                    "
+                                    class="
+                                        btn
+                                        btn-sm
+                                        btn-outline-primary
+                                    "
+                                >
+                                    <i class="bi bi-eye me-1"></i>
+                                    Ver
+                                </a>
+
+
+                                {% if usuario_es_dueno %}
+
+                                    <a
+                                        href="
+                                            {% url 'productos:editar' producto.id %}
+                                        "
+                                        class="
+                                            btn
+                                            btn-sm
+                                            btn-outline-secondary
+                                        "
+                                    >
+                                        <i
+                                            class="
+                                                bi
+                                                bi-pencil
+                                                me-1
+                                            "
+                                        ></i>
+                                        Editar
+                                    </a>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td
+                            colspan="8"
+                            class="
+                                text-center
+                                text-body-secondary
+                                py-5
+                            "
+                        >
+                            No se encontraron productos.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    {% if productos.paginator.num_pages > 1 %}
+
+        <div
+            class="
+                card-footer
+                d-flex
+                flex-column
+                flex-md-row
+                justify-content-between
+                align-items-md-center
+                gap-3
+            "
+        >
+
+            <div class="text-body-secondary small">
+
+                Mostrando
+
+                <strong>
+                    {{ productos.start_index }}
+                </strong>
+
+                a
+
+                <strong>
+                    {{ productos.end_index }}
+                </strong>
+
+                de
+
+                <strong>
+                    {{ productos.paginator.count }}
+                </strong>
+
+                productos
+
+            </div>
+
+
+            <nav>
+
+                <ul
+                    class="
+                        pagination
+                        pagination-sm
+                        mb-0
+                    "
+                >
+
+                    {% if productos.has_previous %}
+
+                        <li class="page-item">
+
+                            <a
+                                class="page-link pagina-productos"
+                                href="?page={{ productos.previous_page_number }}"
+                                data-page="{{ productos.previous_page_number }}"
+                            >
+                                ‹
+                            </a>
+
+                        </li>
+
+                    {% endif %}
+
+
+                    {% for numero in productos.paginator.page_range %}
+
+                        {% if numero == productos.number %}
+
+                            <li class="page-item active">
+
+                                <span class="page-link">
+                                    {{ numero }}
+                                </span>
+
+                            </li>
+
+                        {% else %}
+
+                            <li class="page-item">
+
+                                <a
+                                    class="page-link pagina-productos"
+                                    href="?page={{ numero }}"
+                                    data-page="{{ numero }}"
+                                >
+                                    {{ numero }}
+                                </a>
+
+                            </li>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+
+                    {% if productos.has_next %}
+
+                        <li class="page-item">
+
+                            <a
+                                class="page-link pagina-productos"
+                                href="?page={{ productos.next_page_number }}"
+                                data-page="{{ productos.next_page_number }}"
+                            >
+                                ›
+                            </a>
+
+                        </li>
+
+                    {% endif %}
+
+                </ul>
+
+            </nav>
+
+        </div>
+
+    {% endif %}
+
+</div>

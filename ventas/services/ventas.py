@@ -5,7 +5,7 @@ from django.db import transaction
 
 from caja.services.caja import registrar_movimiento
 from cuentas.models import CuentaPorCobrar
-from productos.models import Producto
+from productos.models import (Producto, PresentacionProducto)
 
 from ventas.models import Venta, DetalleVenta
 
@@ -99,6 +99,7 @@ def registrar_venta(
             continue
 
         producto = linea.get("producto")
+        presentacion = linea.get("presentacion")
         cantidad = linea.get("cantidad")
 
         if producto is None:
@@ -124,12 +125,43 @@ def registrar_venta(
             )
         )
 
+        # ----------------------------------------------------
+        # PRESENTACIÓN
+        # ----------------------------------------------------
+
+        factor_presentacion = Decimal("1.000")
+        presentacion_actual = None
+
+        if presentacion is not None:
+
+            presentacion_actual = (
+                PresentacionProducto.objects
+                .select_for_update()
+                .get(
+                    id=presentacion.id,
+                    producto=producto_actual,
+                    activa=True,
+                )
+            )
+
+            factor_presentacion = Decimal(
+                presentacion_actual.cantidad_unidades
+            )
+
+
+        # Cantidad real que se descontará del inventario
+
+        cantidad_inventario = (
+            Decimal(cantidad)
+            * factor_presentacion
+        )
+
 
         # ----------------------------------------------------
         # VALIDAR STOCK REAL
         # ----------------------------------------------------
 
-        if producto_actual.stock < cantidad:
+        if producto_actual.stock < cantidad_inventario:
 
             raise ValidationError(
                 (
@@ -161,6 +193,7 @@ def registrar_venta(
         DetalleVenta.objects.create(
             venta=venta,
             producto=producto_actual,
+            presentacion=presentacion_actual,
             cantidad=cantidad,
             precio_unitario=precio_unitario,
             costo_unitario=costo_unitario,
@@ -172,7 +205,7 @@ def registrar_venta(
         # DESCONTAR INVENTARIO
         # ----------------------------------------------------
 
-        producto_actual.stock -= cantidad
+        producto_actual.stock -= cantidad_inventario
 
         producto_actual.save(
             update_fields=[

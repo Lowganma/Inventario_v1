@@ -4,7 +4,7 @@ from django import forms
 from django.forms import formset_factory
 
 from clientes.models import Cliente
-from productos.models import Producto
+from productos.models import (Producto, PresentacionProducto)
 
 from .models import Venta
 
@@ -132,6 +132,17 @@ class DetalleVentaForm(forms.Form):
         widget=forms.Select(
             attrs={
                 "class": "form-select venta-producto",
+            }
+        ),
+    )
+
+    presentacion = forms.ModelChoiceField(
+        queryset=PresentacionProducto.objects.none(),
+        required=False,
+        label="Presentación",
+        widget=forms.Select(
+            attrs={
+                "class": "form-select venta-presentacion",
             }
         ),
     )

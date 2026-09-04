@@ -19,6 +19,9 @@ from django.urls import include, path
 from cuentas import views as cuentas_views
 from usuarios import views as usuarios_views
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path("configuracion/modulos/", usuarios_views.configurar_modulos, name="configuracion_modulos"),
     path("", cuentas_views.dashboard, name="inicio"),
@@ -50,3 +53,8 @@ urlpatterns = [
     ),
     
 ]
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT,
+    )

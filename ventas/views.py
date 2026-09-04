@@ -256,12 +256,6 @@ def detalle_venta(request, venta_id):
 
 @login_required
 def datos_producto(request, producto_id):
-    """
-    Devuelve información comercial de un producto.
-
-    La consulta está limitada al negocio del usuario para
-    impedir obtener datos de productos de otra organización.
-    """
 
     producto = get_object_or_404(
         Producto,
@@ -270,12 +264,61 @@ def datos_producto(request, producto_id):
         activo=True,
     )
 
+    presentaciones = (
+        producto.presentaciones
+        .filter(activa=True)
+        .order_by(
+            "cantidad_unidades",
+            "nombre",
+        )
+    )
+
     return JsonResponse(
         {
             "id": producto.id,
             "nombre": producto.nombre,
-            "stock": producto.stock,
-            "precio_venta": str(producto.precio_venta),
-            "costo": str(producto.costo),
+
+            "stock": str(
+                producto.stock
+            ),
+
+            "unidad_base":
+                producto.get_unidad_base_display(),
+
+            "precio_venta":
+                str(producto.precio_venta),
+
+            "costo":
+                str(producto.costo),
+
+            "presentaciones": [
+                {
+                    "id": presentacion.id,
+
+                    "nombre":
+                        presentacion.nombre,
+
+                    "cantidad":
+                        str(
+                            presentacion
+                            .cantidad_unidades
+                        ),
+
+                    "precio": (
+                        str(
+                            presentacion
+                            .precio_venta
+                        )
+                        if
+                        presentacion
+                        .precio_venta
+                        is not None
+                        else None
+                    ),
+                }
+
+                for presentacion
+                in presentaciones
+            ],
         }
     )
