@@ -3,4 +3,8 @@ beautifulsoup4==4.12.3
 gunicorn==22.0.0
 requests==2.32.3
 whitenoise==6.7.0
+<<<<<<< HEAD
 pyllow==12.3.0
+=======
+pillow==12.3.0
+>>>>>>> da114a8 (fix: corrige vista de guardar producto y dependencias)

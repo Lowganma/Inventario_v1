@@ -231,7 +231,11 @@ def _guardar_producto(request, producto=None):
         request,
         "productos/producto_form.html",
         {"formulario": formulario, "producto": producto},
+<<<<<<< HEAD
     )
+=======
+        )
+>>>>>>> da114a8 (fix: corrige vista de guardar producto y dependencias)
 
 
 
