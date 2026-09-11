@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ﻿# Inventario_v1
 ## Versión 1.0
 
@@ -19,25 +18,3 @@ main
     ├── cuentas por cobrar
     ├── abonos
     └── caja diaria
-=======
-﻿# Inventario_v1
-## Versión 1.0
-
-Primer MVP funcional.
-
-Incluye:
-
-main
-└── versión estable actual
-    ├── autenticación
-    ├── negocios
-    ├── roles dueño / empleado
-    ├── módulos configurables
-    ├── clientes
-    ├── productos / inventario
-    ├── compras
-    ├── ventas
-    ├── cuentas por cobrar
-    ├── abonos
-    └── caja diaria
->>>>>>> da114a8 (fix: corrige vista de guardar producto y dependencias)

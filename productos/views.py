@@ -95,7 +95,8 @@ def index(request):
             stock_bajo=Count(
                 "id",
                 filter=Q(
-                    stock__lte=F("stock_minimo")
+                    tipo="producto",
+                    stock__lte=F("stock_minimo"),
                 ),
             ),
 
@@ -207,35 +208,52 @@ def _guardar_producto(request, producto=None):
         instance=producto,
         negocio=request.user.negocio,
     )
+
     if request.method == "POST" and formulario.is_valid():
+
         producto = formulario.save(commit=False)
-        # El negocio procede siempre de la sesión, nunca de datos enviados por el cliente.
+
+        # El negocio siempre procede de la sesión.
         producto.negocio = request.user.negocio
+
         producto.full_clean()
         producto.save()
-        messages.success(request, "Producto guardado correctamente.")
-        return redirect("productos:detalle", producto_id=producto.id)
-    if producto.tipo == "producto":
 
-        PresentacionProducto.objects.get_or_create(
-            producto=producto,
-            cantidad_unidades=Decimal("1.000"),
-            defaults={
-                "nombre":
-                    producto.get_unidad_base_display(),
-                "precio_venta":
-                    producto.precio_venta,
-            },
-    )
+        # -----------------------------------------------------
+        # PRESENTACIÓN BASE
+        # -----------------------------------------------------
+
+        if producto.tipo == "producto":
+
+            PresentacionProducto.objects.get_or_create(
+                producto=producto,
+                cantidad_unidades=Decimal("1.000"),
+                defaults={
+                    "nombre":
+                        producto.get_unidad_base_display(),
+                    "precio_venta":
+                        producto.precio_venta,
+                },
+            )
+
+        messages.success(
+            request,
+            "Producto guardado correctamente.",
+        )
+
+        return redirect(
+            "productos:detalle",
+            producto_id=producto.id,
+        )
+
     return render(
         request,
         "productos/producto_form.html",
-        {"formulario": formulario, "producto": producto},
-<<<<<<< HEAD
+        {
+            "formulario": formulario,
+            "producto": producto,
+        },
     )
-=======
-        )
->>>>>>> da114a8 (fix: corrige vista de guardar producto y dependencias)
 
 
 

@@ -109,35 +109,45 @@
 
                         <td>
 
-                            <span
-                                class="badge
-                                {% if producto.stock_bajo %}
-                                    text-bg-warning
-                                {% else %}
-                                    text-bg-success
-                                {% endif %}"
-                            >
-                                {{ producto.stock_con_unidad }}
-                            </span>
+                            {% if producto.tipo == "servicio" %}
 
-                            {% if producto.stock_bajo %}
+                                <span class="text-body-secondary">
+                                    No aplica
+                                </span>
 
-                                <small
-                                    class="
-                                        d-block
-                                        text-warning-emphasis
-                                        mt-1
-                                    "
+                            {% else %}
+
+                                <span
+                                    class="badge
+                                    {% if producto.stock_bajo %}
+                                        text-bg-warning
+                                    {% else %}
+                                        text-bg-success
+                                    {% endif %}"
                                 >
-                                    <i
-                                        class="
-                                            bi
-                                            bi-exclamation-triangle
-                                        "
-                                    ></i>
+                                    {{ producto.stock_con_unidad }}
+                                </span>
 
-                                    Stock bajo
-                                </small>
+                                {% if producto.stock_bajo %}
+
+                                    <small
+                                        class="
+                                            d-block
+                                            text-warning-emphasis
+                                            mt-1
+                                        "
+                                    >
+                                        <i
+                                            class="
+                                                bi
+                                                bi-exclamation-triangle
+                                            "
+                                        ></i>
+
+                                        Stock bajo
+                                    </small>
+
+                                {% endif %}
 
                             {% endif %}
 
@@ -145,7 +155,19 @@
 
 
                         <td>
-                            {{ producto.stock_minimo_con_unidad }}
+
+                            {% if producto.tipo == "servicio" %}
+
+                                <span class="text-body-secondary">
+                                    No aplica
+                                </span>
+
+                            {% else %}
+
+                                {{ producto.stock_minimo_con_unidad }}
+
+                            {% endif %}
+
                         </td>
 
                         <td>

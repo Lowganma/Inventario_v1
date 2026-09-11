@@ -2,34 +2,34 @@
 
 {% block title %}
     {% if producto %}
-        Editar producto
+        Editar producto o servicio
     {% else %}
-        Nuevo producto
+        Nuevo producto o servicio
     {% endif %}
 {% endblock %}
-
 
 {% block content %}
 
 <div class="row justify-content-center">
-
-    <div class="col-xl-8">
+    <div class="col-xl-10 col-xxl-9">
 
         <!-- =====================================================
              ENCABEZADO
         ====================================================== -->
 
-        <h1>
-            {% if producto %}
-                Editar producto
-            {% else %}
-                Nuevo producto
-            {% endif %}
-        </h1>
+        <div class="mb-4">
+            <h1 id="titulo-formulario" class="mb-1">
+                {% if producto %}
+                    Editar producto o servicio
+                {% else %}
+                    Nuevo producto o servicio
+                {% endif %}
+            </h1>
 
-        <p class="text-body-secondary">
-            Registra sus existencias, costo y precio de venta.
-        </p>
+            <p id="subtitulo-formulario" class="text-body-secondary mb-0">
+                Registra la información comercial y, cuando corresponda, controla sus existencias.
+            </p>
+        </div>
 
 
         <!-- =====================================================
@@ -51,98 +51,252 @@
             ================================================== -->
 
             {% if formulario.non_field_errors %}
-
                 <div class="alert alert-danger">
-
                     {% for error in formulario.non_field_errors %}
                         <div>{{ error }}</div>
                     {% endfor %}
-
                 </div>
-
             {% endif %}
 
 
             <!-- =================================================
-                 CATEGORÍA
+                 TIPO DE REGISTRO
             ================================================== -->
 
-            <div class="mb-3">
+            <div class="mb-4">
 
-                {{ formulario.categoria.label_tag }}
+                <label class="form-label fw-semibold mb-2">
+                    ¿Qué deseas registrar?
+                </label>
 
-                {{ formulario.categoria }}
+                <div class="row g-3">
 
+                    <div class="col-12 col-md-6">
 
-                {% if formulario.categoria.help_text %}
-                    <div class="form-text">
-                        {{ formulario.categoria.help_text }}
+                        <input
+                            type="radio"
+                            class="btn-check"
+                            name="tipo"
+                            id="tipo-producto"
+                            value="producto"
+                            autocomplete="off"
+                            {% if formulario.tipo.value != "servicio" %}
+                                checked
+                            {% endif %}
+                        >
+
+                        <label
+                            class="btn btn-outline-primary w-100 text-start p-3 h-100"
+                            for="tipo-producto"
+                        >
+                            <div class="fw-semibold">
+                                <i class="bi bi-box-seam me-2"></i>
+                                Producto físico
+                            </div>
+
+                            <div class="small mt-1">
+                                Controla existencias, stock y presentaciones.
+                            </div>
+                        </label>
+
                     </div>
-                {% endif %}
 
 
-                {% for error in formulario.categoria.errors %}
-                    <div class="text-danger small">
+                    <div class="col-12 col-md-6">
+
+                        <input
+                            type="radio"
+                            class="btn-check"
+                            name="tipo"
+                            id="tipo-servicio"
+                            value="servicio"
+                            autocomplete="off"
+                            {% if formulario.tipo.value == "servicio" %}
+                                checked
+                            {% endif %}
+                        >
+
+                        <label
+                            class="btn btn-outline-primary w-100 text-start p-3 h-100"
+                            for="tipo-servicio"
+                        >
+                            <div class="fw-semibold">
+                                <i class="bi bi-tools me-2"></i>
+                                Servicio
+                            </div>
+
+                            <div class="small mt-1">
+                                No controla existencias ni inventario.
+                            </div>
+                        </label>
+
+                    </div>
+
+                </div>
+
+                {% for error in formulario.tipo.errors %}
+                    <div class="text-danger small mt-2">
                         {{ error }}
                     </div>
                 {% endfor %}
 
-
-                <!-- =============================================
-                     CREACIÓN RÁPIDA DE CATEGORÍA
-                ============================================== -->
-
-                <div
-                    id="nueva-categoria-container"
-                    class="mt-2 d-none"
-                >
-
-                    <div class="row g-2">
-
-    <div class="col-12 col-md">
-
-        <input
-            type="text"
-            id="nueva-categoria-nombre"
-            class="form-control"
-            placeholder="Nombre de la nueva categoría"
-            maxlength="255"
-            autocomplete="off"
-        >
-
-    </div>
-
-        <div class="col-8 col-md-3">
-
-            <input
-                type="color"
-                id="nueva-categoria-color"
-                class="form-control form-control-color w-100"
-                value="#0d6efd"
-                title="Seleccionar color"
-            >
-
-        </div>
-
-        <div class="col-4 col-md-auto">
-
-            <button
-                type="button"
-                id="crear-categoria-btn"
-                class="btn btn-outline-primary w-100"
-            >
-                Crear
-            </button>
-
-        </div>
-
-    </div>
+            </div>
 
 
-                    <div
-                        id="categoria-error"
-                        class="text-danger small mt-1"
-                    ></div>
+            <!-- =================================================
+                 INFORMACIÓN GENERAL
+            ================================================== -->
+
+            <div class="card mb-4">
+
+                <div class="card-header">
+                    <strong>
+                        <i class="bi bi-info-circle me-2"></i>
+                        Información general
+                    </strong>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row g-3">
+
+                        <!-- CATEGORÍA -->
+                        <div class="col-12 col-md-6">
+
+                            {{ formulario.categoria.label_tag }}
+                            {{ formulario.categoria }}
+
+                            {% for error in formulario.categoria.errors %}
+                                <div class="text-danger small">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+
+                            <!-- CREACIÓN RÁPIDA DE CATEGORÍA -->
+
+                            <div
+                                id="nueva-categoria-container"
+                                class="mt-2 d-none"
+                            >
+
+                                <div class="row g-2">
+
+                                    <div class="col">
+
+                                        <input
+                                            type="text"
+                                            id="nueva-categoria-nombre"
+                                            class="form-control"
+                                            placeholder="Nombre de la nueva categoría"
+                                            maxlength="255"
+                                            autocomplete="off"
+                                        >
+
+                                    </div>
+
+                                    <div class="col-auto">
+
+                                        <input
+                                            type="color"
+                                            id="nueva-categoria-color"
+                                            class="form-control form-control-color"
+                                            value="#0d6efd"
+                                            title="Seleccionar color"
+                                        >
+
+                                    </div>
+
+                                    <div class="col-auto">
+
+                                        <button
+                                            type="button"
+                                            id="crear-categoria-btn"
+                                            class="btn btn-outline-primary"
+                                        >
+                                            Crear
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                                <div
+                                    id="categoria-error"
+                                    class="text-danger small mt-1"
+                                ></div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- CÓDIGO -->
+                        <div class="col-12 col-md-6">
+
+                            {{ formulario.codigo.label_tag }}
+                            {{ formulario.codigo }}
+
+                            {% if formulario.codigo.help_text %}
+                                <div class="form-text">
+                                    {{ formulario.codigo.help_text }}
+                                </div>
+                            {% endif %}
+
+                            {% for error in formulario.codigo.errors %}
+                                <div class="text-danger small">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+
+                        <!-- NOMBRE -->
+                        <div class="col-12">
+
+                            {{ formulario.nombre.label_tag }}
+                            {{ formulario.nombre }}
+
+                            {% for error in formulario.nombre.errors %}
+                                <div class="text-danger small">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+
+                        <!-- DESCRIPCIÓN -->
+                        <div class="col-12 col-lg-8">
+
+                            {{ formulario.descripcion.label_tag }}
+                            {{ formulario.descripcion }}
+
+                            {% for error in formulario.descripcion.errors %}
+                                <div class="text-danger small">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+
+                        <!-- IMAGEN -->
+                        <div class="col-12 col-lg-4">
+
+                            {{ formulario.imagen.label_tag }}
+                            {{ formulario.imagen }}
+
+                            {% for error in formulario.imagen.errors %}
+                                <div class="text-danger small">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
 
                 </div>
 
@@ -150,105 +304,237 @@
 
 
             <!-- =================================================
-                 RESTO DE CAMPOS
+                 MENSAJE PARA SERVICIOS
             ================================================== -->
 
-            {% for field in formulario %}
+            <div
+                id="servicio-sin-inventario"
+                class="alert alert-info d-none mb-4"
+            >
+                <div class="d-flex align-items-start gap-2">
+                    <i class="bi bi-info-circle mt-1"></i>
 
-                {% if field.name != "categoria" %}
-
-                    <div
-                        class="mb-3
-                        {% if field.field.widget.input_type == 'checkbox' %}
-                            form-check
-                        {% endif %}"
-                        id="campo-{{ field.name }}"
-                    >
-
-                        {% if field.field.widget.input_type == "checkbox" %}
-
-                            {{ field }}
-
-                            {{ field.label_tag }}
-
-                        {% else %}
-
-                            {{ field.label_tag }}
-
-                            {{ field }}
-
-                        {% endif %}
+                    <div>
+                        <strong>Inventario: no aplica.</strong>
+                        <div class="small mt-1">
+                            Los servicios se guardan internamente con stock 0 y no requieren unidad de inventario ni stock mínimo.
+                        </div>
+                    </div>
+                </div>
+            </div>
 
 
-                        {% if field.help_text %}
+            <!-- =================================================
+                 INVENTARIO
+            ================================================== -->
 
-                            <div class="form-text">
-                                {{ field.help_text }}
+            <div
+                class="card mb-4"
+                id="seccion-inventario"
+            >
+
+                <div class="card-header">
+                    <strong>
+                        <i class="bi bi-box-seam me-2"></i>
+                        Inventario
+                    </strong>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row g-3">
+
+                        <!-- UNIDAD -->
+                        <div class="col-12 col-md-4">
+
+                            {{ formulario.unidad_base.label_tag }}
+                            {{ formulario.unidad_base }}
+
+                            {% if formulario.unidad_base.help_text %}
+                                <div class="form-text">
+                                    {{ formulario.unidad_base.help_text }}
+                                </div>
+                            {% endif %}
+
+                            {% for error in formulario.unidad_base.errors %}
+                                <div class="text-danger small">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+
+                        <!-- STOCK -->
+                        <div class="col-12 col-md-4">
+
+                            {{ formulario.stock.label_tag }}
+                            {{ formulario.stock }}
+
+                            {% for error in formulario.stock.errors %}
+                                <div class="text-danger small">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+
+                        <!-- STOCK MÍNIMO -->
+                        <div class="col-12 col-md-4">
+
+                            {{ formulario.stock_minimo.label_tag }}
+                            {{ formulario.stock_minimo }}
+
+                            {% if formulario.stock_minimo.help_text %}
+                                <div class="form-text">
+                                    {{ formulario.stock_minimo.help_text }}
+                                </div>
+                            {% endif %}
+
+                            {% for error in formulario.stock_minimo.errors %}
+                                <div class="text-danger small">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 PRECIOS
+            ================================================== -->
+
+            <div class="card mb-4">
+
+                <div class="card-header">
+                    <strong>
+                        <i class="bi bi-currency-dollar me-2"></i>
+                        Precios
+                    </strong>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row g-3">
+
+                        <!-- COSTO -->
+                        <div class="col-12 col-md-6">
+
+                            <label for="{{ formulario.costo.id_for_label }}">
+                                <span id="label-costo">
+                                    Costo
+                                </span>
+                            </label>
+
+                            {{ formulario.costo }}
+
+                            <div
+                                id="ayuda-costo-servicio"
+                                class="form-text d-none"
+                            >
+                                Opcional. Úsalo si el servicio genera algún costo directo.
                             </div>
 
-                        {% endif %}
+                            {% for error in formulario.costo.errors %}
+                                <div class="text-danger small">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
 
 
-                        {% for error in field.errors %}
+                        <!-- PRECIO DE VENTA -->
+                        <div class="col-12 col-md-6">
 
-                            <div class="text-danger small">
-                                {{ error }}
-                            </div>
-
-                        {% endfor %}
-
-
-                        <!-- Error dinámico del precio -->
-
-                        {% if field.name == "precio_venta" %}
+                            {{ formulario.precio_venta.label_tag }}
+                            {{ formulario.precio_venta }}
 
                             <div
                                 id="precio-error"
                                 class="text-danger small mt-1"
                             ></div>
 
-                        {% endif %}
+                            {% for error in formulario.precio_venta.errors %}
+                                <div class="text-danger small">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
 
                     </div>
 
-                {% endif %}
+                </div>
 
-            {% endfor %}
+            </div>
 
 
             <!-- =================================================
-                 BOTONES
+                 ESTADO Y ACCIONES
             ================================================== -->
 
-            <div class="d-flex gap-2">
+            <div
+                class="
+                    d-flex
+                    flex-column
+                    flex-md-row
+                    justify-content-between
+                    align-items-md-center
+                    gap-3
+                "
+            >
 
-                <button
-                    class="btn btn-primary"
-                    type="submit"
-                >
-                    {% if producto %}
-                        Guardar cambios
-                    {% else %}
-                        Guardar producto
-                    {% endif %}
-                </button>
+                <div class="form-check">
+
+                    {{ formulario.activo }}
+
+                    <label
+                        class="form-check-label"
+                        for="{{ formulario.activo.id_for_label }}"
+                    >
+                        Activo
+                    </label>
+
+                </div>
 
 
-                <a
-                    class="btn btn-outline-secondary"
-                    href="{% url 'productos:index' %}"
-                >
-                    Cancelar
-                </a>
+                <div class="d-flex gap-2">
+
+                    <a
+                        class="btn btn-outline-secondary"
+                        href="{% url 'productos:index' %}"
+                    >
+                        Cancelar
+                    </a>
+
+                    <button
+                        class="btn btn-primary"
+                        type="submit"
+                        id="boton-guardar"
+                    >
+                        {% if producto %}
+                            Guardar cambios
+                        {% else %}
+                            Guardar
+                        {% endif %}
+                    </button>
+
+                </div>
 
             </div>
 
         </form>
 
     </div>
-
 </div>
-
 
 
 <!-- =============================================================
@@ -265,6 +551,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const formulario =
         document.getElementById("producto-form");
+
+    const tituloFormulario =
+        document.getElementById("titulo-formulario");
+
+    const subtituloFormulario =
+        document.getElementById("subtitulo-formulario");
+
+    const botonGuardar =
+        document.getElementById("boton-guardar");
+
+
+    // =========================================================
+    // TIPO DE REGISTRO
+    // =========================================================
+
+    const tipoProducto =
+        document.getElementById("tipo-producto");
+
+    const tipoServicio =
+        document.getElementById("tipo-servicio");
+
+    const seccionInventario =
+        document.getElementById("seccion-inventario");
+
+    const servicioSinInventario =
+        document.getElementById("servicio-sin-inventario");
+
+    const ayudaCostoServicio =
+        document.getElementById("ayuda-costo-servicio");
+
+    const labelCosto =
+        document.getElementById("label-costo");
 
 
     // =========================================================
@@ -283,11 +601,11 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById(
             "nueva-categoria-nombre"
         );
-    
+
     const inputColorCategoria =
-    document.getElementById(
-        "nueva-categoria-color"
-    );
+        document.getElementById(
+            "nueva-categoria-color"
+        );
 
     const botonCrearCategoria =
         document.getElementById(
@@ -301,11 +619,160 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // =========================================================
+    // INVENTARIO
+    // =========================================================
+
+    const unidadBase =
+        document.getElementById(
+            "id_unidad_base"
+        );
+
+    const stock =
+        document.getElementById(
+            "id_stock"
+        );
+
+    const stockMinimo =
+        document.getElementById(
+            "id_stock_minimo"
+        );
+
+
+    // =========================================================
+    // COSTO Y PRECIO DE VENTA
+    // =========================================================
+
+    const costo =
+        document.getElementById(
+            "id_costo"
+        );
+
+    const precioVenta =
+        document.getElementById(
+            "id_precio_venta"
+        );
+
+    const precioError =
+        document.getElementById(
+            "precio-error"
+        );
+
+
+    // =========================================================
+    // PRODUCTO / SERVICIO
+    // =========================================================
+
+    function actualizarTipoRegistro() {
+
+        const esServicio =
+            tipoServicio
+            && tipoServicio.checked;
+
+
+        if (seccionInventario) {
+            seccionInventario.classList.toggle(
+                "d-none",
+                esServicio
+            );
+        }
+
+
+        if (servicioSinInventario) {
+            servicioSinInventario.classList.toggle(
+                "d-none",
+                !esServicio
+            );
+        }
+
+
+        if (ayudaCostoServicio) {
+            ayudaCostoServicio.classList.toggle(
+                "d-none",
+                !esServicio
+            );
+        }
+
+
+        if (labelCosto) {
+            labelCosto.textContent =
+                esServicio
+                    ? "Costo del servicio"
+                    : "Costo";
+        }
+
+
+        if (esServicio) {
+
+            // Valores internos compatibles con Django.
+            // El backend también debe reforzar esta regla.
+
+            if (unidadBase) {
+                unidadBase.value = "unidad";
+            }
+
+            if (stock) {
+                stock.value = "0";
+            }
+
+            if (stockMinimo) {
+                stockMinimo.value = "0";
+            }
+
+            if (tituloFormulario) {
+                tituloFormulario.textContent =
+                    {% if producto %}
+                        "Editar servicio";
+                    {% else %}
+                        "Nuevo servicio";
+                    {% endif %}
+            }
+
+            if (subtituloFormulario) {
+                subtituloFormulario.textContent =
+                    "Registra la información comercial del servicio. No se controlan existencias.";
+            }
+
+        } else {
+
+            if (tituloFormulario) {
+                tituloFormulario.textContent =
+                    {% if producto %}
+                        "Editar producto";
+                    {% else %}
+                        "Nuevo producto";
+                    {% endif %}
+            }
+
+            if (subtituloFormulario) {
+                subtituloFormulario.textContent =
+                    "Registra sus existencias, costo y precio de venta.";
+            }
+
+        }
+
+    }
+
+
+    if (tipoProducto) {
+        tipoProducto.addEventListener(
+            "change",
+            actualizarTipoRegistro
+        );
+    }
+
+    if (tipoServicio) {
+        tipoServicio.addEventListener(
+            "change",
+            actualizarTipoRegistro
+        );
+    }
+
+
+    // =========================================================
     // AGREGAR OPCIÓN "+ NUEVA CATEGORÍA"
     // =========================================================
 
     let opcionNuevaCategoria = null;
-
 
     if (selectorCategoria) {
 
@@ -326,7 +793,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // =========================================================
-    // MOSTRAR / OCULTAR CREACIÓN RÁPIDA
+    // MOSTRAR / OCULTAR CREACIÓN RÁPIDA DE CATEGORÍA
     // =========================================================
 
     function actualizarSelectorCategoria() {
@@ -341,19 +808,27 @@ document.addEventListener("DOMContentLoaded", function () {
             === "__nueva__"
         ) {
 
-            nuevaCategoriaContainer
-                .classList
-                .remove("d-none");
+            if (nuevaCategoriaContainer) {
+                nuevaCategoriaContainer
+                    .classList
+                    .remove("d-none");
+            }
 
-            inputNuevaCategoria.focus();
+            if (inputNuevaCategoria) {
+                inputNuevaCategoria.focus();
+            }
 
         } else {
 
-            nuevaCategoriaContainer
-                .classList
-                .add("d-none");
+            if (nuevaCategoriaContainer) {
+                nuevaCategoriaContainer
+                    .classList
+                    .add("d-none");
+            }
 
-            errorCategoria.textContent = "";
+            if (errorCategoria) {
+                errorCategoria.textContent = "";
+            }
 
         }
 
@@ -376,37 +851,41 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function crearCategoriaRapida() {
 
+        if (
+            !inputNuevaCategoria
+            ||
+            !botonCrearCategoria
+            ||
+            !selectorCategoria
+        ) {
+            return;
+        }
+
+
         const nombre =
             inputNuevaCategoria.value.trim();
 
 
-        // -----------------------------------------------------
-        // Validación básica
-        // -----------------------------------------------------
-
         if (!nombre) {
 
-            errorCategoria.textContent =
-                "Escribe el nombre de la categoría.";
+            if (errorCategoria) {
+                errorCategoria.textContent =
+                    "Escribe el nombre de la categoría.";
+            }
 
             inputNuevaCategoria.focus();
 
             return;
-
         }
 
 
         botonCrearCategoria.disabled = true;
+        botonCrearCategoria.textContent = "Creando...";
 
-        botonCrearCategoria.textContent =
-            "Creando...";
+        if (errorCategoria) {
+            errorCategoria.textContent = "";
+        }
 
-        errorCategoria.textContent = "";
-
-
-        // -----------------------------------------------------
-        // Datos enviados a Django
-        // -----------------------------------------------------
 
         const datos =
             new FormData();
@@ -423,7 +902,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         datos.append(
             "color",
-            inputColorCategoria.value
+            inputColorCategoria
+                ? inputColorCategoria.value
+                : "#0d6efd"
         );
 
         datos.append(
@@ -436,34 +917,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const respuesta =
                 await fetch(
-
                     "{% url 'productos:crear_categoria_rapida' %}",
-
                     {
                         method: "POST",
-
                         headers: {
-
                             "X-CSRFToken":
                                 document.querySelector(
                                     "[name=csrfmiddlewaretoken]"
                                 ).value
-
                         },
-
                         body: datos
                     }
-
                 );
 
 
             const resultado =
                 await respuesta.json();
 
-
-            // -------------------------------------------------
-            // Errores enviados por Django
-            // -------------------------------------------------
 
             if (!respuesta.ok) {
 
@@ -476,41 +946,29 @@ document.addEventListener("DOMContentLoaded", function () {
                     &&
                     resultado.errores.nombre
                 ) {
-
                     mensaje =
-                        resultado
-                            .errores
-                            .nombre[0];
-
+                        resultado.errores.nombre[0];
                 }
 
 
-                errorCategoria.textContent =
-                    mensaje;
+                if (errorCategoria) {
+                    errorCategoria.textContent =
+                        mensaje;
+                }
 
                 return;
-
             }
 
-
-            // -------------------------------------------------
-            // Crear opción nueva
-            // -------------------------------------------------
 
             const nuevaOpcion =
                 document.createElement("option");
 
-
             nuevaOpcion.value =
                 resultado.categoria.id;
-
 
             nuevaOpcion.textContent =
                 resultado.categoria.nombre;
 
-
-            // Se coloca antes de
-            // "+ Agregar nueva categoría"
 
             selectorCategoria.insertBefore(
                 nuevaOpcion,
@@ -518,45 +976,41 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-            // -------------------------------------------------
-            // Seleccionar automáticamente
-            // -------------------------------------------------
-
             selectorCategoria.value =
                 resultado.categoria.id;
 
 
-            // -------------------------------------------------
-            // Limpiar formulario rápido
-            // -------------------------------------------------
-
             inputNuevaCategoria.value = "";
 
-            inputColorCategoria.value =
-                "#0d6efd";
+            if (inputColorCategoria) {
+                inputColorCategoria.value =
+                    "#0d6efd";
+            }
 
-            errorCategoria.textContent = "";
+            if (errorCategoria) {
+                errorCategoria.textContent = "";
+            }
 
-            nuevaCategoriaContainer
-                .classList
-                .add("d-none");
+            if (nuevaCategoriaContainer) {
+                nuevaCategoriaContainer
+                    .classList
+                    .add("d-none");
+            }
 
 
         } catch (error) {
 
             console.error(error);
 
-            errorCategoria.textContent =
-                "Ocurrió un problema al comunicarse "
-                + "con el servidor.";
+            if (errorCategoria) {
+                errorCategoria.textContent =
+                    "Ocurrió un problema al comunicarse con el servidor.";
+            }
 
         } finally {
 
-            botonCrearCategoria.disabled =
-                false;
-
-            botonCrearCategoria.textContent =
-                "Crear";
+            botonCrearCategoria.disabled = false;
+            botonCrearCategoria.textContent = "Crear";
 
         }
 
@@ -572,10 +1026,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
-
-    // =========================================================
-    // ENTER CREA LA CATEGORÍA
-    // =========================================================
 
     if (inputNuevaCategoria) {
 
@@ -597,29 +1047,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-
     // =========================================================
     // UNIDADES DE INVENTARIO
     // =========================================================
-
-    const unidadBase =
-        document.getElementById(
-            "id_unidad_base"
-        );
-
-    const stock =
-        document.getElementById(
-            "id_stock"
-        );
-
-    const stockMinimo =
-        document.getElementById(
-            "id_stock_minimo"
-        );
-
-
-    // Unidades que físicamente
-    // no admiten fracciones.
 
     const unidadesEnteras = [
         "unidad",
@@ -649,7 +1079,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (requiereEntero) {
 
             stock.step = "1";
-
             stockMinimo.step = "1";
 
             stock.setAttribute(
@@ -661,12 +1090,32 @@ document.addEventListener("DOMContentLoaded", function () {
                 "inputmode",
                 "numeric"
             );
+            
+            const stockValor =
+                parseFloat(
+                    stock.value.replace(",", ".")
+                );
+
+            const stockMinimoValor =
+                parseFloat(
+                    stockMinimo.value.replace(",", ".")
+                );
+
+
+            if (Number.isFinite(stockValor)) {
+                stock.value =
+                    Math.trunc(stockValor);
+            }
+
+            if (Number.isFinite(stockMinimoValor)) {
+                stockMinimo.value =
+                    Math.trunc(stockMinimoValor);
+            }
 
         } else {
 
-            stock.step = "0.001";
-
-            stockMinimo.step = "0.001";
+            stock.step = "0.01";
+            stockMinimo.step = "0.01";
 
             stock.setAttribute(
                 "inputmode",
@@ -690,32 +1139,7 @@ document.addEventListener("DOMContentLoaded", function () {
             configurarUnidadInventario
         );
 
-
-        // Configuración inicial
-        configurarUnidadInventario();
-
     }
-
-
-
-    // =========================================================
-    // COSTO Y PRECIO DE VENTA
-    // =========================================================
-
-    const costo =
-        document.getElementById(
-            "id_costo"
-        );
-
-    const precioVenta =
-        document.getElementById(
-            "id_precio_venta"
-        );
-
-    const precioError =
-        document.getElementById(
-            "precio-error"
-        );
 
 
     // =========================================================
@@ -749,9 +1173,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ||
             !precioVenta
         ) {
-
             return true;
-
         }
 
 
@@ -766,28 +1188,21 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-        // Si todavía no hay números,
-        // no mostramos error.
-
         if (
             isNaN(costoValor)
             ||
             isNaN(precioValor)
         ) {
 
-            precioVenta
-                .setCustomValidity("");
+            precioVenta.setCustomValidity("");
 
-            precioError.textContent = "";
+            if (precioError) {
+                precioError.textContent = "";
+            }
 
             return true;
-
         }
 
-
-        // -----------------------------------------------------
-        // Precio menor al costo
-        // -----------------------------------------------------
 
         if (
             precioValor
@@ -795,29 +1210,26 @@ document.addEventListener("DOMContentLoaded", function () {
         ) {
 
             const mensaje =
-                "El precio de venta no puede "
-                + "ser menor que el costo.";
-
+                "El precio de venta no puede ser menor que el costo.";
 
             precioVenta.setCustomValidity(
                 mensaje
             );
 
-            precioError.textContent =
-                mensaje;
+            if (precioError) {
+                precioError.textContent =
+                    mensaje;
+            }
 
             return false;
-
         }
 
 
-        // -----------------------------------------------------
-        // Precio válido
-        // -----------------------------------------------------
-
         precioVenta.setCustomValidity("");
 
-        precioError.textContent = "";
+        if (precioError) {
+            precioError.textContent = "";
+        }
 
         return true;
 
@@ -854,7 +1266,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-
     // =========================================================
     // VALIDACIÓN FINAL ANTES DE GUARDAR
     // =========================================================
@@ -865,11 +1276,8 @@ document.addEventListener("DOMContentLoaded", function () {
             "submit",
             function (event) {
 
-                // ---------------------------------------------
-                // No permitir guardar con
-                // "+ Agregar nueva categoría"
-                // seleccionado.
-                // ---------------------------------------------
+                actualizarTipoRegistro();
+
 
                 if (
                     selectorCategoria
@@ -880,20 +1288,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     event.preventDefault();
 
-                    errorCategoria.textContent =
-                        "Crea la categoría antes "
-                        + "de guardar el producto.";
+                    if (errorCategoria) {
+                        errorCategoria.textContent =
+                            "Crea la categoría antes de guardar.";
+                    }
 
-                    inputNuevaCategoria.focus();
+                    if (inputNuevaCategoria) {
+                        inputNuevaCategoria.focus();
+                    }
 
                     return;
-
                 }
 
-
-                // ---------------------------------------------
-                // Precio
-                // ---------------------------------------------
 
                 const precioValido =
                     validarPrecioVenta();
@@ -903,9 +1309,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     event.preventDefault();
 
-                    precioVenta.focus();
-
-                    precioVenta.reportValidity();
+                    if (precioVenta) {
+                        precioVenta.focus();
+                        precioVenta.reportValidity();
+                    }
 
                 }
 
@@ -914,9 +1321,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
+
+    // =========================================================
+    // CONFIGURACIÓN INICIAL
+    // =========================================================
+
+    configurarUnidadInventario();
+    actualizarTipoRegistro();
+
 });
 
 </script>
-
 
 {% endblock %}

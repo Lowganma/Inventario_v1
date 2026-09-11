@@ -62,7 +62,6 @@ class Producto(models.Model):
 
     UNIDADES = [
         ("unidad", "Unidad"),
-        ("hoja", "Hoja"),
         ("kg", "Kilogramo"),
         ("g", "Gramo"),
         ("litro", "Litro"),
@@ -126,19 +125,19 @@ class Producto(models.Model):
 
     stock = models.DecimalField(
         max_digits=14,
-        decimal_places=3,
-        default=Decimal("0.000"),
+        decimal_places=2,
+        default=Decimal("0.00"),
         validators=[
-            MinValueValidator(Decimal("0.000")),
+            MinValueValidator(Decimal("0.00")),
         ],
     )
 
     stock_minimo = models.DecimalField(
         max_digits=14,
-        decimal_places=3,
-        default=Decimal("0.000"),
+        decimal_places=2,
+        default=Decimal("0.00"),
         validators=[
-            MinValueValidator(Decimal("0.000")),
+            MinValueValidator(Decimal("0.00")),
         ],
     )
 
@@ -242,7 +241,6 @@ class Producto(models.Model):
 
         unidades_enteras = {
             "unidad",
-            "hoja",
         }
 
         if self.unidad_base in unidades_enteras:
@@ -255,7 +253,7 @@ class Producto(models.Model):
                     {
                         "stock":
                             "El stock debe ser un número entero "
-                            "para esta unidad."
+                            "cuando la unidad de inventario es 'unidad'."
                     }
                 )
 
@@ -268,7 +266,7 @@ class Producto(models.Model):
                     {
                         "stock_minimo":
                             "El stock mínimo debe ser un número "
-                            "entero para esta unidad."
+                            "entero cuando la unidad de inventario es 'unidad'."
                     }
                 )
 
@@ -295,7 +293,14 @@ class Producto(models.Model):
 
     @property
     def stock_bajo(self):
-        """Indica si las existencias alcanzaron el mínimo."""
+        """
+        Indica si las existencias alcanzaron el mínimo.
+        Los servicios no manejan inventario.
+        """
+
+        if self.tipo == "servicio":
+            return False
+
         return self.stock <= self.stock_minimo
 
     @property
@@ -315,7 +320,6 @@ class Producto(models.Model):
 
         unidades_enteras = {
             "unidad",
-            "hoja",
         }
 
         if self.unidad_base in unidades_enteras:
@@ -331,7 +335,6 @@ class Producto(models.Model):
 
         unidades = {
             "unidad": ("unidad", "unidades"),
-            "hoja": ("hoja", "hojas"),
             "kg": ("kg", "kg"),
             "g": ("g", "g"),
             "litro": ("L", "L"),
@@ -391,9 +394,9 @@ class PresentacionProducto(models.Model):
 
     cantidad_unidades = models.DecimalField(
             max_digits=12,
-            decimal_places=3,
+            decimal_places=2,
             validators=[
-                MinValueValidator(Decimal("0.001")),
+                MinValueValidator(Decimal("0.01")),
             ],
         )
 

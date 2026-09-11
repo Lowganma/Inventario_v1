@@ -59,6 +59,7 @@ class ProductoForm(forms.ModelForm):
     class Meta:
         model = Producto
         fields = [
+            "tipo",
             "categoria",
             "codigo",
             "nombre",
@@ -88,9 +89,9 @@ class ProductoForm(forms.ModelForm):
                     "accept": "image/*",
                 }
             ),
-            "tipo": forms.Select(
+            "tipo": forms.RadioSelect(
                 attrs={
-                    "class": "form-select",
+                    "class": "btn-check",
                 }
             ),
 
