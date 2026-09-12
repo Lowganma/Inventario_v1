@@ -1,1378 +1,2272 @@
 {% extends "base.html" %}
 
-{% block title %}
-    Nueva venta
-{% endblock %}
+{% block title %}Nueva venta{% endblock %}
 
 {% block content %}
 
-<div class="row justify-content-center">
-    <div class="col-12 col-xl-10">
+<style>
+    .venta-pos-shell {
+        max-width: 1500px;
+        margin: 0 auto;
+    }
 
-        {# ===================================================== #}
-        {# ENCABEZADO                                            #}
-        {# ===================================================== #}
+    .venta-pos-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.7fr) minmax(360px, .95fr);
+        gap: 1rem;
+        align-items: start;
+    }
 
-        <div
-            class="
-                d-flex
-                flex-column
-                flex-md-row
-                justify-content-between
-                align-items-md-center
-                gap-3
-                mb-4
-            "
-        >
+    .venta-panel {
+        border: 1px solid var(--bs-border-color);
+        border-radius: 1rem;
+        background: var(--bs-body-bg);
+        overflow: hidden;
+    }
 
-            <div>
-                <a
-                    href="{% url 'ventas:lista' %}"
-                    class="text-decoration-none d-inline-flex align-items-center mb-2"
-                >
-                    <i class="bi bi-arrow-left me-2"></i>
-                    Volver a ventas
-                </a>
+    .venta-panel-header {
+        padding: 1rem 1.1rem;
+        border-bottom: 1px solid var(--bs-border-color);
+        background: var(--bs-tertiary-bg);
+    }
 
-                <h1 class="page-title mb-1">
-                    Nueva venta
-                </h1>
+    .venta-panel-body {
+        padding: 1rem;
+    }
 
-                <p class="page-subtitle mb-0">
-                    Selecciona los productos y registra la forma de pago.
-                </p>
-            </div>
+    .catalogo-toolbar {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: .75rem;
+        align-items: center;
+        margin-bottom: .85rem;
+    }
 
+    .categoria-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+        margin-bottom: 1rem;
+    }
+
+    .categoria-chip {
+        border: 1px solid var(--bs-border-color);
+        border-radius: 999px;
+        padding: .35rem .75rem;
+        background: transparent;
+        color: inherit;
+        font-size: .875rem;
+    }
+
+    .categoria-chip.active,
+    .categoria-chip:hover {
+        border-color: var(--bs-primary);
+        color: var(--bs-primary);
+    }
+
+    .catalogo-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: .75rem;
+        max-height: calc(100vh - 360px);
+        min-height: 360px;
+        overflow-y: auto;
+        padding-right: .15rem;
+    }
+
+    .catalogo-card {
+        display: flex;
+        gap: .75rem;
+        align-items: center;
+        width: 100%;
+        text-align: left;
+        border: 1px solid var(--bs-border-color);
+        border-radius: .9rem;
+        padding: .75rem;
+        background: var(--bs-tertiary-bg);
+        color: inherit;
+        min-height: 92px;
+        transition: .15s ease;
+    }
+
+    .catalogo-card:hover {
+        transform: translateY(-1px);
+        border-color: var(--bs-primary);
+        box-shadow: 0 .35rem 1rem rgba(0, 0, 0, .08);
+    }
+
+    .catalogo-card img,
+    .catalogo-placeholder,
+    .carrito-img,
+    .carrito-placeholder {
+        width: 56px;
+        height: 56px;
+        border-radius: .75rem;
+        object-fit: cover;
+        flex: 0 0 56px;
+        border: 1px solid var(--bs-border-color);
+        background: var(--bs-body-bg);
+    }
+
+    .catalogo-placeholder,
+    .carrito-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--bs-secondary-color);
+    }
+
+    .catalogo-card-title {
+        font-weight: 700;
+        line-height: 1.15;
+        margin-bottom: .2rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .catalogo-card-meta {
+        font-size: .78rem;
+        color: var(--bs-secondary-color);
+        line-height: 1.2;
+        margin-bottom: .25rem;
+    }
+
+    .catalogo-card-price {
+        font-weight: 700;
+        color: var(--bs-primary);
+    }
+
+
+    .catalogo-view-toggle {
+        display: inline-flex;
+        border: 1px solid var(--bs-border-color);
+        border-radius: .65rem;
+        overflow: hidden;
+    }
+
+    .catalogo-view-toggle button {
+        border: 0;
+        background: transparent;
+        color: inherit;
+        padding: .45rem .7rem;
+    }
+
+    .catalogo-view-toggle button.active {
+        background: var(--bs-primary);
+        color: #fff;
+    }
+
+    .catalogo-grid.modo-lineal {
+        grid-template-columns: 1fr;
+    }
+
+    .catalogo-grid.modo-lineal .catalogo-card {
+        min-height: 70px;
+        padding: .6rem .75rem;
+    }
+
+    .catalogo-grid.modo-lineal .catalogo-card img,
+    .catalogo-grid.modo-lineal .catalogo-placeholder {
+        width: 44px;
+        height: 44px;
+        flex-basis: 44px;
+        border-radius: .6rem;
+    }
+
+    .catalogo-grid.modo-lineal .catalogo-card-title {
+        margin-bottom: .1rem;
+    }
+
+    .catalogo-grid.modo-lineal .catalogo-card-meta {
+        margin-bottom: 0;
+    }
+
+    .catalogo-grid.modo-lineal .catalogo-card-price {
+        margin-left: auto;
+        padding-left: .75rem;
+        white-space: nowrap;
+    }
+
+    .venta-side {
+        position: sticky;
+        top: 1rem;
+    }
+
+    .venta-side-body {
+        display: flex;
+        flex-direction: column;
+        max-height: calc(100vh - 135px);
+    }
+
+    .venta-datos-compactos {
+        padding: 1rem;
+        border-bottom: 1px solid var(--bs-border-color);
+    }
+
+    .venta-datos-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: .75rem;
+    }
+
+    .venta-carrito {
+        flex: 1;
+        min-height: 220px;
+        overflow-y: auto;
+        padding: .75rem 1rem;
+    }
+
+    .carrito-vacio {
+        display: flex;
+        min-height: 220px;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: var(--bs-secondary-color);
+    }
+
+    .carrito-linea {
+        border-bottom: 1px solid var(--bs-border-color);
+        padding: .8rem 0;
+    }
+
+    .carrito-linea:last-child {
+        border-bottom: 0;
+    }
+
+    .carrito-linea-top {
+        display: flex;
+        gap: .7rem;
+        align-items: center;
+    }
+
+    .carrito-linea-info {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .carrito-linea-title {
+        font-weight: 700;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .carrito-linea-meta {
+        font-size: .78rem;
+        color: var(--bs-secondary-color);
+    }
+
+    .carrito-linea-controls {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 95px 86px auto;
+        gap: .45rem;
+        margin-top: .65rem;
+        align-items: center;
+    }
+
+    .carrito-linea-subtotal {
+        font-weight: 700;
+        text-align: right;
+    }
+
+    .venta-ajustes {
+        border-top: 1px solid var(--bs-border-color);
+        padding: .85rem 1rem;
+    }
+
+    .venta-resumen {
+        border-top: 1px solid var(--bs-border-color);
+        padding: 1rem;
+        background: var(--bs-tertiary-bg);
+    }
+
+    .venta-total {
+        font-size: 1.65rem;
+        font-weight: 800;
+        color: var(--bs-primary);
+    }
+
+    .resumen-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: .35rem;
+    }
+
+    .nota-toggle {
+        cursor: pointer;
+        color: var(--bs-primary);
+        text-decoration: none;
+        font-size: .9rem;
+    }
+
+    @media (max-width: 1199.98px) {
+        .catalogo-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .venta-pos-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .venta-side {
+            position: static;
+        }
+
+        .venta-side-body {
+            max-height: none;
+        }
+
+        .catalogo-grid {
+            max-height: none;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .catalogo-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .venta-datos-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .carrito-linea-controls {
+            grid-template-columns: 1fr 90px;
+        }
+    }
+</style>
+
+
+<div class="venta-pos-shell">
+
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+        <div>
+            <a
+                href="{% url 'ventas:lista' %}"
+                class="text-decoration-none small d-inline-flex align-items-center mb-1"
+            >
+                <i class="bi bi-arrow-left me-1"></i>
+                Volver a ventas
+            </a>
+
+            <h1 class="page-title mb-1">
+                Nueva venta
+            </h1>
+
+            <p class="page-subtitle mb-0">
+                Selecciona productos o servicios y completa la operación.
+            </p>
         </div>
+    </div>
 
 
-        <form
-            method="post"
-            id="ventaForm"
-            novalidate
-        >
+    <form method="post" id="ventaForm" novalidate>
+        {% csrf_token %}
+        {{ detalles.management_form }}
 
-            {% csrf_token %}
+        <div class="venta-pos-grid">
 
-            {{ detalles.management_form }}
+            <!-- =================================================
+                 IZQUIERDA: CATÁLOGO
+            ================================================== -->
 
+            <section class="venta-panel">
 
-            {# ================================================= #}
-            {# DATOS GENERALES                                   #}
-            {# ================================================= #}
-
-            <div class="card content-card mb-4">
-                <div class="card-body p-4">
-
-                    <h2 class="h5 mb-4">
-                        <i class="bi bi-receipt me-2"></i>
-                        Datos de la venta
-                    </h2>
-
-
-                        <div class="row g-4">
-
-    {# ===================================================== #}
-    {# FORMA DE PAGO                                         #}
-    {# ===================================================== #}
-
-                        <div class="col-12 col-lg-6">
-
-                            <label class="form-label fw-semibold d-block">
-                                Forma de pago
-                            </label>
-
-                            <div
-                                id="tipoPago"
-                                class="d-flex flex-column gap-2"
-                            >
-                                {{ formulario.tipo_pago }}
-                            </div>
-
-                            {% for error in formulario.tipo_pago.errors %}
-                                <div class="text-danger small mt-1">
-                                    {{ error }}
-                                </div>
-                            {% endfor %}
-
-                        </div>
-
-
-                        {# ===================================================== #}
-                        {# CLIENTE                                               #}
-                        {# ===================================================== #}
-
-                        <div class="col-12 col-lg-6">
-
-                            <div
-                                class="
-                                    d-flex
-                                    justify-content-between
-                                    align-items-center
-                                    mb-2
-                                "
-                            >
-
-                                <label
-                                    for="{{ formulario.cliente.id_for_label }}"
-                                    class="form-label fw-semibold mb-0"
-                                >
-                                    Cliente
-                                </label>
-
-                                <a
-                                    href="{% url 'clientes:crear' %}"
-                                    target="_blank"
-                                    class="btn btn-sm btn-outline-primary"
-                                    title="Registrar nuevo cliente"
-                                >
-                                    <i class="bi bi-person-plus"></i>
-                                </a>
-
-                            </div>
-
-                            {{ formulario.cliente }}
-
-                            <div
-                                id="ayudaCliente"
-                                class="form-text"
-                            >
-                                Opcional para pago inmediato.
-                            </div>
-
-                            {% for error in formulario.cliente.errors %}
-                                <div class="text-danger small mt-1">
-                                    {{ error }}
-                                </div>
-                            {% endfor %}
-
-                        </div>
-
-
-                        {# ===================================================== #}
-                        {# MÉTODO DE PAGO                                        #}
-                        {# ===================================================== #}
-
-                        <div
-                            id="contenedorMetodoPago"
-                            class="col-12"
-                        >
-
-                            <label
-                                for="{{ formulario.metodo_pago.id_for_label }}"
-                                class="form-label fw-semibold"
-                            >
-                                Método de pago
-                            </label>
-
-                            {{ formulario.metodo_pago }}
-
-                            {% for error in formulario.metodo_pago.errors %}
-                                <div class="text-danger small mt-1">
-                                    {{ error }}
-                                </div>
-                            {% endfor %}
-
-                        </div>
-
-                    </div>
-
-                    {# Aviso de fiado #}
-
-                    <div
-                        id="avisoFiado"
-                        class="alert alert-warning mt-4 d-none"
-                    >
-                        <i class="bi bi-wallet2 me-2"></i>
-
-                        Esta venta se registrará como
-                        <strong>fiada</strong> y generará
-                        automáticamente una cuenta por cobrar
-                        para el cliente seleccionado.
-                    </div>
-
-                </div>
-            </div>
-
-
-            {# ================================================= #}
-            {# PRODUCTOS                                         #}
-            {# ================================================= #}
-
-            <div class="card content-card mb-4">
-
-                <div class="card-body p-4">
-
-                    <div
-                        class="
-                            d-flex
-                            flex-column
-                            flex-md-row
-                            justify-content-between
-                            align-items-md-center
-                            gap-3
-                            mb-4
-                        "
-                    >
-
+                <div class="venta-panel-header">
+                    <div class="d-flex align-items-center justify-content-between gap-3">
                         <div>
                             <h2 class="h5 mb-1">
-                                <i class="bi bi-box-seam me-2"></i>
-                                Productos
+                                Catálogo
                             </h2>
 
-                            <p class="text-muted mb-0">
-                                Agrega los productos incluidos en la venta.
-                            </p>
+                            <div class="small text-body-secondary">
+                                Busca y agrega productos o servicios.
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <span
+                                id="catalogoContador"
+                                class="badge text-bg-secondary"
+                            >
+                                {{ productos_catalogo|length }} items
+                            </span>
+
+                            <div
+                                class="catalogo-view-toggle"
+                                role="group"
+                                aria-label="Cambiar vista del catálogo"
+                            >
+                                <button
+                                    type="button"
+                                    id="vistaMosaico"
+                                    class="active"
+                                    title="Vista mosaico"
+                                >
+                                    <i class="bi bi-grid-3x3-gap"></i>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    id="vistaLineal"
+                                    title="Vista lineal"
+                                >
+                                    <i class="bi bi-list-ul"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="venta-panel-body">
+
+                    <div class="catalogo-toolbar">
+
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
+                            </span>
+
+                            <input
+                                type="search"
+                                id="buscadorCatalogo"
+                                class="form-control"
+                                placeholder="Buscar por nombre, código o categoría..."
+                                autocomplete="off"
+                            >
                         </div>
 
                         <button
                             type="button"
-                            id="agregarProducto"
-                            class="btn btn-outline-primary"
+                            id="limpiarBusqueda"
+                            class="btn btn-outline-secondary"
                         >
-                            <i class="bi bi-plus-lg me-1"></i>
-                            Agregar producto
+                            Limpiar
                         </button>
 
                     </div>
 
 
-                    <div class="table-responsive">
-
-    <table
-        class="
-            table
-            table-hover
-            align-middle
-            mb-0
-        "
-    >
-
-        <thead>
-
-            <tr>
-
-                <th style="min-width: 280px;">
-                    Producto
-                </th>
-
-                <th style="min-width: 180px;">
-                    Presentación
-                </th>
-
-                <th style="min-width: 120px;">
-                    Cantidad
-                </th>
-
-                <th style="min-width: 150px;">
-                    Precio
-                </th>
-
-                <th style="min-width: 130px;">
-                    Subtotal
-                </th>
-
-                <th
-                    style="width: 70px;"
-                    class="text-center"
-                >
-                    Acción
-                </th>
-
-            </tr>
-
-        </thead>
-
-
-        <tbody id="detallesVenta">
-
-            {% for detalle in detalles %}
-
-                <tr
-                    class="
-                        detalle-venta
-                        {% if detalle.DELETE.value %}
-                            d-none
-                        {% endif %}
-                    "
-                >
-
-                    {# ====================================== #}
-                    {# PRODUCTO                               #}
-                    {# ====================================== #}
-
-                    <td>
-
-                        <div
-                            class="
-                                d-flex
-                                align-items-start
-                                gap-2
-                            "
+                    <div class="categoria-chips">
+                        <button
+                            type="button"
+                            class="categoria-chip active"
+                            data-categoria=""
                         >
+                            Todos
+                        </button>
 
-                            <div class="flex-grow-1">
-
-                                {{ detalle.producto }}
-
-                                <div
-                                    class="
-                                        form-text
-                                        stock-disponible
-                                    "
-                                >
-                                    Selecciona un producto para consultar existencias.
-                                </div>
-
-                                {% for error in detalle.producto.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {{ error }}
-                                    </div>
-                                {% endfor %}
-
-                            </div>
-
-
-                            <a
-                                href="{% url 'productos:crear' %}"
-                                target="_blank"
-                                class="btn btn-sm btn-outline-primary"
-                                title="Crear producto"
+                        {% for categoria in categorias_catalogo %}
+                            <button
+                                type="button"
+                                class="categoria-chip"
+                                data-categoria="{{ categoria|lower }}"
                             >
-                                <i class="bi bi-plus-lg"></i>
-                            </a>
-
-                        </div>
-
-                    </td>
-
-                    <td>
-
-                        {{ detalle.presentacion }}
-
-                        <div
-                            class="form-text detalle-presentacion"
-                        >
-                            Selecciona primero un producto.
-                        </div>
-
-                        {% for error in detalle.presentacion.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ error }}
-                            </div>
+                                {{ categoria }}
+                            </button>
                         {% endfor %}
+                    </div>
 
-                    </td>
 
+                    <div
+                        id="catalogoGrid"
+                        class="catalogo-grid"
+                    >
 
-                                {# ====================================== #}
-                                {# CANTIDAD                               #}
-                                {# ====================================== #}
-
-                                <td>
-
-                                    {{ detalle.cantidad }}
-
-                                    {% for error in detalle.cantidad.errors %}
-                                        <div class="text-danger small mt-1">
-                                            {{ error }}
-                                        </div>
-                                    {% endfor %}
-
-                                </td>
-
-
-                                {# ====================================== #}
-                                {# PRECIO                                 #}
-                                {# ====================================== #}
-
-                                <td>
-
-                                    <div class="input-group">
-
-                                        <span class="input-group-text">
-                                            $
-                                        </span>
-
-                                        {{ detalle.precio_unitario }}
-
-                                    </div>
-
-                                    {% for error in detalle.precio_unitario.errors %}
-                                        <div class="text-danger small mt-1">
-                                            {{ error }}
-                                        </div>
-                                    {% endfor %}
-
-                                </td>
-
-
-                                {# ====================================== #}
-                                {# SUBTOTAL                               #}
-                                {# ====================================== #}
-
-                                <td>
-
-                                    <strong
-                                        class="subtotal-linea"
-                                        data-subtotal
-                                    >
-                                        $0.00
-                                    </strong>
-
-                                </td>
-
-
-                                {# ====================================== #}
-                                {# ELIMINAR                               #}
-                                {# ====================================== #}
-
-                                <td class="text-center">
-
-                                    <button
-                                        type="button"
-                                        class="
-                                            btn
-                                            btn-sm
-                                            btn-outline-danger
-                                            eliminar-producto
-                                        "
-                                        title="Quitar producto"
-                                    >
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-
-                                    {% if detalle.DELETE %}
-                                        <div class="d-none">
-                                            {{ detalle.DELETE }}
-                                        </div>
-                                    {% endif %}
-
-                                </td>
-
-                            </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-
-                    {# ================================================= #}
-                    {# FORMULARIO VACÍO PARA AGREGAR FILAS              #}
-                    {# ================================================= #}
-
-                   <template id="detalleVacio">
-
-                    <tr class="detalle-venta">
-
-                        {# Producto #}
-
-                        <td>
-
-                            <div
-                                class="
-                                    d-flex
-                                    align-items-start
-                                    gap-2
-                                "
-                            >
-
-                                <div class="flex-grow-1">
-
-                                    {{ detalles.empty_form.producto }}
-
-                                    <div
-                                        class="
-                                            form-text
-                                            stock-disponible
-                                        "
-                                    >
-                                        Selecciona un producto para consultar existencias.
-                                    </div>
-
-                                </div>
-
-
-                                <a
-                                    href="{% url 'productos:crear' %}"
-                                    target="_blank"
-                                    class="btn btn-sm btn-outline-primary"
-                                    title="Crear producto"
-                                >
-                                    <i class="bi bi-plus-lg"></i>
-                                </a>
-
-                            </div>
-
-                        </td>
-
-                        <td>
-
-                            {{ detalles.empty_form.presentacion }}
-
-                            <div
-                                class="form-text detalle-presentacion"
-                            >
-                                Selecciona primero un producto.
-                            </div>
-
-                        </td>
-
-
-                        {# Cantidad #}
-
-                        <td>
-
-                            {{ detalles.empty_form.cantidad }}
-
-                        </td>
-
-
-                        {# Precio #}
-
-                        <td>
-
-                            <div class="input-group">
-
-                                <span class="input-group-text">
-                                    $
-                                </span>
-
-                                {{ detalles.empty_form.precio_unitario }}
-
-                            </div>
-
-                        </td>
-
-
-                        {# Subtotal #}
-
-                        <td>
-
-                            <strong data-subtotal>
-                                $0.00
-                            </strong>
-
-                        </td>
-
-
-                        {# Eliminar #}
-
-                        <td class="text-center">
+                        {% for producto in productos_catalogo %}
 
                             <button
                                 type="button"
-                                class="
-                                    btn
-                                    btn-sm
-                                    btn-outline-danger
-                                    eliminar-producto
+                                class="catalogo-card"
+                                data-producto-id="{{ producto.id }}"
+                                data-categoria="{{ producto.categoria.nombre|default:''|lower }}"
+                                data-busqueda="
+                                    {{ producto.nombre|lower }}
+                                    {{ producto.codigo|default:''|lower }}
+                                    {{ producto.categoria.nombre|default:''|lower }}
                                 "
-                                title="Quitar producto"
                             >
-                                <i class="bi bi-trash"></i>
+
+                                {% if producto.imagen %}
+                                    <img
+                                        src="{{ producto.imagen.url }}"
+                                        alt="{{ producto.nombre }}"
+                                    >
+                                {% else %}
+                                    <div class="catalogo-placeholder">
+                                        <i class="bi bi-image"></i>
+                                    </div>
+                                {% endif %}
+
+
+                                <div class="min-w-0 flex-grow-1">
+
+                                    <div class="catalogo-card-title">
+                                        {{ producto.nombre }}
+                                    </div>
+
+                                    <div class="catalogo-card-meta">
+                                        {{ producto.categoria.nombre }}
+                                        ·
+                                        {% if producto.tipo == "servicio" %}
+                                            Servicio
+                                        {% else %}
+                                            {{ producto.stock_con_unidad }}
+                                        {% endif %}
+                                    </div>
+
+                                </div>
+
+                                <div class="catalogo-card-price">
+                                    ${{ producto.precio_venta|floatformat:2 }}
+                                </div>
+
+                                <i class="bi bi-plus-circle text-primary fs-5"></i>
+
                             </button>
 
+                        {% empty %}
 
-                            {% if detalles.empty_form.DELETE %}
-                                <div class="d-none">
-                                    {{ detalles.empty_form.DELETE }}
-                                </div>
-                            {% endif %}
+                            <div class="alert alert-secondary mb-0">
+                                No hay productos o servicios activos.
+                            </div>
 
-                        </td>
+                        {% endfor %}
 
-                    </tr>
+                    </div>
 
-                </template>
+
+                    <div
+                        id="sinResultadosCatalogo"
+                        class="text-center text-body-secondary py-5 d-none"
+                    >
+                        <i class="bi bi-search fs-3 d-block mb-2"></i>
+                        No encontramos coincidencias.
+                    </div>
 
                 </div>
-            </div>
+
+            </section>
 
 
-            {# ================================================= #}
-            {# DESCUENTO, NOTAS Y RESUMEN                        #}
-            {# ================================================= #}
+            <!-- =================================================
+                 DERECHA: VENTA / CARRITO
+            ================================================== -->
 
-            <div class="row g-4">
+            <aside class="venta-panel venta-side">
+                <div class="venta-side-body">
 
-                <div class="col-12 col-lg-7">
+                    <!-- DATOS COMPACTOS -->
 
-                    <div class="card content-card h-100">
+                    <div class="venta-datos-compactos">
 
-                        <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h2 class="h5 mb-0">
+                                Venta actual
+                            </h2>
 
-                            <div class="mb-4">
+                            <span
+                                id="contadorLineasBadge"
+                                class="badge text-bg-primary"
+                            >
+                                0 líneas
+                            </span>
+                        </div>
 
-                                <label
-                                    for="{{ formulario.descuento.id_for_label }}"
-                                    class="form-label fw-semibold"
-                                >
-                                    Descuento
+
+                        <div class="venta-datos-grid">
+
+                            <div>
+                                <label class="form-label small fw-semibold mb-1">
+                                    Cliente
                                 </label>
 
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        $
-                                    </span>
+                                {{ formulario.cliente }}
 
-                                    {{ formulario.descuento }}
-                                </div>
-
-                                {% for error in formulario.descuento.errors %}
+                                {% for error in formulario.cliente.errors %}
                                     <div class="text-danger small mt-1">
                                         {{ error }}
                                     </div>
                                 {% endfor %}
-
                             </div>
 
 
                             <div>
-
-                                <label
-                                    for="{{ formulario.notas.id_for_label }}"
-                                    class="form-label fw-semibold"
-                                >
-                                    Notas
+                                <label class="form-label small fw-semibold mb-1">
+                                    Forma de pago
                                 </label>
 
-                                {{ formulario.notas }}
+                                <div id="tipoPago" class="small">
+                                    {{ formulario.tipo_pago }}
+                                </div>
 
-                                {% for error in formulario.notas.errors %}
+                                {% for error in formulario.tipo_pago.errors %}
                                     <div class="text-danger small mt-1">
                                         {{ error }}
                                     </div>
                                 {% endfor %}
-
                             </div>
+
+
+                            <div id="contenedorMetodoPago">
+                                <label class="form-label small fw-semibold mb-1">
+                                    Método
+                                </label>
+
+                                {{ formulario.metodo_pago }}
+
+                                {% for error in formulario.metodo_pago.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+
+                            <div
+                                id="contenedorReferencia"
+                                class="d-none"
+                            >
+                                <label class="form-label small fw-semibold mb-1">
+                                    Referencia
+                                </label>
+
+                                {{ formulario.referencia_pago }}
+
+                                {% for error in formulario.referencia_pago.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+
+                            <div
+                                id="contenedorDetallePago"
+                                class="d-none"
+                            >
+                                <label class="form-label small fw-semibold mb-1">
+                                    Detalle del pago
+                                </label>
+
+                                {{ formulario.detalle_pago }}
+
+                                {% for error in formulario.detalle_pago.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="avisoFiado"
+                            class="alert alert-warning py-2 px-3 small mt-3 mb-0 d-none"
+                        >
+                            Se generará una cuenta por cobrar.
+                        </div>
+
+                    </div>
+
+
+                    <!-- CARRITO -->
+
+                    <div class="venta-carrito">
+
+                        <div
+                            id="carritoVacio"
+                            class="carrito-vacio"
+                        >
+                            <div>
+                                <i class="bi bi-cart-plus fs-2 d-block mb-2"></i>
+                                <div class="fw-semibold">
+                                    La venta está vacía
+                                </div>
+                                <div class="small">
+                                    Agrega productos desde el catálogo.
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div id="detallesVenta">
+
+                            {% for detalle in detalles %}
+
+                                {% if detalle.producto.value %}
+
+                                    <div
+                                        class="
+                                            carrito-linea detalle-venta
+                                            {% if detalle.DELETE.value %}
+                                                d-none
+                                            {% endif %}
+                                        "
+                                    >
+
+                                        <div class="carrito-linea-top">
+
+                                            <div class="producto-imagen-contenedor">
+                                                <div class="carrito-placeholder">
+                                                    <i class="bi bi-image"></i>
+                                                </div>
+                                            </div>
+
+                                            <div class="carrito-linea-info">
+
+                                                <div class="carrito-linea-title nombre-producto-linea">
+                                                    Producto
+                                                </div>
+
+                                                <div class="carrito-linea-meta stock-disponible">
+                                                    Consultando...
+                                                </div>
+
+                                                <div class="d-none">
+                                                    {{ detalle.producto }}
+                                                </div>
+
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                class="btn btn-sm btn-outline-danger eliminar-producto"
+                                                title="Quitar"
+                                            >
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+
+                                        </div>
+
+
+                                        <div class="carrito-linea-controls">
+
+                                            <div>
+                                                {{ detalle.presentacion }}
+                                                <div class="form-text detalle-presentacion"></div>
+                                            </div>
+
+                                            <div>
+                                                {{ detalle.cantidad }}
+                                            </div>
+
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text">$</span>
+                                                {{ detalle.precio_unitario }}
+                                            </div>
+
+                                            <div
+                                                class="carrito-linea-subtotal"
+                                                data-subtotal
+                                            >
+                                                $0.00
+                                            </div>
+
+                                        </div>
+
+
+                                        {% if detalle.DELETE %}
+                                            <div class="d-none">
+                                                {{ detalle.DELETE }}
+                                            </div>
+                                        {% endif %}
+
+                                    </div>
+
+                                {% endif %}
+
+                            {% endfor %}
 
                         </div>
 
                     </div>
 
-                </div>
 
+                    <!-- AJUSTES -->
 
-                <div class="col-12 col-lg-5">
+                    <div class="venta-ajustes">
 
-                    <div class="card content-card h-100">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="form-check form-switch">
+                                {{ formulario.aplicar_descuento }}
 
-                        <div class="card-body p-4">
-
-                            <h2 class="h5 mb-4">
-                                Resumen
-                            </h2>
-
-
-                            <div class="d-flex justify-content-between mb-2">
-
-                                <span class="text-muted">
-                                    Productos
-                                </span>
-
-                                <strong id="totalProductos">
-                                    0
-                                </strong>
-
-                            </div>
-
-
-                            <div class="d-flex justify-content-between mb-2">
-
-                                <span class="text-muted">
-                                    Unidades
-                                </span>
-
-                                <strong id="totalUnidades">
-                                    0
-                                </strong>
-
-                            </div>
-
-
-                            <div class="d-flex justify-content-between mb-2">
-
-                                <span class="text-muted">
-                                    Subtotal
-                                </span>
-
-                                <strong id="subtotalVenta">
-                                    $0.00
-                                </strong>
-
-                            </div>
-
-
-                            <div class="d-flex justify-content-between mb-3">
-
-                                <span class="text-muted">
-                                    Descuento
-                                </span>
-
-                                <strong id="descuentoVenta">
-                                    $0.00
-                                </strong>
-
-                            </div>
-
-
-                            <hr>
-
-
-                            <div class="d-flex justify-content-between align-items-center">
-
-                                <span class="fs-5 fw-semibold">
-                                    Total
-                                </span>
-
-                                <span
-                                    id="totalVenta"
-                                    class="fs-3 fw-bold text-primary"
+                                <label
+                                    class="form-check-label"
+                                    for="{{ formulario.aplicar_descuento.id_for_label }}"
                                 >
-                                    $0.00
-                                </span>
+                                    Descuento
+                                </label>
+                            </div>
+
+                            <a
+                                href="#"
+                                id="toggleNotas"
+                                class="nota-toggle"
+                            >
+                                + Agregar nota
+                            </a>
+                        </div>
+
+
+                        <div
+                            id="panelDescuento"
+                            class="d-none mt-2"
+                        >
+                            <div class="row g-2">
+
+                                <div class="col-6">
+                                    {{ formulario.tipo_descuento }}
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <span
+                                            id="simboloDescuento"
+                                            class="input-group-text"
+                                        >
+                                            $
+                                        </span>
+
+                                        {{ formulario.valor_descuento }}
+                                    </div>
+                                </div>
 
                             </div>
+
+
+                            {% for error in formulario.tipo_descuento.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                            {% for error in formulario.valor_descuento.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+
+                        <div
+                            id="panelNotas"
+                            class="d-none mt-2"
+                        >
+                            {{ formulario.notas }}
+
+                            {% for error in formulario.notas.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+
+
+                    <!-- RESUMEN -->
+
+                    <div class="venta-resumen">
+
+                        <div class="resumen-row">
+                            <span class="text-body-secondary">
+                                Subtotal
+                            </span>
+
+                            <strong id="subtotalVenta">
+                                $0.00
+                            </strong>
+                        </div>
+
+
+                        <div class="resumen-row">
+                            <span class="text-body-secondary">
+                                Descuento
+                            </span>
+
+                            <strong id="descuentoVenta">
+                                $0.00
+                            </strong>
+                        </div>
+
+
+                        <hr class="my-2">
+
+
+                        <div class="d-flex justify-content-between align-items-end mb-3">
+                            <span class="fw-semibold">
+                                Total
+                            </span>
+
+                            <span
+                                id="totalVenta"
+                                class="venta-total"
+                            >
+                                $0.00
+                            </span>
+                        </div>
+
+
+                        <div class="d-grid gap-2">
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary btn-lg"
+                            >
+                                <i class="bi bi-cart-check me-1"></i>
+                                Registrar venta
+                            </button>
+
+                            <a
+                                href="{% url 'ventas:lista' %}"
+                                class="btn btn-outline-secondary"
+                            >
+                                Cancelar
+                            </a>
 
                         </div>
 
                     </div>
 
                 </div>
+            </aside>
 
-            </div>
+        </div>
 
+    </form>
 
-            {# ================================================= #}
-            {# BOTONES                                           #}
-            {# ================================================= #}
-
-            <div
-                class="
-                    d-grid
-                    d-md-flex
-                    justify-content-md-end
-                    gap-2
-                    mt-4
-                "
-            >
-
-                <a
-                    href="{% url 'ventas:lista' %}"
-                    class="btn btn-outline-secondary"
-                >
-                    Cancelar
-                </a>
-
-                <button
-                    type="submit"
-                    id="botonRegistrarVenta"
-                    class="btn btn-primary px-4"
-                >
-                    <i class="bi bi-cart-check me-2"></i>
-                    Registrar venta
-                </button>
-
-            </div>
-
-        </form>
-
-    </div>
 </div>
 
-{% endblock %}
+
+<!-- =========================================================
+     TEMPLATE DE FILA DEL CARRITO
+========================================================== -->
+
+<template id="detalleVacio">
+
+    <div class="carrito-linea detalle-venta">
+
+        <div class="carrito-linea-top">
+
+            <div class="producto-imagen-contenedor">
+                <div class="carrito-placeholder">
+                    <i class="bi bi-image"></i>
+                </div>
+            </div>
+
+            <div class="carrito-linea-info">
+
+                <div class="carrito-linea-title nombre-producto-linea">
+                    Producto
+                </div>
+
+                <div class="carrito-linea-meta stock-disponible">
+                    Consultando...
+                </div>
+
+                <div class="d-none">
+                    {{ detalles.empty_form.producto }}
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-danger eliminar-producto"
+            >
+                <i class="bi bi-trash"></i>
+            </button>
+
+        </div>
 
 
-{% block extra_js %}
+        <div class="carrito-linea-controls">
+
+            <div>
+                {{ detalles.empty_form.presentacion }}
+                <div class="form-text detalle-presentacion"></div>
+            </div>
+
+            <div>
+                {{ detalles.empty_form.cantidad }}
+            </div>
+
+            <div class="input-group input-group-sm">
+                <span class="input-group-text">$</span>
+                {{ detalles.empty_form.precio_unitario }}
+            </div>
+
+            <div
+                class="carrito-linea-subtotal"
+                data-subtotal
+            >
+                $0.00
+            </div>
+
+        </div>
+
+
+        {% if detalles.empty_form.DELETE %}
+            <div class="d-none">
+                {{ detalles.empty_form.DELETE }}
+            </div>
+        {% endif %}
+
+    </div>
+
+</template>
+
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-    const contenedor =
+    const detallesVenta =
         document.getElementById("detallesVenta");
 
-    const botonAgregar =
-        document.getElementById("agregarProducto");
-
-    const template =
+    const detalleVacio =
         document.getElementById("detalleVacio");
 
     const totalForms =
         document.getElementById("id_form-TOTAL_FORMS");
 
-    const descuentoInput =
-        document.getElementById(
-            "{{ formulario.descuento.id_for_label }}"
+    const carritoVacio =
+        document.getElementById("carritoVacio");
+
+    const contadorLineasBadge =
+        document.getElementById("contadorLineasBadge");
+
+
+    function numero(valor) {
+        const n =
+            parseFloat(
+                (valor || "0")
+                    .toString()
+                    .replace(",", ".")
+            );
+
+        return Number.isFinite(n)
+            ? n
+            : 0;
+    }
+
+
+    function moneda(valor) {
+        return "$" + numero(valor).toFixed(2);
+    }
+
+
+    function urlDatosProducto(productoId) {
+        const base =
+            "{% url 'ventas:datos_producto' 999999 %}";
+
+        return base.replace(
+            "999999",
+            productoId
+        );
+    }
+
+
+    // =========================================================
+    // CATÁLOGO
+    // =========================================================
+
+    const buscadorCatalogo =
+        document.getElementById("buscadorCatalogo");
+
+    const limpiarBusqueda =
+        document.getElementById("limpiarBusqueda");
+
+    const catalogoCards =
+        Array.from(
+            document.querySelectorAll(".catalogo-card")
         );
 
-
-    // ========================================================
-    // AGREGAR PRODUCTO
-    // ========================================================
-
-    botonAgregar.addEventListener("click", function () {
-
-        const indice =
-            parseInt(totalForms.value);
-
-        const html =
-            template.innerHTML.replace(
-                /__prefix__/g,
-                indice
-            );
-
-        contenedor.insertAdjacentHTML(
-            "beforeend",
-            html
+    const chips =
+        Array.from(
+            document.querySelectorAll(".categoria-chip")
         );
 
-        totalForms.value =
-            indice + 1;
+    const sinResultadosCatalogo =
+        document.getElementById("sinResultadosCatalogo");
 
-        actualizarResumen();
-    });
+    const catalogoContador =
+        document.getElementById("catalogoContador");
+
+    let categoriaActiva = "";
+
+    const vistaMosaico =
+        document.getElementById("vistaMosaico");
+
+    const vistaLineal =
+        document.getElementById("vistaLineal");
+
+    const catalogoGrid =
+        document.getElementById("catalogoGrid");
 
 
-    // ========================================================
-    // ELIMINAR PRODUCTO
-    // ========================================================
+    function cambiarVistaCatalogo(modo) {
 
-    contenedor.addEventListener("click", function (event) {
+        const esLineal =
+            modo === "lineal";
 
-        const boton =
-            event.target.closest(
-                ".eliminar-producto"
+        if (catalogoGrid) {
+            catalogoGrid.classList.toggle(
+                "modo-lineal",
+                esLineal
+            );
+        }
+
+        if (vistaMosaico) {
+            vistaMosaico.classList.toggle(
+                "active",
+                !esLineal
+            );
+        }
+
+        if (vistaLineal) {
+            vistaLineal.classList.toggle(
+                "active",
+                esLineal
+            );
+        }
+
+        localStorage.setItem(
+            "venta_catalogo_vista",
+            modo
+        );
+    }
+
+
+    if (vistaMosaico) {
+        vistaMosaico.addEventListener(
+            "click",
+            function () {
+                cambiarVistaCatalogo("mosaico");
+            }
+        );
+    }
+
+
+    if (vistaLineal) {
+        vistaLineal.addEventListener(
+            "click",
+            function () {
+                cambiarVistaCatalogo("lineal");
+            }
+        );
+    }
+
+
+    function filtrarCatalogo() {
+
+        const termino =
+            buscadorCatalogo
+                ? buscadorCatalogo.value
+                    .trim()
+                    .toLowerCase()
+                : "";
+
+        let visibles = 0;
+
+
+        catalogoCards.forEach(function (card) {
+
+            const coincideTexto =
+                !termino
+                ||
+                (
+                    card.dataset.busqueda || ""
+                ).includes(termino);
+
+            const coincideCategoria =
+                !categoriaActiva
+                ||
+                card.dataset.categoria
+                    === categoriaActiva;
+
+            const mostrar =
+                coincideTexto
+                &&
+                coincideCategoria;
+
+
+            card.classList.toggle(
+                "d-none",
+                !mostrar
             );
 
-        if (!boton) {
-            return;
-        }
 
-        const fila =
-            boton.closest(".detalle-venta");
-
-
-        if (!fila) {
-            return;
-        }
-
-        const deleteInput =
-            fila.querySelector(
-                'input[name$="-DELETE"]'
-            );
-
-        if (deleteInput) {
-            deleteInput.checked = true;
-        }
-
-        /*
-         * Deshabilitamos los campos para evitar que el navegador
-         * siga validando campos required de una fila eliminada.
-         */
-        fila.querySelectorAll(
-            "input, select, textarea"
-        ).forEach(function (campo) {
-
-            if (
-                !campo.name ||
-                !campo.name.endsWith("-DELETE")
-            ) {
-                campo.disabled = true;
-                campo.required = false;
+            if (mostrar) {
+                visibles += 1;
             }
 
         });
 
-        fila.classList.add("d-none");
 
-        actualizarResumen();
+        if (sinResultadosCatalogo) {
+            sinResultadosCatalogo.classList.toggle(
+                "d-none",
+                visibles !== 0
+            );
+        }
+
+
+        if (catalogoContador) {
+            catalogoContador.textContent =
+                visibles
+                + (
+                    visibles === 1
+                        ? " item"
+                        : " items"
+                );
+        }
+
+    }
+
+
+    if (buscadorCatalogo) {
+        buscadorCatalogo.addEventListener(
+            "input",
+            filtrarCatalogo
+        );
+    }
+
+
+    if (limpiarBusqueda) {
+        limpiarBusqueda.addEventListener(
+            "click",
+            function () {
+                buscadorCatalogo.value = "";
+                categoriaActiva = "";
+
+                chips.forEach(
+                    chip => chip.classList.remove("active")
+                );
+
+                const todos =
+                    document.querySelector(
+                        '.categoria-chip[data-categoria=""]'
+                    );
+
+                if (todos) {
+                    todos.classList.add("active");
+                }
+
+                filtrarCatalogo();
+                buscadorCatalogo.focus();
+            }
+        );
+    }
+
+
+    chips.forEach(function (chip) {
+
+        chip.addEventListener(
+            "click",
+            function () {
+
+                chips.forEach(
+                    c => c.classList.remove("active")
+                );
+
+                chip.classList.add("active");
+
+                categoriaActiva =
+                    chip.dataset.categoria || "";
+
+                filtrarCatalogo();
+
+            }
+        );
+
     });
 
 
-    // ========================================================
-    // CÁLCULO DEL TOTAL
-    // ========================================================
+    // =========================================================
+    // CARRITO
+    // =========================================================
 
-    function actualizarResumen() {
+    function actualizarEstadoCarrito() {
 
         const filas =
-            contenedor.querySelectorAll(
-                ".detalle-venta"
-            );
+            Array.from(
+                detallesVenta.querySelectorAll(
+                    ".detalle-venta:not(.d-none)"
+                )
+            )
+            .filter(function (fila) {
 
-        let productos = 0;
-        let unidades = 0;
-        let subtotalGeneral = 0;
+                const producto =
+                    fila.querySelector(
+                        ".venta-producto"
+                    );
 
+                return producto && producto.value;
 
-        filas.forEach(function (fila) {
-
-            if (fila.classList.contains("d-none")) {
-                return;
-            }
-
-            const producto =
-                fila.querySelector(
-                    'select[name$="-producto"]'
-                );
-
-            const cantidad =
-                fila.querySelector(
-                    'input[name$="-cantidad"]'
-                );
-
-            const precio =
-                fila.querySelector(
-                    'input[name$="-precio_unitario"]'
-                );
-
-            const subtotalVisual =
-                fila.querySelector(
-                    "[data-subtotal]"
-                );
+            });
 
 
-            const cantidadValor =
-                parseFloat(
-                    cantidad?.value || 0
-                );
-
-            const precioValor =
-                parseFloat(
-                    precio?.value || 0
-                );
-
-
-            const subtotal =
-                cantidadValor * precioValor;
-
-
-            if (subtotalVisual) {
-                subtotalVisual.textContent =
-                    "$" + subtotal.toFixed(2);
-            }
-
-
-            if (producto && producto.value) {
-
-                productos += 1;
-
-                unidades +=
-                    Number.isFinite(cantidadValor)
-                        ? cantidadValor
-                        : 0;
-            }
-
-
-            subtotalGeneral +=
-                Number.isFinite(subtotal)
-                    ? subtotal
-                    : 0;
-
-        });
-
-
-        const descuento =
-            parseFloat(
-                descuentoInput?.value || 0
-            );
-
-
-        const descuentoSeguro =
-            Number.isFinite(descuento)
-                ? descuento
-                : 0;
-
-
-        const total =
-            Math.max(
-                subtotalGeneral - descuentoSeguro,
-                0
-            );
-
-
-        document.getElementById(
-            "totalProductos"
-        ).textContent = productos;
-
-
-        document.getElementById(
-            "totalUnidades"
-        ).textContent = unidades;
-
-
-        document.getElementById(
-            "subtotalVenta"
-        ).textContent =
-            "$" + subtotalGeneral.toFixed(2);
-
-
-        document.getElementById(
-            "descuentoVenta"
-        ).textContent =
-            "$" + descuentoSeguro.toFixed(2);
-
-
-        document.getElementById(
-            "totalVenta"
-        ).textContent =
-            "$" + total.toFixed(2);
-    }
-
-
-    contenedor.addEventListener(
-        "input",
-        actualizarResumen
-    );
-
-
-    descuentoInput?.addEventListener(
-        "input",
-        actualizarResumen
-    );
-
-
-    // ========================================================
-// OBTENER PRECIO Y STOCK DEL PRODUCTO
-// ========================================================
-
-async function cargarDatosProducto(select) {
-
-    const productoId = select.value;
-
-    const fila =
-        select.closest(".detalle-venta");
-
-    if (!fila) {
-        return;
-    }
-
-    const presentacionSelect =
-        fila.querySelector(
-            'select[name$="-presentacion"]'
+        carritoVacio.classList.toggle(
+            "d-none",
+            filas.length !== 0
         );
 
-    const presentacionTexto =
-        fila.querySelector(
-            ".detalle-presentacion"
-        );
 
-    const precioInput =
-        fila.querySelector(
-            'input[name$="-precio_unitario"]'
-        );
-
-    const stockTexto =
-        fila.querySelector(
-            ".stock-disponible"
-        );
-
-    if (!productoId) {
-
-        if (precioInput) {
-            precioInput.value = "";
+        if (contadorLineasBadge) {
+            contadorLineasBadge.textContent =
+                filas.length
+                + (
+                    filas.length === 1
+                        ? " línea"
+                        : " líneas"
+                );
         }
 
-        if (stockTexto) {
-            stockTexto.textContent =
-                "Selecciona un producto para consultar existencias.";
-        }
-
-        actualizarResumen();
-
-        return;
     }
 
 
-    try {
+    async function cargarDatosProducto(fila) {
 
-        const respuesta = await fetch(
-            `/ventas/producto/${productoId}/datos/`
-        );
+        const productoSelect =
+            fila.querySelector(".venta-producto");
+
+        if (!productoSelect || !productoSelect.value) {
+            return;
+        }
+
+
+        const respuesta =
+            await fetch(
+                urlDatosProducto(
+                    productoSelect.value
+                )
+            );
+
 
         if (!respuesta.ok) {
             throw new Error(
-                "No fue posible consultar el producto."
+                "No fue posible cargar el producto."
             );
         }
+
 
         const datos =
             await respuesta.json();
 
-            if (presentacionSelect) {
 
-        presentacionSelect.innerHTML = "";
+        fila.dataset.precioBase =
+            datos.precio_venta || "0";
 
-        const opcionBase =
-            document.createElement("option");
+        fila.dataset.unidadBase =
+            datos.unidad_base || "unidad";
 
-        opcionBase.value = "";
-
-        opcionBase.textContent =
-            datos.unidad_base;
-
-        opcionBase.dataset.cantidad =
-            "1";
-
-        opcionBase.dataset.precio =
-            datos.precio_venta;
-
-        presentacionSelect.appendChild(
-            opcionBase
-        );
+        fila.dataset.tipoProducto =
+            datos.tipo || "producto";
 
 
-        datos.presentaciones.forEach(
-            function (presentacion) {
+        const nombre =
+            fila.querySelector(
+                ".nombre-producto-linea"
+            );
 
-                const opcion =
-                    document.createElement(
-                        "option"
-                    );
+        const stock =
+            fila.querySelector(
+                ".stock-disponible"
+            );
 
-                opcion.value =
-                    presentacion.id;
+        const imagen =
+            fila.querySelector(
+                ".producto-imagen-contenedor"
+            );
 
-                opcion.textContent =
-                    presentacion.nombre;
+        const presentacion =
+            fila.querySelector(
+                ".venta-presentacion"
+            );
 
-                opcion.dataset.cantidad =
-                    presentacion.cantidad;
+        const ayudaPresentacion =
+            fila.querySelector(
+                ".detalle-presentacion"
+            );
 
-                opcion.dataset.precio =
-                    presentacion.precio || "";
+        const cantidad =
+            fila.querySelector(
+                ".venta-cantidad"
+            );
 
-                presentacionSelect.appendChild(
-                    opcion
-                );
+        const precio =
+            fila.querySelector(
+                ".venta-precio"
+            );
+
+
+        if (nombre) {
+            nombre.textContent =
+                datos.nombre;
+        }
+
+
+        if (imagen) {
+
+            if (datos.imagen) {
+
+                imagen.innerHTML = `
+                    <img
+                        src="${datos.imagen}"
+                        alt="${datos.nombre}"
+                        class="carrito-img"
+                    >
+                `;
+
+            } else {
+
+                imagen.innerHTML = `
+                    <div class="carrito-placeholder">
+                        <i class="bi bi-image"></i>
+                    </div>
+                `;
 
             }
-        );
-
-
-        if (presentacionTexto) {
-
-            presentacionTexto.textContent =
-                "Selecciona la presentación de venta.";
 
         }
 
-    }
+
+        if (datos.tipo === "servicio") {
+
+            if (stock) {
+                stock.textContent =
+                    "Servicio · sin inventario";
+            }
+
+            if (presentacion) {
+                presentacion.innerHTML =
+                    '<option value="">No aplica</option>';
+
+                presentacion.disabled = true;
+            }
+
+            if (ayudaPresentacion) {
+                ayudaPresentacion.textContent = "";
+            }
+
+            if (cantidad) {
+                cantidad.step = "1";
+                cantidad.min = "1";
+
+                if (!cantidad.value) {
+                    cantidad.value = "1";
+                }
+            }
+
+        } else {
+
+            if (stock) {
+                stock.textContent =
+                    "Disponible: "
+                    + (
+                        datos.stock_mostrado
+                        || datos.stock
+                    );
+            }
 
 
-        // Coloca automáticamente el precio vigente.
-        if (precioInput) {
+            if (presentacion) {
 
-            precioInput.value =
-                Number(
+                presentacion.disabled = false;
+                presentacion.innerHTML = "";
+
+                const base =
+                    document.createElement("option");
+
+                base.value = "";
+                base.textContent =
+                    datos.unidad_base_display
+                    || "Unidad";
+
+                presentacion.appendChild(base);
+
+
+                (datos.presentaciones || [])
+                    .forEach(function (p) {
+
+                        const option =
+                            document.createElement("option");
+
+                        option.value =
+                            p.id;
+
+                        option.textContent =
+                            p.nombre;
+
+                        option.dataset.cantidad =
+                            p.cantidad;
+
+                        option.dataset.precio =
+                            p.precio || "";
+
+                        presentacion.appendChild(option);
+
+                    });
+
+            }
+
+
+            if (ayudaPresentacion) {
+                ayudaPresentacion.textContent = "";
+            }
+
+
+            if (cantidad) {
+
+                if (datos.unidad_base === "unidad") {
+                    cantidad.step = "1";
+                    cantidad.min = "1";
+                } else {
+                    cantidad.step = "0.01";
+                    cantidad.min = "0.01";
+                }
+
+
+                if (!cantidad.value) {
+                    cantidad.value = "1";
+                }
+
+            }
+
+        }
+
+
+        if (precio) {
+            precio.value =
+                numero(
                     datos.precio_venta
                 ).toFixed(2);
         }
 
 
-        // Muestra el stock disponible.
-        if (stockTexto) {
+        recalcularLinea(fila);
 
-            stockTexto.textContent =
-                `Stock disponible: ${datos.stock}`;
+    }
+
+
+    function actualizarPresentacion(fila) {
+
+        const select =
+            fila.querySelector(
+                ".venta-presentacion"
+            );
+
+        const precio =
+            fila.querySelector(
+                ".venta-precio"
+            );
+
+        const cantidad =
+            fila.querySelector(
+                ".venta-cantidad"
+            );
+
+
+        if (!select || !precio) {
+            return;
         }
 
 
-        /*
-         * Guardamos el stock en la fila únicamente como
-         * información visual. La validación verdadera
-         * seguirá haciéndose en el backend.
-         */
-        fila.dataset.stock =
-            datos.stock;
+        const option =
+            select.options[
+                select.selectedIndex
+            ];
 
 
-        actualizarResumen();
+        if (option && option.value) {
 
-    } catch (error) {
+            const factor =
+                numero(
+                    option.dataset.cantidad
+                );
 
-        console.error(error);
+            const precioPresentacion =
+                option.dataset.precio;
 
-        if (stockTexto) {
 
-            stockTexto.textContent =
-                "No se pudo consultar el inventario.";
+            precio.value =
+                precioPresentacion
+                    ? numero(
+                        precioPresentacion
+                    ).toFixed(2)
+                    : (
+                        numero(
+                            fila.dataset.precioBase
+                        )
+                        * factor
+                    ).toFixed(2);
+
+
+            if (
+                cantidad
+                &&
+                factor !== 1
+            ) {
+                cantidad.step = "1";
+                cantidad.min = "1";
+            }
+
+        } else {
+
+            precio.value =
+                numero(
+                    fila.dataset.precioBase
+                ).toFixed(2);
+
+
+            if (cantidad) {
+
+                if (
+                    fila.dataset.unidadBase
+                    === "unidad"
+                ) {
+                    cantidad.step = "1";
+                    cantidad.min = "1";
+                } else {
+                    cantidad.step = "0.01";
+                    cantidad.min = "0.01";
+                }
+
+            }
+
         }
-    }
-}
-
-function actualizarPresentacion(select) {
-
-    const fila =
-        select.closest(
-            ".detalle-venta"
-        );
-
-    if (!fila) {
-        return;
-    }
 
 
-    const opcion =
-        select.options[
-            select.selectedIndex
-        ];
-
-
-    const precioInput =
-        fila.querySelector(
-            'input[name$="-precio_unitario"]'
-        );
-
-
-    const texto =
-        fila.querySelector(
-            ".detalle-presentacion"
-        );
-
-
-    const factor =
-        parseFloat(
-            opcion?.dataset.cantidad || 1
-        );
-
-
-    fila.dataset.factorPresentacion =
-        factor;
-
-
-    const precio =
-        parseFloat(
-            opcion?.dataset.precio
-        );
-
-
-    if (
-        precioInput
-        &&
-        Number.isFinite(precio)
-    ) {
-
-        precioInput.value =
-            precio.toFixed(2);
+        recalcularLinea(fila);
 
     }
 
 
-    if (texto) {
+    function configurarFila(fila) {
 
-        texto.textContent =
-            `Contiene ${factor} unidades base`;
+        const presentacion =
+            fila.querySelector(
+                ".venta-presentacion"
+            );
 
-    }
+        const cantidad =
+            fila.querySelector(
+                ".venta-cantidad"
+            );
+
+        const eliminar =
+            fila.querySelector(
+                ".eliminar-producto"
+            );
 
 
-    actualizarResumen();
-}
+        if (presentacion) {
+            presentacion.addEventListener(
+                "change",
+                function () {
+                    actualizarPresentacion(fila);
+                }
+            );
+        }
 
 
-// ========================================================
-// ESCUCHAR CAMBIOS EN LOS PRODUCTOS
-// ========================================================
+        if (cantidad) {
+            cantidad.addEventListener(
+                "input",
+                function () {
+                    recalcularLinea(fila);
+                }
+            );
+        }
 
-contenedor.addEventListener(
-    "change",
-    function (event) {
+
+        if (eliminar) {
+            eliminar.addEventListener(
+                "click",
+                function () {
+
+                    const deleteInput =
+                        fila.querySelector(
+                            'input[name$="-DELETE"]'
+                        );
+
+
+                    if (deleteInput) {
+                        deleteInput.checked = true;
+                        fila.classList.add("d-none");
+                    } else {
+                        fila.remove();
+                    }
+
+
+                    recalcularVenta();
+                    actualizarEstadoCarrito();
+
+                }
+            );
+        }
+
+
+        const producto =
+            fila.querySelector(
+                ".venta-producto"
+            );
 
         if (
-            event.target.matches(
-                'select[name$="-producto"]'
-            )
+            producto
+            &&
+            producto.value
         ) {
-            cargarDatosProducto(
-                event.target
-            );
+            cargarDatosProducto(fila)
+                .catch(console.error);
         }
 
-        if (
-            event.target.matches(
-                'select[name$="-presentacion"]'
-            )
-        ) {
-
-            actualizarPresentacion(
-                event.target
-            );
-
-        }
-
-        actualizarResumen();
     }
-);
 
 
+    function agregarProducto(productoId) {
 
-    // ========================================================
-    // MOSTRAR AVISO CUANDO LA VENTA ES FIADA
-    // ========================================================
+        const existente =
+            Array.from(
+                detallesVenta.querySelectorAll(
+                    ".detalle-venta:not(.d-none)"
+                )
+            )
+            .find(function (fila) {
 
-    const avisoFiado =
-        document.getElementById("avisoFiado");
+                const select =
+                    fila.querySelector(
+                        ".venta-producto"
+                    );
 
-    const ayudaCliente =
-        document.getElementById("ayudaCliente");
+                return (
+                    select
+                    &&
+                    select.value
+                    === productoId.toString()
+                );
+
+            });
 
 
-    function actualizarTipoPago() {
+        if (existente) {
 
-        const seleccionado =
-            document.querySelector(
-                'input[name="tipo_pago"]:checked'
+            const cantidad =
+                existente.querySelector(
+                    ".venta-cantidad"
+                );
+
+            if (cantidad) {
+                cantidad.focus();
+                cantidad.select();
+            }
+
+            return;
+        }
+
+
+        const indice =
+            parseInt(
+                totalForms.value,
+                10
             );
 
-        const esFiado =
-            seleccionado?.value === "fiado";
+
+        const html =
+            detalleVacio.innerHTML.replace(
+                /__prefix__/g,
+                indice
+            );
 
 
-        avisoFiado.classList.toggle(
-            "d-none",
-            !esFiado
+        detallesVenta.insertAdjacentHTML(
+            "beforeend",
+            html
         );
 
 
-        ayudaCliente.textContent =
-            esFiado
-                ? "Obligatorio para registrar una venta fiada."
-                : "Opcional para pago inmediato.";
+        totalForms.value =
+            indice + 1;
+
+
+        const fila =
+            detallesVenta.lastElementChild;
+
+        const productoSelect =
+            fila.querySelector(
+                ".venta-producto"
+            );
+
+
+        productoSelect.value =
+            productoId;
+
+
+        configurarFila(fila);
+
+
+        cargarDatosProducto(fila)
+            .then(function () {
+
+                recalcularLinea(fila);
+                actualizarEstadoCarrito();
+
+            })
+            .catch(console.error);
+
+
+        actualizarEstadoCarrito();
+
     }
 
 
-    document.querySelectorAll(
-        'input[name="tipo_pago"]'
-    ).forEach(function (radio) {
+    catalogoCards.forEach(function (card) {
 
-        radio.addEventListener(
-            "change",
-            actualizarTipoPago
+        card.addEventListener(
+            "click",
+            function () {
+                agregarProducto(
+                    card.dataset.productoId
+                );
+            }
         );
 
     });
 
 
-    actualizarTipoPago();
+    document
+        .querySelectorAll(
+            "#detallesVenta .detalle-venta"
+        )
+        .forEach(configurarFila);
 
-    document.querySelectorAll(
-    '#detallesVenta select[name$="-producto"]'
-).forEach(function (select) {
 
-    if (select.value) {
-        cargarDatosProducto(select);
+    // =========================================================
+    // CÁLCULOS
+    // =========================================================
+
+    function recalcularLinea(fila) {
+
+        const cantidad =
+            fila.querySelector(
+                ".venta-cantidad"
+            );
+
+        const precio =
+            fila.querySelector(
+                ".venta-precio"
+            );
+
+        const subtotal =
+            fila.querySelector(
+                "[data-subtotal]"
+            );
+
+
+        const valor =
+            numero(
+                cantidad
+                    ? cantidad.value
+                    : 0
+            )
+            *
+            numero(
+                precio
+                    ? precio.value
+                    : 0
+            );
+
+
+        if (subtotal) {
+            subtotal.dataset.valor =
+                valor.toString();
+
+            subtotal.textContent =
+                moneda(valor);
+        }
+
+
+        recalcularVenta();
+
     }
-});
-    
-    actualizarResumen();
 
+
+    function recalcularVenta() {
+
+        let subtotal = 0;
+
+
+        detallesVenta
+            .querySelectorAll(
+                ".detalle-venta:not(.d-none)"
+            )
+            .forEach(function (fila) {
+
+                const producto =
+                    fila.querySelector(
+                        ".venta-producto"
+                    );
+
+                if (
+                    !producto
+                    ||
+                    !producto.value
+                ) {
+                    return;
+                }
+
+
+                const lineaSubtotal =
+                    fila.querySelector(
+                        "[data-subtotal]"
+                    );
+
+
+                subtotal +=
+                    numero(
+                        lineaSubtotal
+                            ? lineaSubtotal.dataset.valor
+                            : 0
+                    );
+
+            });
+
+
+        const aplicar =
+            document.getElementById(
+                "id_aplicar_descuento"
+            );
+
+        const tipo =
+            document.getElementById(
+                "id_tipo_descuento"
+            );
+
+        const valor =
+            document.getElementById(
+                "id_valor_descuento"
+            );
+
+
+        let descuento = 0;
+
+
+        if (aplicar && aplicar.checked) {
+
+            const v =
+                numero(
+                    valor
+                        ? valor.value
+                        : 0
+                );
+
+
+            if (
+                tipo
+                &&
+                tipo.value
+                === "porcentaje"
+            ) {
+
+                descuento =
+                    subtotal
+                    * v
+                    / 100;
+
+            } else if (
+                tipo
+                &&
+                tipo.value
+                === "fijo"
+            ) {
+
+                descuento = v;
+
+            }
+
+        }
+
+
+        descuento =
+            Math.max(
+                0,
+                Math.min(
+                    descuento,
+                    subtotal
+                )
+            );
+
+
+        document.getElementById(
+            "subtotalVenta"
+        ).textContent =
+            moneda(subtotal);
+
+        document.getElementById(
+            "descuentoVenta"
+        ).textContent =
+            moneda(descuento);
+
+        document.getElementById(
+            "totalVenta"
+        ).textContent =
+            moneda(
+                subtotal - descuento
+            );
+
+
+        actualizarEstadoCarrito();
+
+    }
+
+
+    // =========================================================
+    // FORMA DE PAGO
+    // =========================================================
+
+    const metodoPago =
+        document.getElementById(
+            "id_metodo_pago"
+        );
+
+    const contenedorMetodo =
+        document.getElementById(
+            "contenedorMetodoPago"
+        );
+
+    const referencia =
+        document.getElementById(
+            "contenedorReferencia"
+        );
+
+    const detallePago =
+        document.getElementById(
+            "contenedorDetallePago"
+        );
+
+    const avisoFiado =
+        document.getElementById(
+            "avisoFiado"
+        );
+
+
+    function tipoPagoActual() {
+
+        const radio =
+            document.querySelector(
+                'input[name="tipo_pago"]:checked'
+            );
+
+        return radio
+            ? radio.value
+            : "";
+
+    }
+
+
+    function actualizarPago() {
+
+        const fiado =
+            tipoPagoActual()
+            === "fiado";
+
+        const metodo =
+            metodoPago
+                ? metodoPago.value
+                : "";
+
+
+        contenedorMetodo.classList.toggle(
+            "d-none",
+            fiado
+        );
+
+        avisoFiado.classList.toggle(
+            "d-none",
+            !fiado
+        );
+
+        referencia.classList.toggle(
+            "d-none",
+            fiado
+            ||
+            metodo !== "transferencia"
+        );
+
+        detallePago.classList.toggle(
+            "d-none",
+            fiado
+            ||
+            metodo !== "otro"
+        );
+
+    }
+
+
+    document
+        .querySelectorAll(
+            'input[name="tipo_pago"]'
+        )
+        .forEach(
+            radio => radio.addEventListener(
+                "change",
+                actualizarPago
+            )
+        );
+
+
+    if (metodoPago) {
+        metodoPago.addEventListener(
+            "change",
+            actualizarPago
+        );
+    }
+
+
+    // =========================================================
+    // DESCUENTO Y NOTAS
+    // =========================================================
+
+    const aplicarDescuento =
+        document.getElementById(
+            "id_aplicar_descuento"
+        );
+
+    const panelDescuento =
+        document.getElementById(
+            "panelDescuento"
+        );
+
+    const tipoDescuento =
+        document.getElementById(
+            "id_tipo_descuento"
+        );
+
+    const valorDescuento =
+        document.getElementById(
+            "id_valor_descuento"
+        );
+
+    const simboloDescuento =
+        document.getElementById(
+            "simboloDescuento"
+        );
+
+    const toggleNotas =
+        document.getElementById(
+            "toggleNotas"
+        );
+
+    const panelNotas =
+        document.getElementById(
+            "panelNotas"
+        );
+
+
+    function actualizarDescuento() {
+
+        const activo =
+            aplicarDescuento
+            &&
+            aplicarDescuento.checked;
+
+
+        panelDescuento.classList.toggle(
+            "d-none",
+            !activo
+        );
+
+
+        simboloDescuento.textContent =
+            (
+                tipoDescuento
+                &&
+                tipoDescuento.value
+                === "porcentaje"
+            )
+                ? "%"
+                : "$";
+
+
+        recalcularVenta();
+
+    }
+
+
+    if (aplicarDescuento) {
+        aplicarDescuento.addEventListener(
+            "change",
+            actualizarDescuento
+        );
+    }
+
+
+    if (tipoDescuento) {
+        tipoDescuento.addEventListener(
+            "change",
+            actualizarDescuento
+        );
+    }
+
+
+    if (valorDescuento) {
+        valorDescuento.addEventListener(
+            "input",
+            recalcularVenta
+        );
+    }
+
+
+    if (toggleNotas) {
+        toggleNotas.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                panelNotas.classList.toggle(
+                    "d-none"
+                );
+
+                toggleNotas.textContent =
+                    panelNotas.classList.contains(
+                        "d-none"
+                    )
+                        ? "+ Agregar nota"
+                        : "Ocultar nota";
+
+            }
+        );
+    }
+
+
+    // =========================================================
+    // INICIO
+    // =========================================================
+
+    actualizarPago();
+    actualizarDescuento();
+    actualizarEstadoCarrito();
+    filtrarCatalogo();
+
+    const vistaGuardada =
+        localStorage.getItem(
+            "venta_catalogo_vista"
+        );
+
+    cambiarVistaCatalogo(
+        vistaGuardada === "lineal"
+            ? "lineal"
+            : "mosaico"
+    );
 
 });
 </script>

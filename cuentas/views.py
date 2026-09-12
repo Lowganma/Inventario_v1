@@ -10,6 +10,7 @@ from django.db.models import (
     Q,
     Sum,
 )
+import productos
 from usuarios.permisos import usuario_es_dueno
 
 from django.shortcuts import (
@@ -80,14 +81,23 @@ def dashboard(request):
         negocio=negocio,
     ) if activos["compras"] else Compra.objects.none()
 
-    productos = Producto.objects.filter(
-        negocio=negocio,
-        activo=True,
-    ) if activos["inventario"] else Producto.objects.none()
+    productos = (
+        Producto.objects.filter(
+            negocio=negocio,
+            activo=True,
+    )
+    if activos["inventario"] 
+    else Producto.objects.none()
+    )
+
+    productos_inventariables = productos.filter(
+        tipo="producto",
+        )
 
     movimientos = MovimientoCaja.objects.filter(
         negocio=negocio,
-    ) if activos["caja"] else MovimientoCaja.objects.none()
+    )if activos["caja"] else MovimientoCaja.objects.none()
+
 
     # ========================================================
     # VENTAS DE HOY
@@ -213,12 +223,14 @@ def dashboard(request):
     )
 
     productos_agotados = productos.filter(
+        tipo="producto",
         stock=0,
     ).count()
 
     productos_stock_bajo = (
         productos
         .filter(
+            tipo="producto",
             stock__gt=0,
             stock__lte=F("stock_minimo"),
         )

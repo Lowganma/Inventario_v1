@@ -1,327 +1,556 @@
 {% extends "base.html" %}
 
-{% block title %}
-    Ventas
-{% endblock %}
+{% block title %}Ventas{% endblock %}
 
 {% block content %}
 
-<div class="row justify-content-center">
-    <div class="col-12 col-xl-10">
+<style>
+    .ventas-wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+    }
 
-        <!-- ==================================================
-             ENCABEZADO
-        =================================================== -->
+    .ventas-filtros {
+        display: grid;
+        grid-template-columns: minmax(260px, 1.7fr) repeat(2, minmax(150px, .7fr)) minmax(130px, .55fr) auto;
+        gap: .75rem;
+        align-items: end;
+    }
 
-        <div
-            class="
-                d-flex
-                flex-column
-                flex-md-row
-                justify-content-between
-                align-items-md-center
-                gap-3
-                mb-4
-            "
+    .ventas-table td,
+    .ventas-table th {
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .ventas-table .cliente-col {
+        white-space: normal;
+        min-width: 170px;
+    }
+
+    .ventas-table .detalle-col {
+        white-space: normal;
+        min-width: 190px;
+    }
+
+    .filtro-resumen {
+        font-size: .85rem;
+        color: var(--bs-secondary-color);
+    }
+
+    @media (max-width: 991.98px) {
+        .ventas-filtros {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .ventas-filtros .buscar-col {
+            grid-column: 1 / -1;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .ventas-filtros {
+            grid-template-columns: 1fr;
+        }
+
+        .ventas-filtros .buscar-col {
+            grid-column: auto;
+        }
+    }
+</style>
+
+
+<div class="ventas-wrap">
+
+    <!-- =====================================================
+         ENCABEZADO
+    ====================================================== -->
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+
+        <div>
+            <h1 class="page-title mb-1">
+                Ventas
+            </h1>
+
+            <p class="page-subtitle mb-0">
+                Consulta, filtra y revisa las ventas realizadas por tu negocio.
+            </p>
+        </div>
+
+        <a
+            href="{% url 'ventas:crear' %}"
+            class="btn btn-primary"
         >
+            <i class="bi bi-cart-plus me-2"></i>
+            Nueva venta
+        </a>
 
-            <div>
-                <h1 class="page-title mb-1">
-                    Ventas
-                </h1>
+    </div>
 
-                <p class="page-subtitle mb-0">
-                    Consulta las ventas realizadas por tu negocio.
-                </p>
+
+    <!-- =====================================================
+         RESUMEN
+    ====================================================== -->
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-md-4">
+            <div class="card content-card h-100">
+                <div class="card-body">
+                    <p class="text-body-secondary mb-1">
+                        Ventas registradas
+                    </p>
+
+                    <h2 class="mb-0">
+                        {{ total_ventas }}
+                    </h2>
+                </div>
             </div>
-
-            <a
-                href="{% url 'ventas:crear' %}"
-                class="btn btn-primary"
-            >
-                <i class="bi bi-cart-plus me-2"></i>
-                Nueva venta
-            </a>
-
         </div>
 
 
-        <!-- ==================================================
-             RESUMEN
-        =================================================== -->
+        <div class="col-12 col-md-4">
+            <div class="card content-card h-100">
+                <div class="card-body">
+                    <p class="text-body-secondary mb-1">
+                        Última venta
+                    </p>
 
-        <div class="row g-3 mb-4">
-
-            <div class="col-12 col-md-4">
-
-                <div class="card content-card h-100">
-
-                    <div class="card-body">
-
-                        <p class="text-muted mb-1">
-                            Ventas registradas
-                        </p>
-
-                        <h2 class="mb-0">
-                            {{ ventas|length }}
-                        </h2>
-
-                    </div>
-
+                    {% if ultima_venta %}
+                        <h5 class="mb-0">
+                            {{ ultima_venta.fecha|date:"d/m/Y H:i" }}
+                        </h5>
+                    {% else %}
+                        <h5 class="mb-0 text-body-secondary">
+                            Sin ventas
+                        </h5>
+                    {% endif %}
                 </div>
-
             </div>
-
-
-            <div class="col-12 col-md-4">
-
-                <div class="card content-card h-100">
-
-                    <div class="card-body">
-
-                        <p class="text-muted mb-1">
-                            Última venta
-                        </p>
-
-                        {% if ventas %}
-
-                            <h5 class="mb-0">
-                                {{ ventas.0.fecha|date:"d/m/Y H:i" }}
-                            </h5>
-
-                        {% else %}
-
-                            <h5 class="mb-0 text-muted">
-                                Sin ventas
-                            </h5>
-
-                        {% endif %}
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-12 col-md-4">
-
-                <div class="card content-card h-100">
-
-                    <div class="card-body">
-
-                        <p class="text-muted mb-1">
-                            Última operación
-                        </p>
-
-                        {% if ventas %}
-
-                            <h5 class="mb-0">
-                                ${{ ventas.0.total|floatformat:2 }}
-                            </h5>
-
-                        {% else %}
-
-                            <h5 class="mb-0">
-                                $0.00
-                            </h5>
-
-                        {% endif %}
-
-                    </div>
-
-                </div>
-
-            </div>
-
         </div>
 
 
-        <!-- ==================================================
-             HISTORIAL
-        =================================================== -->
+        <div class="col-12 col-md-4">
+            <div class="card content-card h-100">
+                <div class="card-body">
+                    <p class="text-body-secondary mb-1">
+                        Última operación
+                    </p>
 
-        <div class="card content-card">
+                    {% if ultima_venta %}
+                        <h5 class="mb-0">
+                            ${{ ultima_venta.total|floatformat:2 }}
+                        </h5>
+                    {% else %}
+                        <h5 class="mb-0">
+                            $0.00
+                        </h5>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
 
-            <div class="card-body p-4">
+    </div>
 
-                <div class="d-flex align-items-center mb-3">
 
-                    <i class="bi bi-receipt fs-4 me-2"></i>
+    <!-- =====================================================
+         HISTORIAL
+    ====================================================== -->
 
-                    <h2 class="h5 mb-0">
+    <div class="card content-card">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+
+                <div>
+                    <h2 class="h5 mb-1">
+                        <i class="bi bi-receipt me-2"></i>
                         Historial de ventas
                     </h2>
 
+                    <div class="filtro-resumen">
+                        {% if buscar or fecha_desde or fecha_hasta %}
+                            {{ ventas.paginator.count }} resultado{{ ventas.paginator.count|pluralize }}
+                            con los filtros actuales.
+                        {% else %}
+                            Mostrando el historial general del negocio.
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if buscar or fecha_desde or fecha_hasta %}
+                    <a
+                        href="{% url 'ventas:lista' %}"
+                        class="btn btn-sm btn-outline-secondary"
+                    >
+                        <i class="bi bi-x-circle me-1"></i>
+                        Limpiar filtros
+                    </a>
+                {% endif %}
+
+            </div>
+
+
+            <!-- =============================================
+                 FILTROS
+            ============================================== -->
+
+            <form
+                method="get"
+                class="ventas-filtros mb-4"
+                id="filtrosVentas"
+            >
+
+                <div class="buscar-col">
+                    <label
+                        for="buscar"
+                        class="form-label small fw-semibold"
+                    >
+                        Buscar
+                    </label>
+
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+
+                        <input
+                            type="search"
+                            class="form-control"
+                            id="buscar"
+                            name="buscar"
+                            value="{{ buscar }}"
+                            placeholder="Venta, cliente, producto, referencia..."
+                            autocomplete="off"
+                        >
+                    </div>
                 </div>
 
 
-                {% if ventas %}
+                <div>
+                    <label
+                        for="fecha_desde"
+                        class="form-label small fw-semibold"
+                    >
+                        Desde
+                    </label>
 
-                    <div class="table-responsive">
+                    <input
+                        type="date"
+                        class="form-control"
+                        id="fecha_desde"
+                        name="fecha_desde"
+                        value="{{ fecha_desde }}"
+                    >
+                </div>
 
-                        <table class="table align-middle">
 
-                            <thead>
+                <div>
+                    <label
+                        for="fecha_hasta"
+                        class="form-label small fw-semibold"
+                    >
+                        Hasta
+                    </label>
+
+                    <input
+                        type="date"
+                        class="form-control"
+                        id="fecha_hasta"
+                        name="fecha_hasta"
+                        value="{{ fecha_hasta }}"
+                    >
+                </div>
+
+
+                <div>
+                    <label
+                        for="por_pagina"
+                        class="form-label small fw-semibold"
+                    >
+                        Mostrar
+                    </label>
+
+                    <select
+                        class="form-select"
+                        id="por_pagina"
+                        name="por_pagina"
+                    >
+                        <option value="10" {% if por_pagina == 10 %}selected{% endif %}>
+                            10 ventas
+                        </option>
+
+                        <option value="20" {% if por_pagina == 20 %}selected{% endif %}>
+                            20 ventas
+                        </option>
+
+                        <option value="50" {% if por_pagina == 50 %}selected{% endif %}>
+                            50 ventas
+                        </option>
+                    </select>
+                </div>
+
+
+                <div>
+                    <button
+                        type="submit"
+                        class="btn btn-primary w-100"
+                    >
+                        Filtrar
+                    </button>
+                </div>
+
+            </form>
+
+
+            <!-- =============================================
+                 TABLA
+            ============================================== -->
+
+            {% if ventas %}
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover ventas-table align-middle mb-0">
+
+                        <thead>
+                            <tr>
+                                <th>Venta</th>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                                <th>Detalle</th>
+                                <th>Pago</th>
+                                <th class="text-end">Total</th>
+                                <th class="text-end">Acción</th>
+                            </tr>
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for venta in ventas %}
 
                                 <tr>
-                                    <th>
-                                        Venta
-                                    </th>
 
-                                    <th>
-                                        Fecha
-                                    </th>
-
-                                    <th>
-                                        Cliente
-                                    </th>
-
-                                    <th>
-                                        Productos
-                                    </th>
-
-                                    <th>
-                                        Pago
-                                    </th>
-
-                                    <th class="text-end">
-                                        Total
-                                    </th>
-
-                                    <th class="text-end">
-                                        Acción
-                                    </th>
-                                </tr>
-
-                            </thead>
+                                    <td>
+                                        <strong>
+                                            #{{ venta.numero }}
+                                        </strong>
+                                    </td>
 
 
-                            <tbody>
+                                    <td>
+                                        {{ venta.fecha|date:"d/m/Y H:i" }}
+                                    </td>
 
-                                {% for venta in ventas %}
 
-                                    <tr>
+                                    <td class="cliente-col">
 
-                                        <td>
+                                        {% if venta.cliente %}
                                             <strong>
-                                                #{{ venta.numero }}
-                                            </strong>
-                                        </td>
-
-
-                                        <td>
-                                            {{ venta.fecha|date:"d/m/Y H:i" }}
-                                        </td>
-
-
-                                        <td>
-
-                                            {% if venta.cliente %}
-
                                                 {{ venta.cliente.nombre }}
                                                 {{ venta.cliente.apellido }}
+                                            </strong>
+                                        {% else %}
+                                            <span class="text-body-secondary">
+                                                Consumidor final
+                                            </span>
+                                        {% endif %}
 
+                                    </td>
+
+
+                                    <td class="detalle-col">
+
+                                        <div class="small fw-semibold">
+                                            {{ venta.detalles.count }}
+                                            {% if venta.detalles.count == 1 %}
+                                                línea
                                             {% else %}
-
-                                                <span class="text-muted">
-                                                    Consumidor final
-                                                </span>
-
+                                                líneas
                                             {% endif %}
+                                        </div>
 
-                                        </td>
+                                        {% with primer_detalle=venta.detalles.all|first %}
+                                            {% if primer_detalle %}
+                                                <div class="small text-body-secondary">
+                                                    {{ primer_detalle.producto.nombre }}
+                                                    {% if venta.detalles.count > 1 %}
+                                                        + {{ venta.detalles.count|add:"-1" }} más
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                        {% endwith %}
+
+                                    </td>
 
 
-                                        <td>
+                                    <td>
 
-                                            <span class="badge text-bg-secondary">
+                                        {% if venta.tipo_pago == "fiado" %}
 
-                                                {{ venta.detalles.count }}
-
-                                                {% if venta.detalles.count == 1 %}
-                                                    producto
-                                                {% else %}
-                                                    productos
-                                                {% endif %}
-
+                                            <span class="badge text-bg-warning">
+                                                <i class="bi bi-clock-history me-1"></i>
+                                                Fiado
                                             </span>
 
-                                        </td>
+                                        {% else %}
 
-
-                                        <td>
-
-                                            {% if venta.tipo_pago == "fiado" %}
-
-                                                <span class="badge text-bg-warning">
-                                                    <i class="bi bi-clock-history me-1"></i>
-                                                    Fiado
-                                                </span>
-
-                                            {% else %}
-
+                                            <div>
                                                 <span class="badge text-bg-success">
                                                     <i class="bi bi-cash-coin me-1"></i>
                                                     Pago inmediato
                                                 </span>
+                                            </div>
 
+                                            {% if venta.metodo_pago %}
+                                                <div class="small text-body-secondary mt-1">
+                                                    {{ venta.get_metodo_pago_display }}
+                                                </div>
                                             {% endif %}
 
-                                        </td>
+                                        {% endif %}
+
+                                    </td>
 
 
-                                        <td class="text-end">
-
-                                            <strong>
-                                                ${{ venta.total|floatformat:2 }}
-                                            </strong>
-
-                                        </td>
+                                    <td class="text-end">
+                                        <strong>
+                                            ${{ venta.total|floatformat:2 }}
+                                        </strong>
+                                    </td>
 
 
-                                        <td class="text-end">
+                                    <td class="text-end">
+                                        <a
+                                            href="{% url 'ventas:detalle' venta.id %}"
+                                            class="btn btn-sm btn-outline-primary"
+                                        >
+                                            <i class="bi bi-eye me-1"></i>
+                                            Ver
+                                        </a>
+                                    </td>
 
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- =========================================
+                     PAGINACIÓN
+                ========================================== -->
+
+                {% if ventas.paginator.num_pages > 1 %}
+
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mt-4">
+
+                        <div class="small text-body-secondary">
+                            Página {{ ventas.number }} de {{ ventas.paginator.num_pages }}
+                            · {{ ventas.paginator.count }} venta{{ ventas.paginator.count|pluralize }}
+                        </div>
+
+
+                        <nav aria-label="Paginación de ventas">
+
+                            <ul class="pagination pagination-sm mb-0">
+
+                                <li class="page-item {% if not ventas.has_previous %}disabled{% endif %}">
+                                    {% if ventas.has_previous %}
+                                        <a
+                                            class="page-link"
+                                            href="?buscar={{ buscar|urlencode }}&fecha_desde={{ fecha_desde }}&fecha_hasta={{ fecha_hasta }}&por_pagina={{ por_pagina }}&page={{ ventas.previous_page_number }}"
+                                        >
+                                            Anterior
+                                        </a>
+                                    {% else %}
+                                        <span class="page-link">
+                                            Anterior
+                                        </span>
+                                    {% endif %}
+                                </li>
+
+
+                                {% for numero in ventas.paginator.page_range %}
+
+                                    {% if numero >= ventas.number|add:"-2" and numero <= ventas.number|add:"2" %}
+
+                                        <li class="page-item {% if numero == ventas.number %}active{% endif %}">
                                             <a
-                                                href="{% url 'ventas:detalle' venta.id %}"
-                                                class="btn btn-sm btn-outline-primary"
+                                                class="page-link"
+                                                href="?buscar={{ buscar|urlencode }}&fecha_desde={{ fecha_desde }}&fecha_hasta={{ fecha_hasta }}&por_pagina={{ por_pagina }}&page={{ numero }}"
                                             >
-                                                <i class="bi bi-eye me-1"></i>
-                                                Ver
+                                                {{ numero }}
                                             </a>
+                                        </li>
 
-                                        </td>
-
-                                    </tr>
+                                    {% endif %}
 
                                 {% endfor %}
 
-                            </tbody>
 
-                        </table>
+                                <li class="page-item {% if not ventas.has_next %}disabled{% endif %}">
+                                    {% if ventas.has_next %}
+                                        <a
+                                            class="page-link"
+                                            href="?buscar={{ buscar|urlencode }}&fecha_desde={{ fecha_desde }}&fecha_hasta={{ fecha_hasta }}&por_pagina={{ por_pagina }}&page={{ ventas.next_page_number }}"
+                                        >
+                                            Siguiente
+                                        </a>
+                                    {% else %}
+                                        <span class="page-link">
+                                            Siguiente
+                                        </span>
+                                    {% endif %}
+                                </li>
+
+                            </ul>
+
+                        </nav>
 
                     </div>
 
-                {% else %}
+                {% endif %}
 
-                    <div class="text-center py-5">
 
-                        <i
-                            class="
-                                bi
-                                bi-cart-x
-                                display-4
-                                text-muted
-                            "
-                        ></i>
+            {% else %}
+
+                <div class="text-center py-5">
+
+                    <i class="bi bi-search display-5 text-body-secondary"></i>
+
+                    {% if buscar or fecha_desde or fecha_hasta %}
+
+                        <h3 class="h5 mt-3">
+                            No encontramos ventas
+                        </h3>
+
+                        <p class="text-body-secondary">
+                            Prueba cambiando la búsqueda o el rango de fechas.
+                        </p>
+
+                        <a
+                            href="{% url 'ventas:lista' %}"
+                            class="btn btn-outline-primary"
+                        >
+                            Limpiar filtros
+                        </a>
+
+                    {% else %}
 
                         <h3 class="h5 mt-3">
                             Aún no hay ventas
                         </h3>
 
-                        <p class="text-muted">
-                            Registra tu primera venta
-                            para comenzar a llevar el historial.
+                        <p class="text-body-secondary">
+                            Registra tu primera venta para comenzar el historial.
                         </p>
 
                         <a
@@ -332,15 +561,38 @@
                             Registrar primera venta
                         </a>
 
-                    </div>
+                    {% endif %}
 
-                {% endif %}
+                </div>
 
-            </div>
+            {% endif %}
 
         </div>
 
     </div>
+
 </div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const porPagina =
+        document.getElementById("por_pagina");
+
+    const formulario =
+        document.getElementById("filtrosVentas");
+
+    if (porPagina && formulario) {
+        porPagina.addEventListener(
+            "change",
+            function () {
+                formulario.submit();
+            }
+        );
+    }
+
+});
+</script>
 
 {% endblock %}

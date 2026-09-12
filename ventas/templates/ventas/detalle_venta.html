@@ -1,64 +1,437 @@
 {% extends "base.html" %}
 
-{% block title %}
-    Detalle de venta
-{% endblock %}
+{% block title %}Venta #{{ venta.numero }}{% endblock %}
 
 {% block content %}
 
-<div class="row justify-content-center">
-    <div class="col-12 col-xl-10">
+<style>
+    .factura-wrap {
+        max-width: 1120px;
+        margin: 0 auto;
+    }
 
-        <!-- ==================================================
-             ENCABEZADO
-        =================================================== -->
+    .factura-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
 
-        <div
-            class="
-                d-flex
-                flex-column
-                flex-md-row
-                justify-content-between
-                align-items-md-center
-                gap-3
-                mb-4
-            "
-        >
+    .factura-card {
+        background: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color);
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 .45rem 1.5rem rgba(0,0,0,.07);
+    }
 
-            <div>
+    .factura-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(260px, .7fr);
+        gap: 2rem;
+        padding: 2rem;
+        border-bottom: 1px solid var(--bs-border-color);
+    }
 
-                <a
-                    href="{% url 'ventas:lista' %}"
-                    class="text-decoration-none d-inline-flex align-items-center mb-2"
-                >
-                    <i class="bi bi-arrow-left me-2"></i>
-                    Volver a ventas
-                </a>
+    .factura-negocio {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+    }
 
-                <h1 class="page-title mb-1">
-                    Venta #{{ venta.numero }}
-                </h1>
+    .factura-logo {
+        width: 68px;
+        height: 68px;
+        border-radius: .9rem;
+        border: 1px solid var(--bs-border-color);
+        background: var(--bs-tertiary-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        flex: 0 0 68px;
+    }
 
-                <p class="page-subtitle mb-0">
-                    Detalle de la operación registrada.
-                </p>
+    .factura-titulo {
+        text-align: right;
+    }
+
+    .factura-numero {
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: .5rem;
+    }
+
+    .factura-meta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+        padding: 1.4rem 2rem;
+        border-bottom: 1px solid var(--bs-border-color);
+        background: var(--bs-tertiary-bg);
+    }
+
+    .factura-bloque {
+        border: 1px solid var(--bs-border-color);
+        border-radius: .8rem;
+        padding: 1rem;
+        background: var(--bs-body-bg);
+    }
+
+    .factura-label {
+        color: var(--bs-secondary-color);
+        font-size: .78rem;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        margin-bottom: .25rem;
+    }
+
+    .factura-productos {
+        padding: 1.5rem 2rem;
+    }
+
+    .factura-tabla {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .factura-tabla th {
+        color: var(--bs-secondary-color);
+        font-size: .78rem;
+        text-transform: uppercase;
+        letter-spacing: .035em;
+        font-weight: 700;
+        padding: .7rem .55rem;
+        border-bottom: 1px solid var(--bs-border-color);
+    }
+
+    .factura-tabla td {
+        padding: .85rem .55rem;
+        border-bottom: 1px solid var(--bs-border-color);
+        vertical-align: middle;
+    }
+
+    .factura-tabla tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .factura-producto {
+        display: flex;
+        gap: .75rem;
+        align-items: center;
+    }
+
+    .factura-producto-img,
+    .factura-producto-placeholder {
+        width: 44px;
+        height: 44px;
+        border-radius: .6rem;
+        object-fit: cover;
+        flex: 0 0 44px;
+        border: 1px solid var(--bs-border-color);
+        background: var(--bs-tertiary-bg);
+    }
+
+    .factura-producto-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--bs-secondary-color);
+    }
+
+    .factura-footer-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(310px, .55fr);
+        gap: 1.5rem;
+        padding: 0 2rem 2rem;
+    }
+
+    .factura-notas {
+        border: 1px solid var(--bs-border-color);
+        border-radius: .8rem;
+        padding: 1rem;
+        min-height: 150px;
+    }
+
+    .factura-resumen {
+        border: 1px solid var(--bs-border-color);
+        border-radius: .8rem;
+        padding: 1rem;
+        align-self: start;
+    }
+
+    .resumen-fila {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: .6rem;
+    }
+
+    .resumen-total {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: end;
+        padding-top: .85rem;
+        margin-top: .85rem;
+        border-top: 1px solid var(--bs-border-color);
+    }
+
+    .resumen-total strong:last-child {
+        font-size: 1.8rem;
+        color: var(--bs-primary);
+    }
+
+    .factura-pie {
+        padding: 1rem 2rem;
+        border-top: 1px solid var(--bs-border-color);
+        color: var(--bs-secondary-color);
+        font-size: .82rem;
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .badge-factura {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        border-radius: 999px;
+        padding: .4rem .7rem;
+        font-weight: 700;
+        font-size: .82rem;
+    }
+
+    @media (max-width: 767.98px) {
+        .factura-header,
+        .factura-meta,
+        .factura-footer-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .factura-titulo {
+            text-align: left;
+        }
+
+        .factura-productos {
+            padding: 1rem;
+        }
+
+        .factura-footer-grid {
+            padding: 0 1rem 1rem;
+        }
+
+        .factura-tabla {
+            min-width: 720px;
+        }
+    }
+
+    /* ========================================================
+       IMPRESIÓN
+    ========================================================= */
+
+    @media print {
+        @page {
+            size: A4;
+            margin: 12mm;
+        }
+
+        body {
+            background: #fff !important;
+            color: #000 !important;
+        }
+
+        nav,
+        header,
+        .navbar,
+        .sidebar,
+        .factura-toolbar,
+        .no-print {
+            display: none !important;
+        }
+
+        main,
+        .container,
+        .container-fluid {
+            margin: 0 !important;
+            padding: 0 !important;
+            max-width: none !important;
+        }
+
+        .factura-wrap {
+            max-width: none;
+            margin: 0;
+        }
+
+        .factura-card {
+            border: 0;
+            box-shadow: none;
+            border-radius: 0;
+            background: #fff !important;
+        }
+
+        .factura-header,
+        .factura-meta,
+        .factura-productos,
+        .factura-footer-grid,
+        .factura-pie {
+            color: #000 !important;
+        }
+
+        .factura-meta,
+        .factura-bloque,
+        .factura-notas,
+        .factura-resumen,
+        .factura-producto-placeholder {
+            background: #fff !important;
+        }
+
+        .factura-header,
+        .factura-meta,
+        .factura-productos,
+        .factura-footer-grid {
+            break-inside: avoid;
+        }
+
+        .factura-tabla th,
+        .factura-tabla td,
+        .factura-header,
+        .factura-meta,
+        .factura-pie,
+        .factura-bloque,
+        .factura-notas,
+        .factura-resumen {
+            border-color: #bbb !important;
+        }
+
+        .text-body-secondary,
+        .factura-label,
+        .factura-pie {
+            color: #444 !important;
+        }
+
+        .resumen-total strong:last-child {
+            color: #000 !important;
+        }
+
+        a {
+            color: #000 !important;
+            text-decoration: none !important;
+        }
+    }
+</style>
+
+
+<div class="factura-wrap">
+
+    <!-- =====================================================
+         BARRA DE ACCIONES
+    ====================================================== -->
+
+    <div class="factura-toolbar no-print">
+
+        <div>
+            <a
+                href="{% url 'ventas:lista' %}"
+                class="text-decoration-none"
+            >
+                <i class="bi bi-arrow-left me-1"></i>
+                Volver a ventas
+            </a>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <button
+                type="button"
+                class="btn btn-outline-primary"
+                onclick="window.print()"
+            >
+                <i class="bi bi-printer me-1"></i>
+                Imprimir comprobante
+            </button>
+
+            <a
+                href="{% url 'ventas:crear' %}"
+                class="btn btn-primary"
+            >
+                <i class="bi bi-cart-plus me-1"></i>
+                Nueva venta
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         DOCUMENTO
+    ====================================================== -->
+
+    <article class="factura-card">
+
+        <!-- =================================================
+             CABECERA DEL NEGOCIO
+        ================================================== -->
+
+        <section class="factura-header">
+
+            <div class="factura-negocio">
+
+                <div class="factura-logo">
+                    <i class="bi bi-shop"></i>
+                </div>
+
+                <div>
+
+                    <h2 class="h4 mb-1">
+                        {{ venta.negocio.nombre }}
+                    </h2>
+
+                    {% if venta.negocio.telefono %}
+                        <div class="text-body-secondary">
+                            <i class="bi bi-telephone me-1"></i>
+                            {{ venta.negocio.telefono }}
+                        </div>
+                    {% endif %}
+
+                    <div class="small text-body-secondary mt-2">
+                        Comprobante generado por el sistema administrativo.
+                    </div>
+
+                </div>
 
             </div>
 
 
-            <div>
+            <div class="factura-titulo">
+
+                <div class="factura-label">
+                    Comprobante de venta
+                </div>
+
+                <div class="factura-numero">
+                    #{{ venta.numero }}
+                </div>
+
+                <div class="mb-2">
+                    {{ venta.fecha|date:"d/m/Y H:i" }}
+                </div>
+
 
                 {% if venta.estado == "completada" %}
 
-                    <span class="badge text-bg-success fs-6">
-                        <i class="bi bi-check-circle me-1"></i>
+                    <span class="badge-factura text-bg-success">
+                        <i class="bi bi-check-circle"></i>
                         Completada
                     </span>
 
                 {% else %}
 
-                    <span class="badge text-bg-danger fs-6">
-                        <i class="bi bi-x-circle me-1"></i>
+                    <span class="badge-factura text-bg-danger">
+                        <i class="bi bi-x-circle"></i>
                         Anulada
                     </span>
 
@@ -66,527 +439,423 @@
 
             </div>
 
-        </div>
+        </section>
 
 
-        <!-- ==================================================
-             INFORMACIÓN GENERAL
-        =================================================== -->
+        <!-- =================================================
+             CLIENTE + PAGO
+        ================================================== -->
 
-        <div class="card content-card mb-4">
+        <section class="factura-meta">
 
-            <div class="card-body p-4">
+            <div class="factura-bloque">
 
-                <div class="row g-4">
-
-
-                    <!-- Fecha -->
-
-                    <div class="col-12 col-md-3">
-
-                        <span class="text-muted d-block mb-1">
-                            Fecha
-                        </span>
-
-                        <strong>
-                            {{ venta.fecha|date:"d/m/Y H:i" }}
-                        </strong>
-
-                    </div>
-
-
-                    <!-- Cliente -->
-
-                    <div class="col-12 col-md-3">
-
-                        <span class="text-muted d-block mb-1">
-                            Cliente
-                        </span>
-
-                        {% if venta.cliente %}
-
-                            <strong>
-                                {{ venta.cliente.nombre }}
-                                {{ venta.cliente.apellido }}
-                            </strong>
-
-                        {% else %}
-
-                            <strong>
-                                Consumidor final
-                            </strong>
-
-                        {% endif %}
-
-                    </div>
-
-
-                    <!-- Usuario -->
-
-                    <div class="col-12 col-md-3">
-
-                        <span class="text-muted d-block mb-1">
-                            Registrada por
-                        </span>
-
-                        <strong>
-                            {{ venta.usuario.username }}
-                        </strong>
-
-                    </div>
-
-
-                    <!-- Tipo de pago -->
-
-                    <div class="col-12 col-md-3">
-
-                        <span class="text-muted d-block mb-1">
-                            Forma de pago
-                        </span>
-
-
-                        {% if venta.tipo_pago == "fiado" %}
-
-                            <span class="badge text-bg-warning">
-
-                                <i class="bi bi-clock-history me-1"></i>
-
-                                Fiado
-
-                            </span>
-
-                        {% else %}
-
-                            <span class="badge text-bg-success">
-
-                                <i class="bi bi-cash-coin me-1"></i>
-
-                                Pago inmediato
-
-                            </span>
-
-                        {% endif %}
-
-                    </div>
-
+                <div class="factura-label">
+                    Cliente
                 </div>
 
-            </div>
+                {% if venta.cliente %}
 
-        </div>
+                    <div class="fw-bold fs-6">
+                        {{ venta.cliente.nombre }}
+                        {{ venta.cliente.apellido }}
+                    </div>
 
-
-        <!-- ==================================================
-             CUENTA POR COBRAR
-        =================================================== -->
-
-        {% if venta.tipo_pago == "fiado" %}
-
-            <div class="card content-card mb-4">
-
-                <div class="card-body p-4">
-
-                    <div
-                        class="
-                            d-flex
-                            flex-column
-                            flex-md-row
-                            justify-content-between
-                            align-items-md-center
-                            gap-3
-                        "
-                    >
-
-                        <div>
-
-                            <h2 class="h5 mb-2">
-
-                                <i class="bi bi-wallet2 me-2"></i>
-
-                                Cuenta por cobrar
-
-                            </h2>
-
-
-                            {% if venta.cuenta_por_cobrar %}
-
-                                <p class="text-muted mb-1">
-                                    Esta venta generó automáticamente
-                                    una cuenta por cobrar.
-                                </p>
-
-
-                                <div class="d-flex flex-wrap gap-3 mt-3">
-
-                                    <div>
-
-                                        <span class="text-muted d-block">
-                                            Monto
-                                        </span>
-
-                                        <strong>
-                                            ${{ venta.cuenta_por_cobrar.monto_total|floatformat:2 }}
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <span class="text-muted d-block">
-                                            Abonado
-                                        </span>
-
-                                        <strong>
-                                            ${{ venta.cuenta_por_cobrar.total_abonado|floatformat:2 }}
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <span class="text-muted d-block">
-                                            Pendiente
-                                        </span>
-
-                                        <strong>
-                                            ${{ venta.cuenta_por_cobrar.saldo_pendiente|floatformat:2 }}
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <span class="text-muted d-block">
-                                            Estado
-                                        </span>
-
-                                        {% if venta.cuenta_por_cobrar.estado == "pagada" %}
-
-                                            <span class="badge text-bg-success">
-                                                Pagada
-                                            </span>
-
-                                        {% else %}
-
-                                            <span class="badge text-bg-warning">
-                                                Pendiente
-                                            </span>
-
-                                        {% endif %}
-
-                                    </div>
-
-                                </div>
-
-                            {% else %}
-
-                                <div class="alert alert-danger mb-0">
-
-                                    <i class="bi bi-exclamation-triangle me-2"></i>
-
-                                    La venta está marcada como fiada,
-                                    pero no posee una cuenta por cobrar asociada.
-
-                                </div>
-
-                            {% endif %}
-
+                    {% if venta.cliente.telefono %}
+                        <div class="small text-body-secondary mt-1">
+                            Teléfono:
+                            {{ venta.cliente.telefono }}
                         </div>
+                    {% endif %}
 
+                {% else %}
 
-                        {% if venta.cuenta_por_cobrar %}
-
-                            <div>
-
-                                <a
-                                    href="{% url 'cuentas:detalle' venta.cuenta_por_cobrar.id %}"
-                                    class="btn btn-outline-primary"
-                                >
-                                    <i class="bi bi-eye me-2"></i>
-                                    Ver cuenta
-                                </a>
-
-                            </div>
-
-                        {% endif %}
-
+                    <div class="fw-bold fs-6">
+                        Consumidor final
                     </div>
 
+                    <div class="small text-body-secondary mt-1">
+                        Venta sin cliente registrado.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="factura-bloque">
+
+                <div class="factura-label">
+                    Información de pago
+                </div>
+
+
+                <div class="mb-1">
+
+                    <strong>
+                        {% if venta.tipo_pago == "fiado" %}
+                            Fiado
+                        {% else %}
+                            Pago inmediato
+                        {% endif %}
+                    </strong>
+
+                </div>
+
+
+                {% if venta.tipo_pago != "fiado" %}
+
+                    {% if venta.metodo_pago %}
+                        <div class="small">
+                            Método:
+                            <strong>
+                                {{ venta.get_metodo_pago_display }}
+                            </strong>
+                        </div>
+                    {% endif %}
+
+
+                    {% if venta.referencia_pago %}
+                        <div class="small mt-1">
+                            Referencia:
+                            <strong>
+                                {{ venta.referencia_pago }}
+                            </strong>
+                        </div>
+                    {% endif %}
+
+
+                    {% if venta.detalle_pago %}
+                        <div class="small mt-1">
+                            Detalle:
+                            <strong>
+                                {{ venta.detalle_pago }}
+                            </strong>
+                        </div>
+                    {% endif %}
+
+                {% else %}
+
+                    {% if venta.cuenta_por_cobrar %}
+                        <div class="small mt-1">
+                            Saldo pendiente:
+                            <strong>
+                                ${{ venta.cuenta_por_cobrar.saldo_pendiente|floatformat:2 }}
+                            </strong>
+                        </div>
+                    {% endif %}
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             PRODUCTOS / SERVICIOS
+        ================================================== -->
+
+        <section class="factura-productos">
+
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+
+                <div>
+                    <h3 class="h5 mb-1">
+                        Detalle de la venta
+                    </h3>
+
+                    <div class="small text-body-secondary">
+                        Productos y servicios incluidos en esta operación.
+                    </div>
                 </div>
 
             </div>
 
-        {% endif %}
+
+            <div class="table-responsive">
+
+                <table class="factura-tabla">
+
+                    <thead>
+                        <tr>
+                            <th>
+                                Producto / servicio
+                            </th>
+
+                            <th>
+                                Presentación
+                            </th>
+
+                            <th class="text-center">
+                                Cant.
+                            </th>
+
+                            <th class="text-end">
+                                Precio
+                            </th>
+
+                            <th class="text-end">
+                                Subtotal
+                            </th>
+                        </tr>
+                    </thead>
 
 
-        <!-- ==================================================
-             PRODUCTOS
-        =================================================== -->
+                    <tbody>
 
-        <div class="card content-card mb-4">
-
-            <div class="card-body p-4">
-
-                <h2 class="h5 mb-3">
-
-                    <i class="bi bi-box-seam me-2"></i>
-
-                    Productos vendidos
-
-                </h2>
-
-
-                <div class="table-responsive">
-
-                    <table class="table align-middle">
-
-                        <thead>
+                        {% for detalle in venta.detalles.all %}
 
                             <tr>
 
-                                <th>
-                                    Producto
-                                </th>
+                                <td>
 
-                                <th class="text-center">
-                                    Cantidad
-                                </th>
+                                    <div class="factura-producto">
 
-                                <th class="text-end">
-                                    Precio
-                                </th>
+                                        {% if detalle.producto.imagen %}
 
-                                <th class="text-end">
-                                    Subtotal
-                                </th>
+                                            <img
+                                                src="{{ detalle.producto.imagen.url }}"
+                                                alt="{{ detalle.producto.nombre }}"
+                                                class="factura-producto-img"
+                                            >
+
+                                        {% else %}
+
+                                            <div class="factura-producto-placeholder">
+                                                <i class="bi bi-image"></i>
+                                            </div>
+
+                                        {% endif %}
+
+
+                                        <div>
+
+                                            <div class="fw-bold">
+                                                {{ detalle.producto.nombre }}
+                                            </div>
+
+                                            <div class="small text-body-secondary">
+
+                                                {% if detalle.producto.tipo == "servicio" %}
+                                                    Servicio
+                                                {% else %}
+                                                    {{ detalle.producto.categoria.nombre }}
+                                                {% endif %}
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if detalle.producto.tipo == "servicio" %}
+
+                                        <span class="text-body-secondary">
+                                            No aplica
+                                        </span>
+
+                                    {% elif detalle.presentacion %}
+
+                                        <strong>
+                                            {{ detalle.presentacion.nombre }}
+                                        </strong>
+
+                                        <div class="small text-body-secondary">
+                                            {{ detalle.factor_presentacion|floatformat:"-2" }}
+                                            ×
+                                            {{ detalle.producto.get_unidad_base_display }}
+                                        </div>
+
+                                    {% else %}
+
+                                        {{ detalle.producto.get_unidad_base_display }}
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td class="text-center">
+
+                                    {% if detalle.producto.unidad_base == "unidad" or detalle.presentacion %}
+                                        {{ detalle.cantidad|floatformat:"-0" }}
+                                    {% else %}
+                                        {{ detalle.cantidad|floatformat:"-2" }}
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td class="text-end">
+                                    ${{ detalle.precio_unitario|floatformat:2 }}
+                                </td>
+
+
+                                <td class="text-end">
+                                    <strong>
+                                        ${{ detalle.subtotal|floatformat:2 }}
+                                    </strong>
+                                </td>
 
                             </tr>
 
-                        </thead>
+                        {% empty %}
+
+                            <tr>
+                                <td
+                                    colspan="5"
+                                    class="text-center text-body-secondary py-4"
+                                >
+                                    No existen productos o servicios asociados a esta venta.
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
 
 
-                        <tbody>
+        <!-- =================================================
+             NOTAS + TOTALES
+        ================================================== -->
 
-                            {% for detalle in venta.detalles.all %}
+        <section class="factura-footer-grid">
 
-                                <tr>
+            <div class="factura-notas">
 
-                                    <td>
+                <div class="factura-label mb-2">
+                    Notas
+                </div>
 
-                                        <strong>
-                                            {{ detalle.producto.nombre }}
-                                        </strong>
+                {% if venta.notas %}
 
-                                    </td>
+                    <div>
+                        {{ venta.notas|linebreaksbr }}
+                    </div>
 
+                {% else %}
 
-                                    <td class="text-center">
+                    <div class="text-body-secondary">
+                        Sin observaciones.
+                    </div>
 
-                                        {{ detalle.cantidad }}
-
-                                    </td>
-
-
-                                    <td class="text-end">
-
-                                        ${{ detalle.precio_unitario|floatformat:2 }}
-
-                                    </td>
+                {% endif %}
 
 
-                                    <td class="text-end">
-
-                                        <strong>
-                                            ${{ detalle.subtotal|floatformat:2 }}
-                                        </strong>
-
-                                    </td>
-
-                                </tr>
-
-                            {% empty %}
-
-                                <tr>
-
-                                    <td
-                                        colspan="4"
-                                        class="text-center text-muted py-4"
-                                    >
-
-                                        No existen productos asociados
-                                        a esta venta.
-
-                                    </td>
-
-                                </tr>
-
-                            {% endfor %}
-
-                        </tbody>
-
-                    </table>
-
+                <div class="mt-4 small text-body-secondary">
+                    Registrada por:
+                    <strong class="text-body">
+                        {{ venta.usuario.username }}
+                    </strong>
                 </div>
 
             </div>
 
-        </div>
+
+            <div class="factura-resumen">
+
+                <div class="factura-label mb-3">
+                    Resumen
+                </div>
 
 
-        <!-- ==================================================
-             RESUMEN ECONÓMICO
-        =================================================== -->
+                <div class="resumen-fila">
 
-        <div class="row g-4">
+                    <span class="text-body-secondary">
+                        Subtotal
+                    </span>
 
-            <div class="col-12 col-lg-7">
+                    <strong>
+                        ${{ venta.subtotal|floatformat:2 }}
+                    </strong>
 
-                <div class="card content-card h-100">
-
-                    <div class="card-body p-4">
-
-                        <h2 class="h5 mb-3">
-
-                            <i class="bi bi-journal-text me-2"></i>
-
-                            Notas
-
-                        </h2>
+                </div>
 
 
-                        {% if venta.notas %}
+                {% if venta.descuento > 0 %}
 
-                            <p class="mb-0">
-                                {{ venta.notas }}
-                            </p>
+                    <div class="resumen-fila">
 
-                        {% else %}
+                        <span class="text-body-secondary">
 
-                            <p class="text-muted mb-0">
-                                Sin observaciones.
-                            </p>
+                            Descuento
 
-                        {% endif %}
+                            {% if venta.tipo_descuento == "porcentaje" %}
+                                ({{ venta.valor_descuento|floatformat:"-2" }}%)
+                            {% endif %}
+
+                        </span>
+
+                        <strong>
+                            - ${{ venta.descuento|floatformat:2 }}
+                        </strong>
 
                     </div>
 
-                </div>
+                {% else %}
 
-            </div>
+                    <div class="resumen-fila">
 
+                        <span class="text-body-secondary">
+                            Descuento
+                        </span>
 
-            <div class="col-12 col-lg-5">
-
-                <div class="card content-card h-100">
-
-                    <div class="card-body p-4">
-
-                        <h2 class="h5 mb-4">
-                            Resumen
-                        </h2>
-
-
-                        <div class="d-flex justify-content-between mb-2">
-
-                            <span class="text-muted">
-                                Subtotal
-                            </span>
-
-                            <strong>
-                                ${{ venta.subtotal|floatformat:2 }}
-                            </strong>
-
-                        </div>
-
-
-                        <div class="d-flex justify-content-between mb-3">
-
-                            <span class="text-muted">
-                                Descuento
-                            </span>
-
-                            <strong>
-                                - ${{ venta.descuento|floatformat:2 }}
-                            </strong>
-
-                        </div>
-
-
-                        <hr>
-
-
-                        <div
-                            class="
-                                d-flex
-                                justify-content-between
-                                align-items-center
-                            "
-                        >
-
-                            <span class="fs-5 fw-semibold">
-                                Total
-                            </span>
-
-                            <span class="fs-3 fw-bold text-primary">
-
-                                ${{ venta.total|floatformat:2 }}
-
-                            </span>
-
-                        </div>
+                        <strong>
+                            $0.00
+                        </strong>
 
                     </div>
 
+                {% endif %}
+
+
+                <div class="resumen-total">
+
+                    <strong>
+                        Total
+                    </strong>
+
+                    <strong>
+                        ${{ venta.total|floatformat:2 }}
+                    </strong>
+
                 </div>
 
             </div>
 
-        </div>
+        </section>
 
 
-        <!-- ==================================================
-             ACCIONES
-        =================================================== -->
+        <!-- =================================================
+             PIE
+        ================================================== -->
 
-        <div
-            class="
-                d-grid
-                d-md-flex
-                justify-content-md-end
-                gap-2
-                mt-4
-            "
-        >
+        <footer class="factura-pie">
 
-            <a
-                href="{% url 'ventas:lista' %}"
-                class="btn btn-outline-secondary"
-            >
+            <span>
+                Venta #{{ venta.numero }}
+            </span>
 
-                <i class="bi bi-arrow-left me-2"></i>
+            <span>
+                Registrada el {{ venta.fecha|date:"d/m/Y H:i" }}
+            </span>
 
-                Volver a ventas
+        </footer>
 
-            </a>
+    </article>
 
-
-            <a
-                href="{% url 'ventas:crear' %}"
-                class="btn btn-primary"
-            >
-
-                <i class="bi bi-cart-plus me-2"></i>
-
-                Nueva venta
-
-            </a>
-
-        </div>
-
-    </div>
 </div>
 
 {% endblock %}
