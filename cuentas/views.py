@@ -10,6 +10,13 @@ from django.db.models import (
     Q,
     Sum,
 )
+from django.views.decorators.http import require_POST
+
+from .services.tasa_bcv import (
+    actualizar_tasa_dolar_bcv,
+    ErrorConsultaBCV,
+)
+
 import productos
 from usuarios.permisos import usuario_es_dueno
 
@@ -802,4 +809,38 @@ def anular_cuenta(request, cuenta_id):
         {
             "cuenta": cuenta,
         },
+    )
+
+@login_required
+@require_POST
+def actualizar_tasa_bcv(request):
+    """
+    Actualiza manualmente la tasa BCV mostrada
+    globalmente en el sistema.
+    """
+
+    try:
+
+        tasa, creada = actualizar_tasa_dolar_bcv()
+
+        messages.success(
+            request,
+            (
+                "Tasa BCV actualizada correctamente: "
+                f"$1 = Bs. {tasa.valor:.2f}"
+            ),
+        )
+
+    except ErrorConsultaBCV as error:
+
+        messages.error(
+            request,
+            (
+                "No fue posible actualizar la tasa BCV. "
+                f"{error}"
+            ),
+        )
+
+    return redirect(
+        request.POST.get("next") or "inicio"
     )

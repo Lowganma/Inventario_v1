@@ -6,6 +6,11 @@ from . import views
 app_name = "cuentas"
 
 urlpatterns = [
+    path(
+    "tasa-bcv/actualizar/",
+    views.actualizar_tasa_bcv,
+    name="actualizar_tasa_bcv",
+    ),
     path("dashboard/", views.dashboard, name="dashboard"),
     path("", views.lista_cuentas, name="lista"),
     path("nueva/", views.crear_cuenta, name="crear"),
