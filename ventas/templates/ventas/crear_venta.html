@@ -66,27 +66,42 @@
 
     .catalogo-grid {
         display: grid;
+        /* Mosaico: 3 columnas que aprovechan todo el ancho disponible. */
         grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-auto-rows: minmax(118px, auto);
+        align-content: start;
         gap: .75rem;
-        max-height: calc(100vh - 360px);
+        max-height: 430px;
         min-height: 360px;
         overflow-y: auto;
+        overflow-x: hidden;
         padding-right: .15rem;
     }
 
     .catalogo-card {
-        display: flex;
-        gap: .75rem;
+        display: grid;
+        /* Imagen | información flexible | precio | botón */
+        grid-template-columns: 42px minmax(0, 1fr) auto auto;
+        gap: .55rem;
         align-items: center;
         width: 100%;
+        max-width: none;
+        min-width: 0;
         text-align: left;
         border: 1px solid var(--bs-border-color);
         border-radius: .9rem;
         padding: .75rem;
         background: var(--bs-tertiary-bg);
         color: inherit;
-        min-height: 92px;
+        min-height: 118px;
+        overflow: hidden;
         transition: .15s ease;
+    }
+
+    /* Bootstrap no garantiza una utilidad min-w-0; la fijamos explícitamente. */
+    .catalogo-card > .flex-grow-1 {
+        min-width: 0;
+        overflow: hidden;
     }
 
     .catalogo-card:hover {
@@ -118,23 +133,35 @@
 
     .catalogo-card-title {
         font-weight: 700;
-        line-height: 1.15;
+        font-size: .86rem;
+        line-height: 1.18;
         margin-bottom: .2rem;
         overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        white-space: normal;
+        overflow-wrap: anywhere;
     }
 
     .catalogo-card-meta {
-        font-size: .78rem;
+        font-size: .72rem;
         color: var(--bs-secondary-color);
         line-height: 1.2;
         margin-bottom: .25rem;
     }
 
     .catalogo-card-price {
+        font-size: .84rem;
         font-weight: 700;
         color: var(--bs-primary);
+        white-space: nowrap;
+        flex: 0 0 auto;
+    }
+
+    .catalogo-card > .bi-plus-circle {
+        flex: 0 0 auto;
     }
 
 
@@ -158,10 +185,15 @@
     }
 
     .catalogo-grid.modo-lineal {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
+        width: 100%;
     }
 
     .catalogo-grid.modo-lineal .catalogo-card {
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        grid-template-columns: 44px minmax(0, 1fr) auto auto;
         min-height: 70px;
         padding: .6rem .75rem;
     }
@@ -176,6 +208,12 @@
 
     .catalogo-grid.modo-lineal .catalogo-card-title {
         margin-bottom: .1rem;
+        font-size: inherit;
+        display: block;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        overflow-wrap: normal;
     }
 
     .catalogo-grid.modo-lineal .catalogo-card-meta {
@@ -196,11 +234,8 @@
     .venta-side-body {
         display: flex;
         flex-direction: column;
-
-        /* Altura real disponible dentro de la pantalla */
-        height: calc(100vh - 110px);
-
-        /* Evita que el contenido fuerce el panel */
+        /* Evitamos 100vh: el zoom cambia los píxeles CSS del viewport y aplasta el carrito. */
+        height: auto;
         min-height: 0;
     }
 
@@ -218,11 +253,14 @@
 
     /* SOLO esta zona hace scroll */
     .venta-carrito {
-        flex: 1 1 auto;
-        min-height: 0;
+        /* El carrito conserva una zona visible estable con cualquier zoom. */
+        flex: 0 0 auto;
+        min-height: 190px;
+        max-height: 320px;
         overflow-y: auto;
-
+        overflow-x: hidden;
         padding: .35rem .85rem;
+        scrollbar-gutter: stable;
     }
 
     /* Parte inferior siempre visible */
@@ -330,7 +368,7 @@
 
     @media (max-width: 1199.98px) {
         .catalogo-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
         }
     }
 
@@ -348,13 +386,19 @@
         }
 
         .catalogo-grid {
-            max-height: none;
+            max-height: 430px;
         }
     }
 
     @media (max-width: 575.98px) {
         .catalogo-grid {
-            grid-template-columns: 1fr;
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .catalogo-card {
+            width: 100%;
+            min-width: 0;
+            max-width: none;
         }
 
         .venta-datos-grid {
@@ -1790,9 +1834,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     ".venta-cantidad"
                 );
 
+            /* Cada clic sobre un producto ya agregado suma una unidad. */
             if (cantidad) {
-                cantidad.focus();
-                cantidad.select();
+                cantidad.value =
+                    (numero(cantidad.value) + 1).toString();
+
+                recalcularLinea(existente);
+                actualizarEstadoCarrito();
             }
 
             return;
