@@ -13,8 +13,68 @@ from productos.models import Producto
 
 from .forms import DetalleVentaFormSet, VentaForm
 from .models import Venta
-from .services.ventas import registrar_venta
+from .services.ventas import registrar_venta as registrar_venta_servicio
+from django.db import transaction
 
+
+from decimal import Decimal
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.db import transaction
+from .forms import DetalleVentaFormSet
+from .services.ventas import registrar_venta as registrar_venta_servicio
+
+@transaction.atomic
+def registrar_venta(request):
+    if request.method == 'POST':
+        try:
+            # 1. Obtener el negocio actual (ajusta según cómo esté en tu User/Perfil)
+            negocio_actual = getattr(request.user, 'negocio', None)
+            if not negocio_actual and hasattr(request.user, 'perfil'):
+                negocio_actual = request.user.perfil.negocio
+
+            # 2. Obtener cliente si existe
+            cliente_id = request.POST.get('cliente') or request.POST.get('cliente_id')
+            cliente_obj = None
+            if cliente_id:
+                from clientes.models import Cliente
+                cliente_obj = Cliente.objects.filter(id=cliente_id).first()
+
+            # 3. Procesar los items enviados por el FormSet del HTML
+            formset = DetalleVentaFormSet(request.POST)
+            detalles_list = []
+            if formset.is_valid():
+                for form in formset:
+                    if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                        detalles_list.append({
+                            'producto': form.cleaned_data.get('producto'),
+                            'cantidad': form.cleaned_data.get('cantidad'),
+                            'precio_unitario': form.cleaned_data.get('precio_unitario'),
+                        })
+
+            # 4. LLAMADA AL SERVICIO USANDO EL ALIAS
+            venta = registrar_venta_servicio(
+                negocio=negocio_actual,
+                usuario=request.user,
+                cliente=cliente_obj,
+                tipo_pago=request.POST.get('tipo_pago', 'contado'),
+                metodo_pago=request.POST.get('metodo_pago'),
+                referencia_pago=request.POST.get('referencia_pago', ''),
+                detalle_pago=request.POST.get('detalle_pago', ''),
+                tipo_descuento=request.POST.get('tipo_descuento', ''),
+                valor_descuento=Decimal(request.POST.get('valor_descuento', '0') or '0'),
+                notas=request.POST.get('notas', ''),
+                detalles=detalles_list
+            )
+
+            return redirect('ventas:detalle_venta', pk=venta.id)
+
+        except Exception as e:
+            # Captura cualquier error de validación o lógica del servicio y lo muestra
+            messages.error(request, f"No fue posible registrar la venta: {e}")
+
+    # Si es un GET o falló el POST, vuelve a cargar la plantilla
+    # ... render(...)
 
 @login_required
 def lista_ventas(request):
@@ -215,7 +275,7 @@ def crear_venta(request):
 
         if formulario.is_valid() and detalles.is_valid():
             try:
-                venta = registrar_venta(
+                venta = registrar_venta_servicio(
                     negocio=negocio,
                     usuario=request.user,
                     cliente=formulario.cleaned_data.get("cliente"),

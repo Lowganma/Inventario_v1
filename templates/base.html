@@ -133,19 +133,21 @@
                     {# ========================================= #}
 
                     <li class="nav-item d-flex align-items-center me-lg-3">
-                        <div class="navbar-rate px-3 py-2 d-flex align-items-center gap-2" title="Tasa de referencia BCV">
+                        <div class="navbar-rate px-3 py-2 d-flex align-items-center gap-2"
+                            id="bcv-rate-container"
+                            data-tasa="{{ tasa_bcv_global.valor|default:'0' }}">
                             
                             {% if tasa_bcv_global %}
                                 <div>
                                     <span class="d-block small">Tasa BCV</span>
-                                    <strong>$1 = Bs. {{ tasa_bcv_global.valor|floatformat:2 }}</strong>
+                                    <strong>$1 = Bs. <span id="bcv-rate-value">{{ tasa_bcv_global.valor|floatformat:2 }}</span></strong>
                                 </div>
                             {% else %}
                                 <span class="small">Tasa BCV no disponible</span>
                             {% endif %}
-
+                            
                             {% if request.user.is_authenticated %}
-                                <form method="post" action="{% url 'cuentas:actualizar_tasa_bcv' %}" class="m-0">
+                                <form method="post" action="{% url 'cuentas:actualizar_tasa_bcv' %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
                                     
@@ -153,13 +155,11 @@
                                         type="submit" 
                                         class="btn btn-sm btn-outline-light rounded-circle" 
                                         title="Actualizar tasa BCV" 
-                                        aria-label="Actualizar tasa BCV"
-                                    >
+                                        aria-label="Actualizar tasa BCV">
                                         <i class="bi bi-arrow-clockwise"></i>
                                     </button>
                                 </form>
                             {% endif %}
-
                         </div>
                     </li>
 
