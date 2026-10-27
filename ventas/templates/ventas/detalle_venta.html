@@ -541,7 +541,7 @@
                         <div class="small mt-1">
                             Saldo pendiente:
                             <strong>
-                                {% precio_doble venta.cuenta_por_cobrar.saldo_pendiente %}
+                                {% precio_moneda venta.cuenta_por_cobrar.saldo_pendiente %}
                             </strong>
                         </div>
                     {% endif %}
@@ -694,13 +694,13 @@
 
 
                                 <td class="text-end">
-                                    {% precio_doble detalle.precio_unitario %}
+                                    {% precio_moneda detalle.precio_unitario %}
                                 </td>
 
 
                                 <td class="text-end">
                                     <strong>
-                                        {% precio_doble detalle.subtotal %}
+                                        {% precio_moneda detalle.subtotal %}
                                     </strong>
                                 </td>
 
@@ -779,7 +779,7 @@
                     </span>
 
                     <strong>
-                        {% precio_doble venta.subtotal %}
+                        {% precio_moneda venta.subtotal %}
                     </strong>
 
                 </div>
@@ -800,7 +800,7 @@
                         </span>
 
                         <strong>
-                            - {% precio_doble venta.descuento %}
+                            - {% precio_moneda venta.descuento %}
                         </strong>
 
                     </div>
@@ -814,7 +814,7 @@
                         </span>
 
                         <strong>
-                            {% precio_doble 0 %}
+                            {% precio_moneda 0 %}
                         </strong>
 
                     </div>
@@ -829,7 +829,7 @@
                     </strong>
 
                     <strong>
-                        {% precio_doble venta.total %}
+                        {% precio_moneda venta.total %}
                     </strong>
 
                 </div>

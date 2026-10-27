@@ -99,7 +99,7 @@
                         </p>
 
                         <h2 class="mb-1">
-                            {% precio_doble total_por_cobrar %}
+                            {% precio_moneda total_por_cobrar %}
                         </h2>
 
                         <small class="text-muted">
@@ -325,13 +325,13 @@
 
                                     {# Monto original de la cuenta #}
                                     <td>
-                                        {% precio_doble cuenta.monto_total %}
+                                        {% precio_moneda cuenta.monto_total %}
                                     </td>
 
 
                                     {# Total acumulado de todos los abonos #}
                                     <td class="text-success">
-                                        {% precio_doble cuenta.total_abonado %}
+                                        {% precio_moneda cuenta.total_abonado %}
                                     </td>
 
 
@@ -355,7 +355,7 @@
                                                     {% endif %}
                                                 "
                                             >
-                                                {% precio_doble cuenta.saldo_pendiente %}
+                                                {% precio_moneda cuenta.saldo_pendiente %}
                                             </strong>
 
                                         {% endif %}

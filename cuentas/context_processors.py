@@ -18,4 +18,8 @@ def tasa_bcv_global(request):
 
     return {
         "tasa_bcv_global": tasa,
+        "mostrar_selector_moneda": (
+            getattr(request.resolver_match, "namespace", "") in {"productos", "cuentas", "ventas", "caja"}
+            or getattr(request.resolver_match, "url_name", "") == "inicio"
+        ),
     }

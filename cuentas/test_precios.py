@@ -13,11 +13,13 @@ from productos.models import Categoria, Producto
 from usuarios.models import Negocio
 from ventas.models import DetalleVenta, Venta
 from .models import CuentaPorCobrar, TasaCambio
+from caja.models import CajaDiaria, MovimientoCaja
+from django.utils import timezone
 
 
 class PrecioDobleTests(SimpleTestCase):
     def render_precio(self, valor, tasa=None):
-        return Template('{% load precios %}{% precio_doble valor %}').render(
+        return Template('{% load precios %}{% precio_moneda valor %}').render(
             Context({'valor': valor, 'tasa_bcv_global': tasa})
         )
 
@@ -61,24 +63,29 @@ class PrecioDoblePaginasTests(TestCase):
         cls.cuenta = CuentaPorCobrar.objects.create(cliente=cls.cliente, concepto='Copias', monto_total=Decimal('0.40'))
         cls.venta = Venta.objects.create(negocio=cls.negocio, usuario=cls.usuario, total=Decimal('0.40'))
         DetalleVenta.objects.create(venta=cls.venta, producto=cls.producto, cantidad=1, precio_unitario=Decimal('0.40'), costo_unitario=Decimal('0.10'), subtotal=Decimal('0.40'))
+        cls.caja = CajaDiaria.objects.create(negocio=cls.negocio, abierta_por=cls.usuario, fecha=timezone.localdate(), saldo_inicial=Decimal('0.40'))
+        MovimientoCaja.objects.create(negocio=cls.negocio, usuario=cls.usuario, tipo='ingreso', monto=Decimal('0.40'), metodo_pago='efectivo', concepto='Prueba')
         TasaCambio.objects.create(valor=Decimal('800'), fecha_vigencia=date(2026, 10, 26))
         TasaCambio.objects.create(valor=Decimal('887.3'), fecha_vigencia=date(2026, 10, 27))
 
     def setUp(self):
         self.client.force_login(self.usuario)
 
-    def test_listas_y_detalles_muestran_ambos_importes(self):
+    def test_listas_y_detalles_incluyen_importes_para_el_selector(self):
         rutas = [
             reverse('productos:index'), reverse('productos:detalle', args=[self.producto.pk]),
             reverse('cuentas:lista'), reverse('cuentas:detalle', args=[self.cuenta.pk]),
             reverse('ventas:lista'), reverse('ventas:detalle', args=[self.venta.pk]),
             reverse('ventas:crear'), reverse('inicio'),
+            reverse('caja:dashboard'), reverse('caja:movimientos'), reverse('caja:cierres'),
+            reverse('caja:detalle_cierre', args=[self.caja.pk]),
             reverse('cuentas:registrar_abono', args=[self.cuenta.pk]),
             reverse('cuentas:pagar_completo', args=[self.cuenta.pk]),
         ]
         for url in rutas:
             with self.subTest(url=url):
                 response = self.client.get(url)
+                self.assertContains(response, 'data-moneda="bs"')
                 self.assertContains(response, '$0.40')
                 self.assertContains(response, 'Bs. 354,92')
 
@@ -95,3 +102,13 @@ class PrecioDoblePaginasTests(TestCase):
         response = self.client.get(reverse('productos:index'))
         self.assertContains(response, 'Tasa BCV no disponible')
         self.assertContains(response, '$0.40')
+
+    def test_selector_bloquea_bolivares_sin_tasa(self):
+        TasaCambio.objects.all().delete()
+        response = self.client.get(reverse('productos:index'))
+        self.assertContains(response, 'disabled title="Actualiza la tasa BCV')
+
+    def test_cierre_muestra_el_saldo_completo_en_la_moneda_seleccionable(self):
+        response = self.client.get(reverse('caja:cerrar'))
+        self.assertContains(response, '$0.80')
+        self.assertContains(response, 'Bs. 709,84')

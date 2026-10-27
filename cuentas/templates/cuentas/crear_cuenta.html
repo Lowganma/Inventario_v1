@@ -76,9 +76,6 @@
                                     </label>
 
                                     {{ field }}
-                                    {% if field.name == 'monto_total' or field.name == 'monto_pagado' %}
-                                        <small class="precio-equivalente" data-equivalente-input="{{ field.id_for_label }}" aria-live="polite"></small>
-                                    {% endif %}
 
                                     {% if field.help_text %}
                                         <div class="form-text">

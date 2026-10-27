@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load precios %}
+
 
 {% block title %}
 Movimientos de caja
@@ -121,13 +123,13 @@ Movimientos de caja
                                             {% if movimiento.tipo == "ingreso" %}
 
                                                 <strong class="text-success">
-                                                    + ${{ movimiento.monto|floatformat:2 }}
+                                                    + {% precio_moneda movimiento.monto %}
                                                 </strong>
 
                                             {% else %}
 
                                                 <strong class="text-danger">
-                                                    - ${{ movimiento.monto|floatformat:2 }}
+                                                    - {% precio_moneda movimiento.monto %}
                                                 </strong>
 
                                             {% endif %}

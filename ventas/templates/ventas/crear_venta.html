@@ -303,7 +303,7 @@
 
     .carrito-linea-controls {
         display: grid;
-        grid-template-columns: minmax(80px, 1fr) 70px 76px auto;
+        grid-template-columns: minmax(0, 1fr) minmax(100px, auto);
         gap: .3rem;
         margin-top: .35rem;
         align-items: center;
@@ -445,11 +445,6 @@
                                 {{ productos_catalogo|length }} items
                             </span>
 
-                            <div class="catalogo-view-toggle me-1" role="group" aria-label="Cambiar moneda del catálogo">
-                                <button type="button" id="btnMonedaUsd" class="active" title="Ver en Dólares">$</button>
-                                <button type="button" id="btnMonedaBs" title="Ver en Bolívares">Bs</button>
-                            </div>
-
                             <div class="catalogo-view-toggle" role="group" aria-label="Cambiar vista del catálogo">
                                 <button type="button" id="vistaMosaico" class="active" title="Vista mosaico">
                                     <i class="bi bi-grid-3x3-gap"></i>
@@ -500,7 +495,7 @@
                                 </div>
 
                                 <div class="catalogo-card-price" data-precio-usd="{{ producto.precio_venta|unlocalize }}">
-                                    {% precio_doble producto.precio_venta %}
+                                    {% precio_moneda producto.precio_venta %}
                                 </div>
 
                                 <i class="bi bi-plus-circle text-primary fs-5"></i>
@@ -603,7 +598,7 @@
                                                 </div>
                                             </div>
 
-                                            <button type="button" class="btn btn-sm btn-outline-danger eliminar-producto" title="Quitar">
+                                            <button type="button" class="btn btn-sm btn-outline-danger eliminar-producto" aria-label="Quitar producto de la venta" title="Quitar">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
@@ -614,9 +609,10 @@
                                                 <div class="form-text detalle-presentacion"></div>
                                             </div>
                                             <div>{{ detalle.cantidad }}</div>
-                                            <div class="input-group input-group-sm">
-                                                <span class="input-group-text">$</span>
-                                                {{ detalle.precio_unitario }}
+                                            <div class="carrito-precio-unitario">
+                                                <small class="text-body-secondary d-block">Precio unitario</small>
+                                                <span data-unitario>{% precio_moneda detalle.precio_unitario.value|default:0 %}</span>
+                                                <div class="d-none">{{ detalle.precio_unitario }}</div>
                                             </div>
                                             <div class="carrito-linea-subtotal" data-subtotal>$0.00</div>
                                         </div>
@@ -691,11 +687,6 @@
                             <span id="totalVenta" class="venta-total">$0.00</span>
                         </div>
 
-                        <div class="d-flex justify-content-between align-items-end pt-2 border-top border-secondary-subtle">
-                            <span class="fw-semibold text-success">Total (Bs.)</span>
-                            <span id="totalVentaBs" class="venta-total text-success">Bs. 0,00</span>
-                        </div>
-
                         <input type="hidden" name="tasa_cambio" id="input-tasa-cambio" value="0">
                         <input type="hidden" name="total_usd" id="input-total-usd" value="0">
 
@@ -732,7 +723,7 @@
                 </div>
             </div>
 
-            <button type="button" class="btn btn-sm btn-outline-danger eliminar-producto">
+            <button type="button" class="btn btn-sm btn-outline-danger eliminar-producto" aria-label="Quitar producto de la venta">
                 <i class="bi bi-trash"></i>
             </button>
         </div>
@@ -747,9 +738,10 @@
                 {{ detalles.empty_form.cantidad }}
             </div>
 
-            <div class="input-group input-group-sm">
-                <span class="input-group-text">$</span>
-                {{ detalles.empty_form.precio_unitario }}
+            <div class="carrito-precio-unitario">
+                <small class="text-body-secondary d-block">Precio unitario</small>
+                <span data-unitario>{% precio_moneda 0 %}</span>
+                <div class="d-none">{{ detalles.empty_form.precio_unitario }}</div>
             </div>
 
             <div class="carrito-linea-subtotal" data-subtotal>$0.00</div>
@@ -1023,11 +1015,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const precioInput = getCampoPrecio(fila);
         if (precioInput) {
             precioInput.addEventListener("input", () => recalcularLinea(fila));
-            const equivalente = document.createElement("small");
-            equivalente.className = "precio-equivalente w-100";
-            equivalente.setAttribute("data-precio-unitario-bs", "");
-            equivalente.setAttribute("aria-live", "polite");
-            precioInput.parentElement.append(equivalente);
+
         }
 
         if (eliminar) {
@@ -1114,11 +1102,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (subtotal) {
             subtotal.dataset.valor = valor.toString();
-            const equivalentePrecio = fila.querySelector("[data-precio-unitario-bs]");
-            if (equivalentePrecio) equivalentePrecio.textContent = window.Precios.bolivares(precio ? precio.value : 0);
             window.Precios.mostrar(subtotal, valor);
         }
 
+        const unitario = fila.querySelector("[data-unitario]");
+        if (unitario) window.Precios.mostrar(unitario, precio ? precio.value : 0);
+        window.Precios.actualizarInputs();
         recalcularVenta();
     }
 
@@ -1153,7 +1142,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         window.Precios.mostrar(document.getElementById("subtotalVenta"), subtotal);
         window.Precios.mostrar(document.getElementById("descuentoVenta"), descuento);
-        document.getElementById("totalVenta").textContent = moneda(totalUSD);
+        window.Precios.mostrar(document.getElementById("totalVenta"), totalUSD);
 
         const tasaBCV = window.Precios.tasa();
 
@@ -1162,11 +1151,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const inputTotalUSD = document.getElementById('input-total-usd');
         if (inputTotalUSD) inputTotalUSD.value = totalUSD.toFixed(2);
-
-        const totalBsElement = document.getElementById('totalVentaBs');
-        if (totalBsElement) {
-            totalBsElement.textContent = window.Precios.bolivares(totalUSD);
-        }
 
         actualizarEstadoCarrito();
     }
@@ -1227,55 +1211,6 @@ document.addEventListener("DOMContentLoaded", function () {
             toggleNotas.textContent = panelNotas.classList.contains("d-none") ? "+ Agregar nota" : "Ocultar nota";
         });
     }
-
-    // =========================================================
-    // ALTERNAR MONEDA EN CATÁLOGO ($ / Bs)
-    // =========================================================
-    const btnMonedaUsd = document.getElementById("btnMonedaUsd");
-    const btnMonedaBs = document.getElementById("btnMonedaBs");
-    const preciosCards = document.querySelectorAll(".catalogo-card-price");
-
-    const tasaCambioGlobal = window.Precios.tasa();
-    
-    let monedaCatalogoActual = "usd";
-
-    function aplicarMonedaCatalogo() {
-        preciosCards.forEach(function(el) {
-            const precioUsd = numero(el.dataset.precioUsd);
-            
-            window.Precios.mostrar(el, precioUsd, monedaCatalogoActual);
-        });
-
-        if (btnMonedaUsd && btnMonedaBs) {
-            btnMonedaUsd.classList.toggle("active", monedaCatalogoActual === "usd");
-            btnMonedaBs.classList.toggle("active", monedaCatalogoActual === "bs");
-        }
-
-        localStorage.setItem("venta_catalogo_moneda", monedaCatalogoActual);
-    }
-
-    if (btnMonedaUsd && btnMonedaBs) {
-        btnMonedaUsd.addEventListener("click", function() {
-            monedaCatalogoActual = "usd";
-            aplicarMonedaCatalogo();
-        });
-
-        btnMonedaBs.addEventListener("click", function() {
-            if (tasaCambioGlobal > 0) {
-                monedaCatalogoActual = "bs";
-                aplicarMonedaCatalogo();
-            } else {
-                alert("No hay una tasa de cambio registrada para convertir a Bolívares.");
-            }
-        });
-    }
-
-    const monedaGuardada = localStorage.getItem("venta_catalogo_moneda");
-    if (monedaGuardada === "bs" && tasaCambioGlobal > 0) {
-        monedaCatalogoActual = "bs";
-    }
-    
-    aplicarMonedaCatalogo();
 
     // =========================================================
     // INICIO

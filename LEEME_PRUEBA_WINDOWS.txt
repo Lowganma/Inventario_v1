@@ -8,7 +8,7 @@ PRUEBA LOCAL EN WINDOWS
    para descargar las dependencias. El servidor funciona solo en tu PC.
 4. Espera al mensaje del servidor. Abre http://127.0.0.1:8765/usuarios/registro/
    para crear tu usuario y negocio. En las siguientes visitas usa la pagina inicial.
-5. Agrega un producto en Productos. Se muestran USD y el equivalente en Bs.
+5. Agrega un producto en Productos. Usa el selector Mostrar precios en: USD o Bolivares. Solo veras una moneda.
 6. Usa el boton de actualizar junto a Tasa BCV para consultar la tasa.
    Si falta una tasa, veras "Tasa BCV no disponible". No se incluyen tasas inventadas.
 7. En Ventas > Nueva venta, agrega el producto, cambia la cantidad y prueba
@@ -20,8 +20,8 @@ iniciar, abre PROBAR_EN_WINDOWS.bat otra vez.
 
 Esta copia contiene los cambios de doble precio y empieza con una base de
 prueba vacia. No incluye usuarios, contrasenas ni datos de tu negocio.
-Conserva tu instalacion actual separada. Los importes se ingresan en USD;
-Bs. es el equivalente de referencia con la ultima tasa BCV registrada.
+Conserva tu instalacion actual separada. El selector tambien cambia los campos monetarios de entrada.
+Bs. usa la ultima tasa BCV registrada; los datos se guardan en USD.
 El ZIP no actualiza GitHub ni tu instalacion anterior.
 
 Usa PROBAR_EN_WINDOWS.bat: requirements-prueba.txt evita el conflicto que

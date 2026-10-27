@@ -355,7 +355,7 @@
 
                     <div class="fs-3 fw-bold">
 
-                        {% precio_doble producto.valor_inventario %}
+                        {% precio_moneda producto.valor_inventario %}
 
                     </div>
 
@@ -419,7 +419,7 @@
 
                     <div class="fs-3 fw-bold">
 
-                        {% precio_doble producto.costo %}
+                        {% precio_moneda producto.costo %}
 
                     </div>
 
@@ -446,7 +446,7 @@
 
                     <div class="fs-3 fw-bold">
 
-                        {% precio_doble producto.precio_venta %}
+                        {% precio_moneda producto.precio_venta %}
 
                     </div>
 
@@ -566,7 +566,7 @@
                                     Precio de venta
                                 </label>
 
-                                {{ formulario_presentacion.precio_venta }}<small class="precio-equivalente" data-equivalente-input="{{ formulario_presentacion.precio_venta.id_for_label }}" aria-live="polite"></small>
+                                {{ formulario_presentacion.precio_venta }}
 
                                 <div class="form-text">
                                     Opcional.
@@ -651,7 +651,7 @@
 
                                     {% if presentacion.precio_venta != None %}
 
-                                        {% precio_doble presentacion.precio_venta %}
+                                        {% precio_moneda presentacion.precio_venta %}
 
                                     {% else %}
 

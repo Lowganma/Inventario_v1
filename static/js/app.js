@@ -100,53 +100,113 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
-// Importes contables e inputs permanecen en USD. Bs. es una referencia BCV.
+// Una preferencia de moneda para todas las pantallas. Los valores contables
+// originales permanecen en USD; los controles visibles convierten al editar.
 window.Precios = (() => {
-    const formatoBs = new Intl.NumberFormat("es-VE", {
-        minimumFractionDigits: 2, maximumFractionDigits: 2,
-    });
+    const formatoBs = new Intl.NumberFormat("es-VE", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    const clave = "inventario-moneda";
+    let moneda = "usd";
+    const campos = new Map();
+    const nombres = new Set(["costo", "precio_venta", "monto_total", "monto_pagado", "monto", "saldo_inicial", "saldo_final_declarado", "valor_descuento"]);
     function numero(valor) {
         const n = Number(String(valor ?? "").replace(",", "."));
         return Number.isFinite(n) ? n : 0;
     }
     function tasa() {
-        const valor = numero(document.getElementById("bcv-rate-container")?.dataset.tasa);
-        return valor > 0 ? valor : 0;
+        const n = numero(document.getElementById("bcv-rate-container")?.dataset.tasa);
+        return n > 0 ? n : 0;
     }
     function redondear(valor) {
         const n = numero(valor);
         return Math.sign(n) * Math.round((Math.abs(n) + Number.EPSILON) * 100) / 100;
     }
-    function dolares(valor) {
-        return "$" + redondear(valor).toFixed(2);
-    }
+    function dolares(valor) { return "$" + redondear(valor).toFixed(2); }
     function bolivares(valor) {
-        if (!tasa()) return "Tasa BCV no disponible";
-        const usd = redondear(valor);
-        return "Bs. " + formatoBs.format(redondear(usd * tasa()));
+        return tasa() ? "Bs. " + formatoBs.format(redondear(redondear(valor) * tasa())) : "Tasa BCV no disponible";
     }
-    function mostrar(elemento, valor, principal = "usd") {
-        const usd = dolares(valor);
-        const bs = bolivares(valor);
-        const contenedor = document.createElement("span");
-        contenedor.className = "precio-doble";
-        const primero = document.createElement("span");
-        primero.className = principal === "bs" ? "precio-bs-principal" : "precio-usd";
-        primero.textContent = principal === "bs" ? bs : usd;
-        const segundo = document.createElement("small");
-        segundo.className = "precio-bs";
-        segundo.textContent = principal === "bs" ? usd : bs;
-        segundo.title = "Equivalente de referencia con la última tasa BCV registrada";
-        contenedor.append(primero, segundo);
-        elemento.replaceChildren(contenedor);
+    function mostrar(elemento, valor) {
+        elemento.dataset.importeUsd = String(redondear(valor));
+        elemento.textContent = moneda === "bs" ? bolivares(valor) : dolares(valor);
+        elemento.classList.add("importe-moneda");
     }
-    function actualizarInputs(root = document) {
-        root.querySelectorAll("[data-equivalente-input]").forEach(salida => {
-            const input = document.getElementById(salida.dataset.equivalenteInput);
-            salida.textContent = input && input.value !== "" ? "USD · " + bolivares(input.value) : "Importe en USD · equivalente en Bs.";
+    function porcentaje(input) {
+        return input.name === "valor_descuento" && document.getElementById("id_tipo_descuento")?.value === "porcentaje";
+    }
+    function actualizarInputs() {
+        campos.forEach((visible, original) => {
+            if (!original.isConnected) { campos.delete(original); return; }
+            const esBs = moneda === "bs" && !porcentaje(original);
+            visible.readOnly = original.readOnly;
+            visible.disabled = original.disabled;
+            if (document.activeElement !== visible) {
+                visible.value = original.value === "" ? "" : redondear(numero(original.value) * (esBs ? tasa() : 1)).toFixed(2);
+            }
+            for (const limite of ["min", "max"]) {
+                if (original.hasAttribute(limite)) visible.setAttribute(limite, String(numero(original.getAttribute(limite)) * (esBs ? tasa() : 1)));
+            }
+            const unidad = porcentaje(original) ? "%" : esBs ? "Bs." : "USD";
+            visible.setAttribute("aria-label", `${original.dataset.etiquetaMoneda || original.name}: ${unidad}`);
+            const prefijo = visible.parentElement.querySelector(".input-group-text");
+            if (prefijo && /^(\$|USD|Bs\.|%)$/.test(prefijo.textContent.trim())) prefijo.textContent = unidad;
+            const etiqueta = document.querySelector(`label[for="${visible.id}"]`);
+            const badge = etiqueta?.querySelector("[data-unidad-moneda]");
+            if (badge) badge.textContent = ` (${unidad})`;
         });
     }
-    document.addEventListener("DOMContentLoaded", () => actualizarInputs());
-    document.addEventListener("input", () => actualizarInputs());
-    return { tasa, bolivares, mostrar, actualizarInputs, redondear, dolares };
+    function prepararInputs() {
+        document.querySelectorAll('input[type="number"]:not([data-moneda-visible])').forEach(original => {
+            if (campos.has(original) || !(nombres.has(original.name))) return;
+            const visible = original.cloneNode();
+            visible.removeAttribute("name");
+            visible.removeAttribute("class");
+            visible.className = "form-control";
+            visible.id = `${original.id}-moneda`;
+            visible.dataset.monedaVisible = "true";
+            visible.step = "0.01";
+            const etiqueta = document.querySelector(`label[for="${original.id}"]`);
+            if (etiqueta) {
+                original.dataset.etiquetaMoneda = etiqueta.textContent.trim();
+                etiqueta.htmlFor = visible.id;
+                const unidad = document.createElement("span");
+                unidad.dataset.unidadMoneda = "";
+                etiqueta.append(unidad);
+            }
+            original.type = "hidden";
+            original.after(visible);
+            campos.set(original, visible);
+            visible.addEventListener("input", () => {
+                original.value = visible.value === "" ? "" : redondear(numero(visible.value) / (moneda === "bs" && !porcentaje(original) ? tasa() : 1)).toFixed(2);
+                original.dispatchEvent(new Event("input", {bubbles: true}));
+            });
+            visible.addEventListener("change", () => original.dispatchEvent(new Event("change", {bubbles: true})));
+            visible.addEventListener("blur", () => actualizarInputs());
+        });
+        actualizarInputs();
+    }
+    function refrescar(root = document) {
+        root.querySelectorAll("[data-importe-usd]").forEach(el => mostrar(el, el.dataset.importeUsd));
+        prepararInputs();
+    }
+    function cambiar(elegida, guardar = true) {
+        moneda = elegida === "bs" && tasa() ? "bs" : "usd";
+        document.documentElement.dataset.moneda = moneda;
+        document.querySelectorAll("button[data-moneda]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.moneda === moneda)));
+        const estado = document.getElementById("moneda-estado");
+        if (estado) estado.textContent = !tasa() ? "Actualiza la tasa BCV para ver bolívares" : moneda === "bs" ? "Bolívares · tasa BCV de referencia" : "Importes en dólares";
+        if (guardar) { try { localStorage.setItem(clave, moneda); } catch (_) {} }
+        refrescar();
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+        let guardada;
+        try { guardada = localStorage.getItem(clave); } catch (_) {}
+        cambiar(guardada, false);
+        document.querySelectorAll("button[data-moneda]").forEach(b => b.addEventListener("click", () => cambiar(b.dataset.moneda)));
+        new MutationObserver(registros => {
+            registros.forEach(r => r.addedNodes.forEach(n => {
+                if (n.nodeType === 1 && (n.matches("[data-importe-usd], input[type=number]") || n.querySelector("[data-importe-usd], input[type=number]"))) refrescar(n.parentElement || document);
+            }));
+        }).observe(document.querySelector("main") || document.body, {childList: true, subtree: true});
+    });
+    document.addEventListener("change", actualizarInputs);
+    return { tasa, bolivares, mostrar, actualizarInputs, redondear, dolares, cambiar, refrescar };
 })();

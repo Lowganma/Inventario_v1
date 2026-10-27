@@ -141,11 +141,11 @@
 
                     {% if ultima_venta %}
                         <h5 class="mb-0">
-                            {% precio_doble ultima_venta.total %}
+                            {% precio_moneda ultima_venta.total %}
                         </h5>
                     {% else %}
                         <h5 class="mb-0">
-                            {% precio_doble 0 %}
+                            {% precio_moneda 0 %}
                         </h5>
                     {% endif %}
                 </div>
@@ -419,7 +419,7 @@
 
                                     <td class="text-end">
                                         <strong>
-                                            {% precio_doble venta.total %}
+                                            {% precio_moneda venta.total %}
                                         </strong>
                                     </td>
 

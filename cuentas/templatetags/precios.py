@@ -15,7 +15,7 @@ def formato_bs(valor):
 
 
 @register.simple_tag(takes_context=True)
-def precio_doble(context, valor):
+def precio_moneda(context, valor):
     """Equivalente de referencia con la tasa actual; no cambia montos contables."""
     usd = importe(valor)
     tasa = context.get("tasa_bcv_global")
@@ -32,7 +32,7 @@ def precio_doble(context, valor):
         secundario = "Tasa BCV no disponible"
         referencia = "Registra una tasa BCV válida para ver el equivalente en bolívares"
     return format_html(
-        '<span class="precio-doble"><span class="precio-usd">${}</span>'
-        '<small class="precio-bs" title="{}">{}</small></span>',
-        format(usd, ".2f"), referencia, secundario,
+        '<span class="importe-moneda" data-importe-usd="{}" title="{}">'
+        '<span class="importe-usd">${}</span><span class="importe-bs">{}</span></span>',
+        format(usd, ".2f"), referencia, format(usd, ".2f"), secundario,
     )
