@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load precios %}
 
 {# Título de la pestaña del navegador #}
 {% block title %}
@@ -98,7 +99,7 @@
                         </p>
 
                         <h2 class="mb-1">
-                            ${{ total_por_cobrar|floatformat:2 }}
+                            {% precio_doble total_por_cobrar %}
                         </h2>
 
                         <small class="text-muted">
@@ -324,13 +325,13 @@
 
                                     {# Monto original de la cuenta #}
                                     <td>
-                                        ${{ cuenta.monto_total|floatformat:2 }}
+                                        {% precio_doble cuenta.monto_total %}
                                     </td>
 
 
                                     {# Total acumulado de todos los abonos #}
                                     <td class="text-success">
-                                        ${{ cuenta.total_abonado|floatformat:2 }}
+                                        {% precio_doble cuenta.total_abonado %}
                                     </td>
 
 
@@ -354,7 +355,7 @@
                                                     {% endif %}
                                                 "
                                             >
-                                                ${{ cuenta.saldo_pendiente|floatformat:2 }}
+                                                {% precio_doble cuenta.saldo_pendiente %}
                                             </strong>
 
                                         {% endif %}

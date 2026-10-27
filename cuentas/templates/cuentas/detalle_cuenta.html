@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load precios %}
 
 {% block title %}
     Detalle de la cuenta
@@ -269,7 +270,7 @@
                                 {# Monto y fecha #}
                                 <div class="col-12 col-md">
                                     <strong class="fs-5 text-success">
-                                        ${{ abono.monto_pagado|floatformat:2 }}
+                                        {% precio_doble abono.monto_pagado %}
                                     </strong>
 
                                     <small class="text-muted d-block">
@@ -358,7 +359,7 @@
                         </small>
 
                         <strong class="fs-4">
-                            ${{ cuenta.monto_total|floatformat:2 }}
+                            {% precio_doble cuenta.monto_total %}
                         </strong>
                     </div>
 
@@ -368,7 +369,7 @@
                         </small>
 
                         <strong class="fs-4 text-success">
-                            ${{ cuenta.total_abonado|floatformat:2 }}
+                            {% precio_doble cuenta.total_abonado %}
                         </strong>
                     </div>
 
@@ -387,7 +388,7 @@
                                 {% endif %}
                             "
                         >
-                            ${{ cuenta.saldo_pendiente|floatformat:2 }}
+                            {% precio_doble cuenta.saldo_pendiente %}
                         </strong>
                     </div>
 

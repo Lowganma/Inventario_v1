@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load precios %}
 
 {% block title %}
 Anular cuenta
@@ -45,12 +46,12 @@ Anular cuenta
 
                     <div class="mb-2">
                         <strong>Monto:</strong>
-                        ${{ cuenta.monto_total|floatformat:2 }}
+                        {% precio_doble cuenta.monto_total %}
                     </div>
 
                     <div>
                         <strong>Saldo pendiente:</strong>
-                        ${{ cuenta.saldo_pendiente|floatformat:2 }}
+                        {% precio_doble cuenta.saldo_pendiente %}
                     </div>
 
                 </div>

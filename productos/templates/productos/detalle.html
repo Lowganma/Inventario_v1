@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load precios %}
 
 {% block title %}
     {{ producto.nombre }} | Inventario
@@ -354,7 +355,7 @@
 
                     <div class="fs-3 fw-bold">
 
-                        ${{ producto.valor_inventario|floatformat:2 }}
+                        {% precio_doble producto.valor_inventario %}
 
                     </div>
 
@@ -418,7 +419,7 @@
 
                     <div class="fs-3 fw-bold">
 
-                        ${{ producto.costo|floatformat:2 }}
+                        {% precio_doble producto.costo %}
 
                     </div>
 
@@ -445,7 +446,7 @@
 
                     <div class="fs-3 fw-bold">
 
-                        ${{ producto.precio_venta|floatformat:2 }}
+                        {% precio_doble producto.precio_venta %}
 
                     </div>
 
@@ -565,7 +566,7 @@
                                     Precio de venta
                                 </label>
 
-                                {{ formulario_presentacion.precio_venta }}
+                                {{ formulario_presentacion.precio_venta }}<small class="precio-equivalente" data-equivalente-input="{{ formulario_presentacion.precio_venta.id_for_label }}" aria-live="polite"></small>
 
                                 <div class="form-text">
                                     Opcional.
@@ -650,7 +651,7 @@
 
                                     {% if presentacion.precio_venta != None %}
 
-                                        ${{ presentacion.precio_venta|floatformat:2 }}
+                                        {% precio_doble presentacion.precio_venta %}
 
                                     {% else %}
 

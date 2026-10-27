@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load precios l10n %}
 
 {% block title %}Nueva venta{% endblock %}
 
@@ -498,8 +499,8 @@
                                     </div>
                                 </div>
 
-                                <div class="catalogo-card-price" data-precio-usd="{{ producto.precio_venta|stringformat:'.2f' }}">
-                                    ${{ producto.precio_venta|floatformat:2 }}
+                                <div class="catalogo-card-price" data-precio-usd="{{ producto.precio_venta|unlocalize }}">
+                                    {% precio_doble producto.precio_venta %}
                                 </div>
 
                                 <i class="bi bi-plus-circle text-primary fs-5"></i>
@@ -796,7 +797,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function moneda(valor) {
-        return "$" + numero(valor).toFixed(2);
+        return window.Precios.dolares(valor);
     }
 
     function urlDatosProducto(productoId) {
@@ -1020,7 +1021,14 @@ document.addEventListener("DOMContentLoaded", function () {
         if (cantidad) cantidad.addEventListener("input", () => recalcularLinea(fila));
 
         const precioInput = getCampoPrecio(fila);
-        if (precioInput) precioInput.addEventListener("input", () => recalcularLinea(fila));
+        if (precioInput) {
+            precioInput.addEventListener("input", () => recalcularLinea(fila));
+            const equivalente = document.createElement("small");
+            equivalente.className = "precio-equivalente w-100";
+            equivalente.setAttribute("data-precio-unitario-bs", "");
+            equivalente.setAttribute("aria-live", "polite");
+            precioInput.parentElement.append(equivalente);
+        }
 
         if (eliminar) {
             eliminar.addEventListener("click", function () {
@@ -1102,11 +1110,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const precio = getCampoPrecio(fila);
         const subtotal = fila.querySelector("[data-subtotal]");
 
-        const valor = numero(cantidad ? cantidad.value : 0) * numero(precio ? precio.value : 0);
+        const valor = window.Precios.redondear(numero(cantidad ? cantidad.value : 0) * numero(precio ? precio.value : 0));
 
         if (subtotal) {
             subtotal.dataset.valor = valor.toString();
-            subtotal.textContent = moneda(valor);
+            const equivalentePrecio = fila.querySelector("[data-precio-unitario-bs]");
+            if (equivalentePrecio) equivalentePrecio.textContent = window.Precios.bolivares(precio ? precio.value : 0);
+            window.Precios.mostrar(subtotal, valor);
         }
 
         recalcularVenta();
@@ -1138,15 +1148,14 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
-        descuento = Math.max(0, Math.min(descuento, subtotal));
-        const totalUSD = subtotal - descuento;
+        descuento = window.Precios.redondear(Math.max(0, Math.min(descuento, subtotal)));
+        const totalUSD = window.Precios.redondear(subtotal - descuento);
 
-        document.getElementById("subtotalVenta").textContent = moneda(subtotal);
-        document.getElementById("descuentoVenta").textContent = moneda(descuento);
+        window.Precios.mostrar(document.getElementById("subtotalVenta"), subtotal);
+        window.Precios.mostrar(document.getElementById("descuentoVenta"), descuento);
         document.getElementById("totalVenta").textContent = moneda(totalUSD);
 
-        const rateContainer = document.getElementById('bcv-rate-container');
-        const tasaBCV = rateContainer ? parseFloat((rateContainer.dataset.tasa || "0").replace(',', '.')) : 0;
+        const tasaBCV = window.Precios.tasa();
 
         const inputTasa = document.getElementById('input-tasa-cambio');
         if (inputTasa) inputTasa.value = tasaBCV;
@@ -1154,13 +1163,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const inputTotalUSD = document.getElementById('input-total-usd');
         if (inputTotalUSD) inputTotalUSD.value = totalUSD.toFixed(2);
 
-        const totalBS = totalUSD * tasaBCV;
         const totalBsElement = document.getElementById('totalVentaBs');
         if (totalBsElement) {
-            totalBsElement.textContent = "Bs. " + totalBS.toLocaleString('es-VE', { 
-                minimumFractionDigits: 2, 
-                maximumFractionDigits: 2 
-            });
+            totalBsElement.textContent = window.Precios.bolivares(totalUSD);
         }
 
         actualizarEstadoCarrito();
@@ -1230,8 +1235,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const btnMonedaBs = document.getElementById("btnMonedaBs");
     const preciosCards = document.querySelectorAll(".catalogo-card-price");
 
-    const divTasaGlobal = document.getElementById('bcv-rate-container');
-    const tasaCambioGlobal = divTasaGlobal ? parseFloat((divTasaGlobal.dataset.tasa || "0").replace(',', '.')) : 0;
+    const tasaCambioGlobal = window.Precios.tasa();
     
     let monedaCatalogoActual = "usd";
 
@@ -1239,15 +1243,7 @@ document.addEventListener("DOMContentLoaded", function () {
         preciosCards.forEach(function(el) {
             const precioUsd = numero(el.dataset.precioUsd);
             
-            if (monedaCatalogoActual === "usd") {
-                el.textContent = "$" + precioUsd.toFixed(2);
-            } else {
-                const precioBs = precioUsd * tasaCambioGlobal;
-                el.textContent = "Bs. " + precioBs.toLocaleString('es-VE', { 
-                    minimumFractionDigits: 2, 
-                    maximumFractionDigits: 2 
-                });
-            }
+            window.Precios.mostrar(el, precioUsd, monedaCatalogoActual);
         });
 
         if (btnMonedaUsd && btnMonedaBs) {

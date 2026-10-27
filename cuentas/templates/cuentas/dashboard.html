@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load precios %}
 
 {% block title %}
 Panel principal
@@ -86,7 +87,7 @@ Panel principal
                                     </p>
 
                                     <h2 class="mb-1">
-                                        ${{ total_ventas_hoy|floatformat:2 }}
+                                        {% precio_doble total_ventas_hoy %}
                                     </h2>
 
                                     <small class="text-muted">
@@ -138,7 +139,7 @@ Panel principal
                                     </p>
 
                                     <h2 class="mb-1">
-                                        ${{ ingresos_hoy|floatformat:2 }}
+                                        {% precio_doble ingresos_hoy %}
                                     </h2>
 
                                     <small class="text-muted">
@@ -185,7 +186,7 @@ Panel principal
                                     </p>
 
                                     <h2 class="mb-1">
-                                        ${{ egresos_hoy|floatformat:2 }}
+                                        {% precio_doble egresos_hoy %}
                                     </h2>
 
                                     <small class="text-muted">
@@ -237,7 +238,7 @@ Panel principal
                                         </p>
 
                                         <h2 class="mb-1">
-                                            ${{ saldo_caja|floatformat:2 }}
+                                            {% precio_doble saldo_caja %}
                                         </h2>
 
                                         <small class="text-muted">
@@ -358,7 +359,7 @@ Panel principal
                                     </span>
 
                                     <strong>
-                                        ${{ total_compras_hoy|floatformat:2 }}
+                                        {% precio_doble total_compras_hoy %}
                                     </strong>
                                 </div>
 
@@ -380,7 +381,7 @@ Panel principal
                                     </span>
 
                                     <strong>
-                                        ${{ abonos_hoy|floatformat:2 }}
+                                        {% precio_doble abonos_hoy %}
                                     </strong>
                                 </div>
 
@@ -402,7 +403,7 @@ Panel principal
                                     </span>
 
                                     <strong>
-                                        ${{ total_fiado_hoy|floatformat:2 }}
+                                        {% precio_doble total_fiado_hoy %}
                                     </strong>
                                 </div>
 
@@ -425,13 +426,13 @@ Panel principal
                                     {% if flujo_hoy >= 0 %}
 
                                         <strong class="text-success">
-                                            +${{ flujo_hoy|floatformat:2 }}
+                                            +{% precio_doble flujo_hoy %}
                                         </strong>
 
                                     {% else %}
 
                                         <strong class="text-danger">
-                                            ${{ flujo_hoy|floatformat:2 }}
+                                            {% precio_doble flujo_hoy %}
                                         </strong>
 
                                     {% endif %}
@@ -488,18 +489,11 @@ Panel principal
 
 
                                 <h2 class="display-6 mb-1">
-                                    ${{ total_por_cobrar|floatformat:2 }}
+                                    {% precio_doble total_por_cobrar %}
                                 </h2>
 
 
-                                {% if total_por_cobrar_bs is not None %}
 
-                                    <p class="text-muted mb-4">
-                                        Bs.
-                                        {{ total_por_cobrar_bs|floatformat:2 }}
-                                    </p>
-
-                                {% endif %}
 
 
                                 <div
@@ -746,7 +740,7 @@ Panel principal
                                     </span>
 
                                     <strong>
-                                        ${{ valor_inventario|floatformat:2 }}
+                                        {% precio_doble valor_inventario %}
                                     </strong>
 
                                 </div>
@@ -875,13 +869,13 @@ Panel principal
                                                             {% if movimiento.tipo == "ingreso" %}
 
                                                                 <strong class="text-success">
-                                                                    +${{ movimiento.monto|floatformat:2 }}
+                                                                    +{% precio_doble movimiento.monto %}
                                                                 </strong>
 
                                                             {% else %}
 
                                                                 <strong class="text-danger">
-                                                                    -${{ movimiento.monto|floatformat:2 }}
+                                                                    -{% precio_doble movimiento.monto %}
                                                                 </strong>
 
                                                             {% endif %}
@@ -1157,7 +1151,7 @@ Panel principal
 
 
                                             <strong>
-                                                ${{ cuenta.saldo_pendiente|floatformat:2 }}
+                                                {% precio_doble cuenta.saldo_pendiente %}
                                             </strong>
 
                                         </a>

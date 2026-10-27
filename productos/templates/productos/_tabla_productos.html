@@ -1,3 +1,4 @@
+{% load precios %}
 <div class="card">
 
     <div class="table-responsive">
@@ -171,11 +172,11 @@
                         </td>
 
                         <td>
-                            ${{ producto.costo|floatformat:2 }}
+                            {% precio_doble producto.costo %}
                         </td>
 
                         <td>
-                            ${{ producto.precio_venta|floatformat:2 }}
+                            {% precio_doble producto.precio_venta %}
                         </td>
 
                         <td>

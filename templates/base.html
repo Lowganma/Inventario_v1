@@ -1,4 +1,4 @@
-{% load static %}
+{% load static l10n %}
 
 <!DOCTYPE html>
 
@@ -135,7 +135,7 @@
                     <li class="nav-item d-flex align-items-center me-lg-3">
                         <div class="navbar-rate px-3 py-2 d-flex align-items-center gap-2"
                             id="bcv-rate-container"
-                            data-tasa="{{ tasa_bcv_global.valor|default:'0' }}">
+                            data-tasa="{{ tasa_bcv_global.valor|unlocalize|default:'0' }}">
                             
                             {% if tasa_bcv_global %}
                                 <div>

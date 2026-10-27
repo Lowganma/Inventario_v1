@@ -1,0 +1,29 @@
+PRUEBA LOCAL EN WINDOWS
+
+1. Instala Python 3.11 para Windows si todavia no lo tienes:
+   https://www.python.org/downloads/release/python-3119/
+   Elige Windows installer (64-bit). Conserva Python Launcher seleccionado.
+2. Extrae TODO el ZIP en una carpeta nueva. No lo abras dentro del ZIP.
+3. Haz doble clic en PROBAR_EN_WINDOWS.bat. La primera vez requiere Internet
+   para descargar las dependencias. El servidor funciona solo en tu PC.
+4. Espera al mensaje del servidor. Abre http://127.0.0.1:8765/usuarios/registro/
+   para crear tu usuario y negocio. En las siguientes visitas usa la pagina inicial.
+5. Agrega un producto en Productos. Se muestran USD y el equivalente en Bs.
+6. Usa el boton de actualizar junto a Tasa BCV para consultar la tasa.
+   Si falta una tasa, veras "Tasa BCV no disponible". No se incluyen tasas inventadas.
+7. En Ventas > Nueva venta, agrega el producto, cambia la cantidad y prueba
+   un descuento. Deben cambiar los subtotales y el total en ambas monedas.
+8. En Cuentas, crea una cuenta y verifica monto, saldo y abonos en ambas monedas.
+
+Deja la ventana negra abierta. Para detener, pulsa Ctrl+C. Para volver a
+iniciar, abre PROBAR_EN_WINDOWS.bat otra vez.
+
+Esta copia contiene los cambios de doble precio y empieza con una base de
+prueba vacia. No incluye usuarios, contrasenas ni datos de tu negocio.
+Conserva tu instalacion actual separada. Los importes se ingresan en USD;
+Bs. es el equivalente de referencia con la ultima tasa BCV registrada.
+El ZIP no actualiza GitHub ni tu instalacion anterior.
+
+Usa PROBAR_EN_WINDOWS.bat: requirements-prueba.txt evita el conflicto que
+ya existe en requirements.txt. No necesitas Docker para esta prueba.
+Si aparece un error, copia el mensaje completo o toma una captura y enviala.

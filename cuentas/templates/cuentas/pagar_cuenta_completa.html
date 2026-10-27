@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load precios %}
 
 {% block title %}
     Pagar saldo completo
@@ -143,7 +144,7 @@
                     </small>
 
                     <strong class="fs-2 text-success">
-                        ${{ cuenta.saldo_pendiente|floatformat:2 }}
+                        {% precio_doble cuenta.saldo_pendiente %}
                     </strong>
 
                     <p class="text-muted small mt-3 mb-0">

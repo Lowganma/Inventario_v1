@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load precios %}
 
 {% block title %}Venta #{{ venta.numero }}{% endblock %}
 
@@ -540,7 +541,7 @@
                         <div class="small mt-1">
                             Saldo pendiente:
                             <strong>
-                                ${{ venta.cuenta_por_cobrar.saldo_pendiente|floatformat:2 }}
+                                {% precio_doble venta.cuenta_por_cobrar.saldo_pendiente %}
                             </strong>
                         </div>
                     {% endif %}
@@ -693,13 +694,13 @@
 
 
                                 <td class="text-end">
-                                    ${{ detalle.precio_unitario|floatformat:2 }}
+                                    {% precio_doble detalle.precio_unitario %}
                                 </td>
 
 
                                 <td class="text-end">
                                     <strong>
-                                        ${{ detalle.subtotal|floatformat:2 }}
+                                        {% precio_doble detalle.subtotal %}
                                     </strong>
                                 </td>
 
@@ -778,7 +779,7 @@
                     </span>
 
                     <strong>
-                        ${{ venta.subtotal|floatformat:2 }}
+                        {% precio_doble venta.subtotal %}
                     </strong>
 
                 </div>
@@ -799,7 +800,7 @@
                         </span>
 
                         <strong>
-                            - ${{ venta.descuento|floatformat:2 }}
+                            - {% precio_doble venta.descuento %}
                         </strong>
 
                     </div>
@@ -813,7 +814,7 @@
                         </span>
 
                         <strong>
-                            $0.00
+                            {% precio_doble 0 %}
                         </strong>
 
                     </div>
@@ -828,7 +829,7 @@
                     </strong>
 
                     <strong>
-                        ${{ venta.total|floatformat:2 }}
+                        {% precio_doble venta.total %}
                     </strong>
 
                 </div>

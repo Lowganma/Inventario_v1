@@ -100,3 +100,53 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+// Importes contables e inputs permanecen en USD. Bs. es una referencia BCV.
+window.Precios = (() => {
+    const formatoBs = new Intl.NumberFormat("es-VE", {
+        minimumFractionDigits: 2, maximumFractionDigits: 2,
+    });
+    function numero(valor) {
+        const n = Number(String(valor ?? "").replace(",", "."));
+        return Number.isFinite(n) ? n : 0;
+    }
+    function tasa() {
+        const valor = numero(document.getElementById("bcv-rate-container")?.dataset.tasa);
+        return valor > 0 ? valor : 0;
+    }
+    function redondear(valor) {
+        const n = numero(valor);
+        return Math.sign(n) * Math.round((Math.abs(n) + Number.EPSILON) * 100) / 100;
+    }
+    function dolares(valor) {
+        return "$" + redondear(valor).toFixed(2);
+    }
+    function bolivares(valor) {
+        if (!tasa()) return "Tasa BCV no disponible";
+        const usd = redondear(valor);
+        return "Bs. " + formatoBs.format(redondear(usd * tasa()));
+    }
+    function mostrar(elemento, valor, principal = "usd") {
+        const usd = dolares(valor);
+        const bs = bolivares(valor);
+        const contenedor = document.createElement("span");
+        contenedor.className = "precio-doble";
+        const primero = document.createElement("span");
+        primero.className = principal === "bs" ? "precio-bs-principal" : "precio-usd";
+        primero.textContent = principal === "bs" ? bs : usd;
+        const segundo = document.createElement("small");
+        segundo.className = "precio-bs";
+        segundo.textContent = principal === "bs" ? usd : bs;
+        segundo.title = "Equivalente de referencia con la última tasa BCV registrada";
+        contenedor.append(primero, segundo);
+        elemento.replaceChildren(contenedor);
+    }
+    function actualizarInputs(root = document) {
+        root.querySelectorAll("[data-equivalente-input]").forEach(salida => {
+            const input = document.getElementById(salida.dataset.equivalenteInput);
+            salida.textContent = input && input.value !== "" ? "USD · " + bolivares(input.value) : "Importe en USD · equivalente en Bs.";
+        });
+    }
+    document.addEventListener("DOMContentLoaded", () => actualizarInputs());
+    document.addEventListener("input", () => actualizarInputs());
+    return { tasa, bolivares, mostrar, actualizarInputs, redondear, dolares };
+})();
