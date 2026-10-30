@@ -1,0 +1,5 @@
+<div class="catalogo-view-toggle moneda-selector" role="group" aria-label="Cambiar moneda">
+    <button type="button" data-moneda="usd" class="active" aria-pressed="true" title="Ver en Dólares">$</button>
+    <button type="button" data-moneda="bs" aria-pressed="false" {% if not tasa_bcv_global or tasa_bcv_global.valor <= 0 %}disabled title="Actualiza la tasa BCV para usar bolívares"{% else %}title="Ver en Bolívares"{% endif %}>Bs</button>
+</div>
+<span id="moneda-estado" class="visually-hidden" role="status" aria-live="polite">Importes en dólares</span>

@@ -3,6 +3,8 @@
 
 {% block title %}Nueva venta{% endblock %}
 
+{% block selector_moneda %}{% endblock %}
+
 {% block content %}
 
 <style>
@@ -160,25 +162,6 @@
 
     .catalogo-card > .bi-plus-circle {
         flex: 0 0 auto;
-    }
-
-    .catalogo-view-toggle {
-        display: inline-flex;
-        border: 1px solid var(--bs-border-color);
-        border-radius: .65rem;
-        overflow: hidden;
-    }
-
-    .catalogo-view-toggle button {
-        border: 0;
-        background: transparent;
-        color: inherit;
-        padding: .45rem .7rem;
-    }
-
-    .catalogo-view-toggle button.active {
-        background: var(--bs-primary);
-        color: #fff;
     }
 
     .catalogo-grid.modo-lineal {
@@ -444,6 +427,8 @@
                             <span id="catalogoContador" class="badge text-bg-secondary">
                                 {{ productos_catalogo|length }} items
                             </span>
+
+                            {% include "components/selector_moneda.html" %}
 
                             <div class="catalogo-view-toggle" role="group" aria-label="Cambiar vista del catálogo">
                                 <button type="button" id="vistaMosaico" class="active" title="Vista mosaico">

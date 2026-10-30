@@ -2,6 +2,8 @@ from datetime import date
 from decimal import Decimal
 from types import SimpleNamespace
 
+from bs4 import BeautifulSoup
+
 from django.contrib.auth.models import User
 from django.template import Context, Template
 from django.test import SimpleTestCase, TestCase, override_settings
@@ -18,6 +20,14 @@ from django.utils import timezone
 
 
 class PrecioDobleTests(SimpleTestCase):
+    def test_un_solo_importe_visible_incluso_sin_css_ni_javascript(self):
+        for tasa in [None, SimpleNamespace(valor=Decimal('887.3'), fecha_vigencia=date.today())]:
+            with self.subTest(tasa=tasa):
+                html = BeautifulSoup(self.render_precio(Decimal('0.40'), tasa), 'html.parser')
+                self.assertEqual(html.get_text(), '$0.40')
+                self.assertEqual(html.span['data-importe-usd'], '0.40')
+                self.assertEqual(len(html.select('[data-importe-usd]')), 1)
+
     def render_precio(self, valor, tasa=None):
         return Template('{% load precios %}{% precio_moneda valor %}').render(
             Context({'valor': valor, 'tasa_bcv_global': tasa})
@@ -70,6 +80,17 @@ class PrecioDoblePaginasTests(TestCase):
 
     def setUp(self):
         self.client.force_login(self.usuario)
+
+    def test_caja_productos_y_catalogo_comparten_el_mismo_selector(self):
+        for nombre in ['productos:index', 'caja:dashboard', 'ventas:crear']:
+            with self.subTest(vista=nombre):
+                response = self.client.get(reverse(nombre))
+                html = BeautifulSoup(response.content, 'html.parser')
+                controles = html.select('.catalogo-view-toggle.moneda-selector')
+                self.assertEqual(len(controles), 1)
+                self.assertEqual([b.get_text() for b in controles[0].select('button')], ['$', 'Bs'])
+                self.assertEqual(controles[0].select_one('.active')['data-moneda'], 'usd')
+                self.assertNotIn('moneda-toolbar', str(html))
 
     def test_listas_y_detalles_incluyen_importes_para_el_selector(self):
         rutas = [

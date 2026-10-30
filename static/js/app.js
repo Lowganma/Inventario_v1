@@ -195,10 +195,11 @@ window.Precios = (() => {
         document.documentElement.dataset.moneda = moneda;
         document.querySelectorAll("button[data-moneda]").forEach(b => {
             b.setAttribute("aria-pressed", String(b.dataset.moneda === moneda));
+            b.classList.toggle("active", b.dataset.moneda === moneda);
             if (b.dataset.moneda === "bs") {
                 b.disabled = !tasa();
                 if (b.disabled) b.title = "Actualiza la tasa BCV para usar bolívares";
-                else b.removeAttribute("title");
+                else b.title = "Ver en Bolívares";
             }
         });
         const estado = document.getElementById("moneda-estado");

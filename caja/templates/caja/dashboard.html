@@ -2,10 +2,11 @@
 {% load precios %}
 
 {% block title %}Caja diaria{% endblock %}
+{% block selector_moneda %}{% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
  <div><h1 class="page-title mb-1">Caja diaria</h1><p class="text-muted mb-0">Control financiero por jornada.</p></div>
- <div class="d-flex gap-2"><a class="btn btn-outline-primary" href="{% url 'caja:movimientos' %}">Movimientos</a>{% if usuario_es_dueno %}<a class="btn btn-outline-secondary" href="{% url 'caja:cierres' %}">Cierres</a>{% endif %}</div>
+ <div class="d-flex align-items-center flex-wrap gap-2">{% include "components/selector_moneda.html" %}<a class="btn btn-outline-primary" href="{% url 'caja:movimientos' %}">Movimientos</a>{% if usuario_es_dueno %}<a class="btn btn-outline-secondary" href="{% url 'caja:cierres' %}">Cierres</a>{% endif %}</div>
 </div>
 {% if not caja %}
 <div class="card content-card"><div class="card-body text-center py-5"><h2 class="h4">Caja de hoy todavía no está abierta</h2><a class="btn btn-primary mt-3" href="{% url 'caja:abrir' %}">Abrir caja</a></div></div>

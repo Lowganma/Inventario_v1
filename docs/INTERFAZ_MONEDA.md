@@ -1,9 +1,15 @@
 # Selector de moneda
 
-Se muestra un solo importe por precio, saldo o total. El selector «Mostrar precios en»
-está sobre el contenido de Productos, Cuentas, Ventas y Caja, visible también en móvil
-sin abrir el menú. USD y Bolívares son opciones excluyentes; el estado elegido se
-marca con color y `aria-pressed`. Se recuerda la elección en este navegador.
+Se muestra un solo importe por precio, saldo o total, incluso antes de cargar CSS
+o JavaScript. El equivalente en Bs. se conserva como dato, sin un segundo texto
+visible junto al dólar.
+
+Productos y Caja incorporan el selector compacto «$ / Bs» en el encabezado.
+Nueva venta lo incluye junto al contador del catálogo. Las tres vistas usan
+`components/selector_moneda.html` y los estilos originales de `.catalogo-view-toggle`,
+compartidos desde `app.css`: opción activa azul con texto blanco, opción inactiva
+transparente con el color del tema. Las demás pantallas conservan un selector
+compacto sobre su contenido. Se recuerda la elección en este navegador.
 
 La misma elección afecta catálogo, carrito, subtotales, descuentos, saldos, cierres,
 listas cargadas mediante AJAX y campos monetarios. Cantidades, existencias y

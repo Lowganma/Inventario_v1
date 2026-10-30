@@ -3,6 +3,8 @@
 
 {% block title %}Inventario{% endblock %}
 
+{% block selector_moneda %}{% endblock %}
+
 {% block content %}
 
 <!-- =========================================================
@@ -32,9 +34,10 @@
     </div>
 
 
-    {% if usuario_es_dueno %}
+    <div class="d-flex align-items-center flex-wrap gap-2">
+        {% include "components/selector_moneda.html" %}
 
-        <div class="d-flex flex-column flex-sm-row gap-2">
+        {% if usuario_es_dueno %}
 
             <a
                 href="{% url 'productos:categorias' %}"
@@ -52,9 +55,8 @@
                 Nuevo producto
             </a>
 
-        </div>
-
-    {% endif %}
+        {% endif %}
+    </div>
 
 </div>
 

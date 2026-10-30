@@ -45,7 +45,7 @@
     {# ===================================================== #}
 
     <link
-        href="{% static 'css/app.css' %}"
+        href="{% static 'css/app.css' %}?v=moneda-20261030-2"
         rel="stylesheet"
     >
 
@@ -587,18 +587,13 @@
         "
     >
 
+        {% block selector_moneda %}
         {% if request.user.is_authenticated and mostrar_selector_moneda %}
-        <div class="moneda-toolbar" aria-label="Moneda de los importes">
-            <div>
-                <span class="moneda-label">Mostrar precios en</span>
-                <div class="moneda-switch" role="group" aria-label="Elegir moneda">
-                    <button type="button" data-moneda="usd" aria-pressed="true">$ <span>USD</span></button>
-                    <button type="button" data-moneda="bs" aria-pressed="false" {% if not tasa_bcv_global or tasa_bcv_global.valor <= 0 %}disabled title="Actualiza la tasa BCV para usar bolívares"{% endif %}>Bs. <span>Bolívares</span></button>
-                </div>
-            </div>
-            <span id="moneda-estado" class="moneda-estado" role="status" aria-live="polite">{% if tasa_bcv_global and tasa_bcv_global.valor > 0 %}Importes en dólares{% else %}Actualiza la tasa BCV para ver bolívares{% endif %}</span>
+        <div class="d-flex justify-content-end mb-3">
+            {% include "components/selector_moneda.html" %}
         </div>
         {% endif %}
+        {% endblock %}
         {% block content %}
         {% endblock %}
 
@@ -621,7 +616,7 @@
     {# ===================================================== #}
 
     <script
-        src="{% static 'js/app.js' %}"
+        src="{% static 'js/app.js' %}?v=moneda-20261030-2"
     ></script>
 
 

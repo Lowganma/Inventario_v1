@@ -32,7 +32,6 @@ def precio_moneda(context, valor):
         secundario = "Tasa BCV no disponible"
         referencia = "Registra una tasa BCV válida para ver el equivalente en bolívares"
     return format_html(
-        '<span class="importe-moneda" data-importe-usd="{}" title="{}">'
-        '<span class="importe-usd">${}</span><span class="importe-bs">{}</span></span>',
-        format(usd, ".2f"), referencia, format(usd, ".2f"), secundario,
+        '<span class="importe-moneda" data-importe-usd="{}" data-importe-bs="{}" title="{}">${}</span>',
+        format(usd, ".2f"), secundario, referencia, format(usd, ".2f"),
     )
