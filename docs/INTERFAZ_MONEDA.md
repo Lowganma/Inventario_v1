@@ -13,6 +13,17 @@ al ingresar Bs. se convierte a USD y se redondea a centavos. Los equivalentes us
 última tasa BCV registrada, no la tasa histórica de cada operación.
 Sin tasa positiva se mantiene USD y el control Bs. explica qué falta.
 
+La preferencia también se sincroniza entre pestañas del mismo navegador. Si se
+actualiza `data-tasa` en `#bcv-rate-container` sin recargar, los importes se
+recalculan desde su valor original en USD. Si la tasa deja de ser válida, se
+muestran dólares y se desactiva Bs.; al recuperar una tasa válida se restaura la
+preferencia. Los importes nuevos de filtros y paginación AJAX conservan la moneda.
+
+En Productos se convierten costo, precio y valor total estimado. En Caja se
+convierten saldo inicial, ingresos, egresos, saldo esperado, conceptos y métodos.
+En el historial de Ventas se convierten los totales y la última operación;
+«Ventas registradas» sigue siendo un conteo y «Última venta» una fecha.
+
 ## Referencias consultadas
 
 - [Shopify Polaris: grupos de botones](https://github.com/Shopify/polaris/blob/main/polaris.shopify.com/content/components/actions/button-group.mdx).

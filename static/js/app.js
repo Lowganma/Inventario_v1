@@ -106,6 +106,7 @@ window.Precios = (() => {
     const formatoBs = new Intl.NumberFormat("es-VE", {minimumFractionDigits: 2, maximumFractionDigits: 2});
     const clave = "inventario-moneda";
     let moneda = "usd";
+    let preferida = "usd";
     const campos = new Map();
     const nombres = new Set(["costo", "precio_venta", "monto_total", "monto_pagado", "monto", "saldo_inicial", "saldo_final_declarado", "valor_descuento"]);
     function numero(valor) {
@@ -184,28 +185,50 @@ window.Precios = (() => {
         actualizarInputs();
     }
     function refrescar(root = document) {
+        if (root.matches?.("[data-importe-usd]")) mostrar(root, root.dataset.importeUsd);
         root.querySelectorAll("[data-importe-usd]").forEach(el => mostrar(el, el.dataset.importeUsd));
         prepararInputs();
     }
     function cambiar(elegida, guardar = true) {
-        moneda = elegida === "bs" && tasa() ? "bs" : "usd";
+        preferida = elegida === "bs" ? "bs" : "usd";
+        moneda = preferida === "bs" && tasa() ? "bs" : "usd";
         document.documentElement.dataset.moneda = moneda;
-        document.querySelectorAll("button[data-moneda]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.moneda === moneda)));
+        document.querySelectorAll("button[data-moneda]").forEach(b => {
+            b.setAttribute("aria-pressed", String(b.dataset.moneda === moneda));
+            if (b.dataset.moneda === "bs") {
+                b.disabled = !tasa();
+                if (b.disabled) b.title = "Actualiza la tasa BCV para usar bolívares";
+                else b.removeAttribute("title");
+            }
+        });
         const estado = document.getElementById("moneda-estado");
         if (estado) estado.textContent = !tasa() ? "Actualiza la tasa BCV para ver bolívares" : moneda === "bs" ? "Bolívares · tasa BCV de referencia" : "Importes en dólares";
-        if (guardar) { try { localStorage.setItem(clave, moneda); } catch (_) {} }
+        if (guardar) { try { localStorage.setItem(clave, preferida); } catch (_) {} }
         refrescar();
     }
     document.addEventListener("DOMContentLoaded", () => {
         let guardada;
         try { guardada = localStorage.getItem(clave); } catch (_) {}
         cambiar(guardada, false);
-        document.querySelectorAll("button[data-moneda]").forEach(b => b.addEventListener("click", () => cambiar(b.dataset.moneda)));
+        document.addEventListener("click", evento => {
+            const boton = evento.target.closest("button[data-moneda]");
+            if (boton && !boton.disabled) cambiar(boton.dataset.moneda);
+        });
+        // Recalcular siempre desde USD si la tasa activa cambia sin recargar.
+        const contenedorTasa = document.getElementById("bcv-rate-container");
+        if (contenedorTasa) {
+            new MutationObserver(() => cambiar(preferida, false)).observe(contenedorTasa, {
+                attributes: true, attributeFilter: ["data-tasa"]
+            });
+        }
         new MutationObserver(registros => {
             registros.forEach(r => r.addedNodes.forEach(n => {
                 if (n.nodeType === 1 && (n.matches("[data-importe-usd], input[type=number]") || n.querySelector("[data-importe-usd], input[type=number]"))) refrescar(n.parentElement || document);
             }));
         }).observe(document.querySelector("main") || document.body, {childList: true, subtree: true});
+    });
+    window.addEventListener("storage", evento => {
+        if (evento.key === clave || evento.key === null) cambiar(evento.newValue, false);
     });
     document.addEventListener("change", actualizarInputs);
     return { tasa, bolivares, mostrar, actualizarInputs, redondear, dolares, cambiar, refrescar };
