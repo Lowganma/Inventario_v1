@@ -1,5 +1,3 @@
-﻿
-```markdown
 # 📦 Sistema de Gestión de Inventario y Caja (`Inventario_v1`)
 
 Un sistema web modular, robusto y liviano desarrollado en **Django** para la administración de stock, control de ventas, caja chica y gestión de clientes en pequeños comercios y negocios locales.
@@ -34,7 +32,7 @@ Sigue estos pasos para ejecutar el proyecto en tu máquina local:
 
 ### 1. Clonar el repositorio
 ```bash
-git clone [https://github.com/Lowganma/Inventario_v1.git](https://github.com/Lowganma/Inventario_v1.git)
+git clone https://github.com/Lowganma/Inventario_v1.git
 cd Inventario_v1
 
 ```
