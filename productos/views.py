@@ -11,7 +11,8 @@ from django.http import JsonResponse
 from usuarios.permisos import dueno_required
 
 from .forms import CategoriaForm, ProductoForm, PresentacionProductoForm
-from .models import Categoria, PresentacionProducto, Producto
+from .models import Categoria, Producto
+from .guardado import guardar_producto
 
 
 @login_required
@@ -217,24 +218,7 @@ def _guardar_producto(request, producto=None):
         producto.negocio = request.user.negocio
 
         producto.full_clean()
-        producto.save()
-
-        # -----------------------------------------------------
-        # PRESENTACIÓN BASE
-        # -----------------------------------------------------
-
-        if producto.tipo == "producto":
-
-            PresentacionProducto.objects.get_or_create(
-                producto=producto,
-                cantidad_unidades=Decimal("1.000"),
-                defaults={
-                    "nombre":
-                        producto.get_unidad_base_display(),
-                    "precio_venta":
-                        producto.precio_venta,
-                },
-            )
+        guardar_producto(producto, precio_anterior=formulario.initial.get("precio_venta"))
 
         messages.success(
             request,

@@ -9,22 +9,22 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="{% static 'css/app.css' %}" rel="stylesheet">
-    <link href="{% static 'css/identidad.css' %}" rel="stylesheet">
+    <link href="{% static 'css/identidad.css' %}?v=2" rel="stylesheet">
     {% block extra_css %}{% endblock %}
 </head>
 <body class="ot-app">
 <a class="visually-hidden-focusable ot-skip" href="#contenido">Ir al contenido</a>
 <header class="ot-header">
-    <button type="button" id="ot-menu" aria-controls="menuPrincipal" aria-expanded="false"><i class="bi bi-list" aria-hidden="true"></i> Menú</button>
+    {% if request.user.is_authenticated %}<button type="button" id="ot-menu" aria-controls="menuPrincipal" aria-expanded="false"><i id="ot-menu-icon" class="bi bi-list" aria-hidden="true"></i> <span id="ot-menu-label">Menú</span></button>{% endif %}
     <a class="ot-brand" href="{% url 'inicio' %}"><img src="{% static 'img/organiza-te.svg' %}" alt="" width="36" height="36">organiza-te</a>
-    <div class="ot-rate" id="bcv-rate-container" data-tasa="{{ tasa_bcv_global.valor|default:'0' }}">
+    {% if request.user.is_authenticated %}<div class="ot-rate" id="bcv-rate-container" data-tasa="{{ tasa_bcv_global.valor|default:'0' }}">
         {% if tasa_bcv_global %}<span>BCV <strong>$1 = Bs. <span id="bcv-rate-value">{{ tasa_bcv_global.valor|floatformat:2 }}</span></strong></span>{% else %}<span>BCV sin tasa</span>{% endif %}
-        {% if request.user.is_authenticated %}<form method="post" action="{% url 'cuentas:actualizar_tasa_bcv' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button aria-label="Actualizar tasa BCV" title="Actualizar tasa BCV"><i class="bi bi-arrow-clockwise"></i></button></form>{% endif %}
-    </div>
+        <form method="post" action="{% url 'cuentas:actualizar_tasa_bcv' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button aria-label="Actualizar tasa BCV" title="Actualizar tasa BCV"><i class="bi bi-arrow-clockwise"></i></button></form>
+    </div>{% endif %}
     <button id="themeToggle" type="button" aria-label="Activar modo oscuro"><i id="themeIcon" class="bi bi-moon-stars"></i></button>
 </header>
+{% if request.user.is_authenticated %}
 <nav id="menuPrincipal" class="ot-sidebar" aria-label="Navegación principal">
-    {% if request.user.is_authenticated %}
     <div class="ot-workspace"><span>Mi empresa</span><strong>{{ request.negocio.nombre|default:request.user.username }}</strong></div>
     <a href="{% url 'inicio' %}" {% if request.resolver_match.url_name == 'inicio' or request.resolver_match.view_name == 'cuentas:dashboard' %}aria-current="page"{% endif %}><i class="bi bi-grid"></i> Panel principal</a>
     {% if modulos_activos.caja %}<a href="{% url 'caja:dashboard' %}" {% if request.resolver_match.namespace == 'caja' %}aria-current="page"{% endif %}><i class="bi bi-cash-stack"></i> Caja</a>{% endif %}
@@ -35,11 +35,9 @@
     {% if modulos_activos.inventario %}<a href="{% url 'productos:index' %}" {% if request.resolver_match.namespace == 'productos' %}aria-current="page"{% endif %}><i class="bi bi-box-seam"></i> Productos</a>{% endif %}
     {% if usuario_es_dueno %}<details class="ot-config"><summary>Configuración</summary><a href="{% url 'usuarios:lista' %}">Usuarios</a><a href="{% url 'configuracion_modulos' %}">Módulos</a></details>{% endif %}
     <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="ot-signout"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</button></form>
-    {% else %}
-    <a href="{% url 'login' %}">Iniciar sesión</a><a href="{% url 'usuarios:registro' %}">Registrarse</a>
-    {% endif %}
 </nav>
 <button type="button" class="ot-backdrop" aria-label="Cerrar menú" tabindex="-1"></button>
+{% endif %}
     {% if messages %}
 
         <div class="container main-container pt-3">
@@ -111,7 +109,7 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'js/app.js' %}"></script>
+    <script src="{% static 'js/app.js' %}?v=2"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

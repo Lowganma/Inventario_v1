@@ -25,7 +25,10 @@
 }
 [data-bs-theme="dark"] {
     --ot-papel:#162124; --ot-superficie:#243336; --ot-banda:#304345; --ot-borde:#506467;
-    --ot-secundario:#b2c4bc; --app-background:var(--ot-papel); --app-card-background:var(--ot-superficie);
+    --bs-body-color:#edf4ed; --bs-body-color-rgb:237,244,237; --bs-heading-color:var(--bs-body-color);
+    --bs-secondary-color:#bdcec6; --bs-tertiary-color:#b2c3bb;
+    --bs-success-rgb:149,224,179; --bs-link-color:#9dddc0; --bs-link-hover-color:#c6ee95; --bs-link-hover-color-rgb:198,238,149;
+    --ot-secundario:var(--bs-secondary-color); --app-background:var(--ot-papel); --app-card-background:var(--ot-superficie);
     --app-card-border:var(--ot-borde); --bs-border-color:var(--ot-borde); --bs-body-bg:var(--ot-superficie);
     --bs-tertiary-bg:var(--ot-banda); --bs-primary:#9dddc0; --bs-primary-rgb:157,221,192;
     --bs-danger-rgb:255,161,137; --bs-link-color-rgb:157,221,192; --app-shadow:none;
@@ -102,3 +105,30 @@
 .ot-legend span::before {content:"";display:inline-block;width:1rem;vertical-align:middle;border-top:3px solid var(--bs-primary);margin-right:.35rem}
 .ot-legend span:last-child::before {border-top:2px dashed rgb(var(--bs-danger-rgb))}
 @media(max-width:650px){.ot-chart{height:86px}.ot-legend{font-size:.75rem}}
+
+.ot-sidebar[hidden] {display:none!important}
+[data-bs-theme="dark"] .ot-app :is(.text-bg-primary,.text-bg-success,.text-bg-danger) {color:#14272a!important}
+[data-bs-theme="dark"] .ot-app .badge:is(.bg-success,.bg-primary,.bg-danger),
+[data-bs-theme="dark"] .ot-app :is(.bg-success,.bg-primary).text-white {color:#14272a!important}
+[data-bs-theme="dark"] .ot-app .btn-outline-secondary {--bs-btn-color:#c5d6ce;--bs-btn-border-color:#82968d}
+[data-bs-theme="dark"] .ot-app .form-control::placeholder {color:var(--ot-secundario);opacity:1}
+[data-bs-theme="dark"] .ot-app .catalogo-view-toggle button.active {background:var(--ot-accion);color:white}
+@media screen {
+    .ot-app {background-image:url("../img/hojas-te.svg");background-size:190px 160px}
+}
+.ot-login {max-width:760px;margin:clamp(1rem,8vh,6rem) auto;display:grid;grid-template-columns:minmax(185px,.75fr) minmax(0,1.25fr);border:1px solid var(--ot-borde);background:var(--ot-superficie);border-radius:.35rem;overflow:hidden}
+.ot-login-brand {position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;min-height:225px;background:var(--ot-tinta);color:var(--ot-lima);overflow:hidden}
+.ot-login-brand::before {content:"";position:absolute;inset:0;z-index:-1;background:url("../img/hojas-te.svg") center/100px 88px;filter:brightness(2.3)}
+.ot-login-brand img {width:96px;height:96px}
+.ot-login-brand strong {font-size:1.65rem;letter-spacing:-.05em}
+.ot-login-form {padding:clamp(1.35rem,3vw,2.6rem)}
+@media(max-width:650px) {
+    .ot-login {grid-template-columns:1fr;margin:.5rem auto;max-width:430px}
+    .ot-login-brand {min-height:85px;flex-direction:row}
+    .ot-login-brand img {width:54px;height:54px}
+}
+.ot-excel-review {max-height:52vh;overflow:auto;border:1px solid var(--ot-borde)}
+.ot-excel-review thead th {position:sticky;top:0}
+
+.ot-brand + #themeToggle {margin-left:auto}
+[data-bs-theme="dark"] .ot-app .table thead th {color:var(--bs-body-color)}

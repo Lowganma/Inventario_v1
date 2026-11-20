@@ -1,11 +1,13 @@
 from django.urls import path
 
-from . import views
+from . import views, vistas_excel
 
 app_name = "productos"
 
 urlpatterns = [
     path("", views.index, name="index"),
+    path("excel/", vistas_excel.importar, name="importar_excel"),
+    path("excel/<str:modo>/", vistas_excel.descargar, name="descargar_excel"),
     path("nuevo/", views.crear_producto, name="crear"),
     path("categorias/", views.lista_categorias, name="categorias"),
     path("categorias/nueva/", views.crear_categoria, name="crear_categoria"),

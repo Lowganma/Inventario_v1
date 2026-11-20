@@ -33,7 +33,8 @@
 
     {% if usuario_es_dueno %}
 
-        <div class="d-flex flex-column flex-sm-row gap-2">
+        <div class="d-flex flex-column flex-sm-row flex-wrap gap-2">
+            <a href="{% url 'productos:importar_excel' %}" class="btn btn-outline-primary"><i class="bi bi-file-earmark-spreadsheet me-1"></i> Cargar por Excel</a>
 
             <a
                 href="{% url 'productos:categorias' %}"

@@ -100,3 +100,13 @@ python manage.py runserver 0.0.0.0:8000
 ## 📝 Licencia
 
 Este proyecto se distribuye bajo la licencia **MIT**.
+
+### Cargar y actualizar el catálogo con Excel
+
+En **Productos → Cargar por Excel**, el propietario puede descargar su catálogo, una plantilla vacía o un ejemplo de papelería. Para un alta se requieren nombre, categoría y precio de venta en USD. El tipo por defecto es producto físico y la unidad por defecto es unidad. Un código escrito como texto conserva sus ceros iniciales.
+
+Para una actualización basta el ID del catálogo o un código existente y la columna que cambia. Los campos vacíos conservan los datos actuales. **Stock final** es una cantidad absoluta. El archivo del catálogo deja esa columna vacía y muestra el stock disponible en otra columna de consulta. Revisa las diferencias y las categorías nuevas antes de pulsar **Confirmar y guardar**. Si hay errores, la pantalla indica el número de fila y conserva el inventario.
+
+Para mostrar el flujo en una demo del portafolio, registra un negocio de prueba y usa **Probar con un ejemplo de papelería**. El Excel incluye un cuaderno físico y un servicio de copias. Después de importarlo, descarga el catálogo, cambia el precio del cuaderno y vuelve a subirlo para mostrar la comparación.
+
+Capturas de la demo: [inicio de sesión en móvil](docs/demo/login-movil.png) y [revisión del Excel en escritorio](docs/demo/carga-excel.png).

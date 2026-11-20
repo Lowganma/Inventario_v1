@@ -108,15 +108,24 @@ document.addEventListener("DOMContentLoaded", () => {
     function show(open) {
         document.body.classList.toggle("ot-menu-open", open);
         sidebar.hidden = !open;
+        const label = open ? "Ocultar menú" : "Mostrar menú";
+        document.getElementById("ot-menu-label").textContent = wide.matches ? label : "Menú";
+        document.getElementById("ot-menu-icon").className = wide.matches
+            ? (open ? "bi bi-chevron-bar-left" : "bi bi-chevron-bar-right") : "bi bi-list";
+        button.setAttribute("aria-label", label);
         button.setAttribute("aria-expanded", String(open));
     }
     function reset() {
-        show(wide.matches && localStorage.getItem("ot-menu") !== "closed");
+        let preferencia;
+        try { preferencia = localStorage.getItem("ot-menu"); } catch { /* Almacenamiento desactivado. */ }
+        show(wide.matches && preferencia !== "closed");
     }
     button.addEventListener("click", () => {
-        const open = sidebar.hidden;
+        const open = button.getAttribute("aria-expanded") !== "true";
         show(open);
-        if (wide.matches) localStorage.setItem("ot-menu", open ? "open" : "closed");
+        if (wide.matches) {
+            try { localStorage.setItem("ot-menu", open ? "open" : "closed"); } catch { /* Solo esta página. */ }
+        }
         if (open && !wide.matches) sidebar.querySelector("a").focus();
     });
     function dismiss() { show(false); button.focus(); }
