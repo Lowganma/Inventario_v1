@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load monedas %}
 {% block title %}
     Compras
 {% endblock %}
@@ -207,7 +207,7 @@
                                         <td class="text-end">
 
                                             <strong>
-                                                ${{ compra.total|floatformat:2 }}
+                                                {% importe compra.total %}
                                             </strong>
 
                                         </td>

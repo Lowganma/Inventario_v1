@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load monedas %}
 {% block title %}Inventario{% endblock %}
 
 {% block content %}
@@ -118,7 +118,7 @@
                 </div>
 
                 <div class="fs-3 fw-bold">
-                    ${{ valor_total|floatformat:2 }}
+                    {% importe valor_total %}
                 </div>
 
             </div>
@@ -389,8 +389,8 @@ document.addEventListener(
                     await respuesta.text();
 
 
-                contenedorTabla.innerHTML =
-                    html;
+                contenedorTabla.innerHTML = html;
+                monedaVista.actualizar(contenedorTabla);
 
 
                 // Cambiamos la URL sin recargar.

@@ -36,7 +36,7 @@ from productos.models import Producto
 from ventas.models import Venta
 
 from .forms import AbonoForm, CuentaPorCobrarForm
-from .models import CuentaPorCobrar, TasaCambio
+from .models import CuentaPorCobrar
 from .services.cobros import registrar_abono_cuenta
 # Create your views here.
 
@@ -321,28 +321,6 @@ def dashboard(request):
     )
 
     # ========================================================
-    # TASA BCV
-    # ========================================================
-
-    tasa_bcv = (
-        TasaCambio.objects
-        .filter(moneda="USD")
-        .order_by(
-            "-fecha_vigencia",
-            "-id",
-        )
-        .first()
-    )
-
-    total_por_cobrar_bs = None
-
-    if tasa_bcv:
-        total_por_cobrar_bs = (
-            total_por_cobrar
-            * tasa_bcv.valor
-        )
-
-    # ========================================================
     # BÚSQUEDA DE CUENTAS
     # ========================================================
 
@@ -422,10 +400,6 @@ def dashboard(request):
         "cuentas_pagadas": cuentas_pagadas,
         "cuentas_vencidas": cuentas_vencidas,
         "total_por_cobrar": total_por_cobrar,
-
-        # BCV
-        "tasa_bcv": tasa_bcv,
-        "total_por_cobrar_bs": total_por_cobrar_bs,
 
         # Buscador
         "busqueda": busqueda,

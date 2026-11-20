@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load monedas %}
 {% block title %}
     Nueva compra
 {% endblock %}
@@ -237,7 +237,7 @@
                                             class="form-control subtotal-linea fw-semibold"
                                             data-subtotal
                                         >
-                                            $0.00
+                                            {% importe 0 %}
                                         </div>
 
                                     </div>
@@ -360,7 +360,7 @@
                                         class="form-control subtotal-linea fw-semibold"
                                         data-subtotal
                                     >
-                                        $0.00
+                                        {% importe 0 %}
                                     </div>
 
                                 </div>
@@ -475,7 +475,7 @@
                                     id="totalCompra"
                                     class="fs-3 fw-bold text-primary"
                                 >
-                                    $0.00
+                                    {% importe 0 %}
                                 </span>
 
                             </div>
@@ -890,7 +890,7 @@ async function cargarDatosProducto(selectProducto) {
             if (subtotalElemento) {
 
                 subtotalElemento.textContent =
-                    "$" + subtotal.toFixed(2);
+                    monedaVista.importe(subtotal);
             }
 
 
@@ -926,12 +926,13 @@ async function cargarDatosProducto(selectProducto) {
         document.getElementById(
             "totalCompra"
         ).textContent =
-            "$" + total.toFixed(2);
+            monedaVista.importe(total);
     }
 
 
     // Calcula el resumen al cargar la página.
 
+    document.addEventListener("monedacambiada", actualizarResumen);
     actualizarResumen();
 
 });

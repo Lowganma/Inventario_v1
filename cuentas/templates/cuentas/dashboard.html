@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load monedas %}
 {% load i18n %}
 
 {% block title %}
@@ -14,24 +15,24 @@ Panel principal
 
 
         <header class="ot-page-head">
-            <div><h1 class="page-title mb-1">Panel principal</h1><p class="page-subtitle mb-0">{% language "es" %}{{ hoy|date:"l, j \d\e F"|capfirst }}{% endlanguage %} · USD</p></div>
+            <div><h1 class="page-title mb-1">Panel principal</h1><p class="page-subtitle mb-0">{% language "es" %}{{ hoy|date:"l, j \d\e F"|capfirst }}{% endlanguage %}</p></div>
             {% if modulos_activos.ventas %}<a class="btn btn-primary" href="{% url 'ventas:crear' %}"><i class="bi bi-plus-lg"></i> Nueva venta</a>{% endif %}
         </header>
         <div class="ot-dashboard">
             {% if modulos_activos.caja %}
-            <a class="ot-metric ot-cash" href="{% url 'caja:dashboard' %}"><small>Saldo de caja</small><strong>USD {{ saldo_caja|floatformat:2 }}</strong><span>{% if caja_hoy %}Caja {{ caja_hoy.estado }} · Ver caja{% else %}Ir a caja{% endif %} <i class="bi bi-arrow-right"></i></span></a>
+            <a class="ot-metric ot-cash" href="{% url 'caja:dashboard' %}"><small>Saldo de caja</small><strong>{% importe saldo_caja %}</strong><span>{% if caja_hoy %}Caja {{ caja_hoy.estado }} · Ver caja{% else %}Ir a caja{% endif %} <i class="bi bi-arrow-right"></i></span></a>
             {% endif %}
             <div class="ot-stats">
-                {% if modulos_activos.ventas %}<a href="{% url 'ventas:lista' %}"><span>Ventas de hoy</span><strong>{{ cantidad_ventas_hoy }}</strong><small>USD {{ total_ventas_hoy|floatformat:2 }}</small></a>{% endif %}
-                {% if modulos_activos.cuentas %}<a href="{% url 'cuentas:lista' %}"><span>Por cobrar</span><strong>USD {{ total_por_cobrar|floatformat:2 }}</strong><small>{{ cuentas_pendientes }} pendiente{{ cuentas_pendientes|pluralize }}</small></a>{% endif %}
-                {% if modulos_activos.caja %}<a href="{% url 'caja:dashboard' %}"><span>Ingresos de hoy</span><strong>USD {{ ingresos_hoy|floatformat:2 }}</strong></a><a href="{% url 'caja:dashboard' %}"><span>Egresos de hoy</span><strong>USD {{ egresos_hoy|floatformat:2 }}</strong></a>{% endif %}
+                {% if modulos_activos.ventas %}<a href="{% url 'ventas:lista' %}"><span>Ventas de hoy</span><strong>{{ cantidad_ventas_hoy }}</strong><small>{% importe total_ventas_hoy %}</small></a>{% endif %}
+                {% if modulos_activos.cuentas %}<a href="{% url 'cuentas:lista' %}"><span>Por cobrar</span><strong>{% importe total_por_cobrar %}</strong><small>{{ cuentas_pendientes }} pendiente{{ cuentas_pendientes|pluralize }}</small></a>{% endif %}
+                {% if modulos_activos.caja %}<a href="{% url 'caja:dashboard' %}"><span>Ingresos de hoy</span><strong>{% importe ingresos_hoy %}</strong></a><a href="{% url 'caja:dashboard' %}"><span>Egresos de hoy</span><strong>{% importe egresos_hoy %}</strong></a>{% endif %}
             </div>
         </div>
         {% if modulos_activos.caja %}
         <section class="card ot-cash-chart mb-4">
             <div class="card-header d-flex justify-content-between align-items-center"><h2 class="h5 mb-0">Flujo de caja</h2><span>{% language "es" %}{{ hoy|date:"F Y"|capfirst }}{% endlanguage %}</span></div>
             {% if flujo_mes %}<div class="card-body">
-                <div class="ot-legend"><span>Ingresos <b>USD {{ flujo_mes.ingreso.total|floatformat:2 }}</b></span><span>Egresos <b>USD {{ flujo_mes.egreso.total|floatformat:2 }}</b></span></div>
+                <div class="ot-legend"><span>Ingresos <b>{% importe flujo_mes.ingreso.total %}</b></span><span>Egresos <b>{% importe flujo_mes.egreso.total %}</b></span></div>
                 <svg class="ot-chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Ingresos y egresos acumulados desde el primer día del mes">
                     <path d="M0 4H100 M0 51H100 M0 98H100" fill="none" stroke="var(--ot-borde)" vector-effect="non-scaling-stroke"/>
                     <polyline points="{{ flujo_mes.ingreso.puntos }}" stroke="var(--bs-primary)" fill="none" stroke-width="3" vector-effect="non-scaling-stroke"/>
@@ -44,7 +45,7 @@ Panel principal
         {% if modulos_activos.ventas %}
         <section class="card mb-4"><div class="card-header d-flex align-items-center justify-content-between gap-2"><h2 class="h5 mb-0">Ventas recientes</h2><a href="{% url 'ventas:lista' %}">Ver historial</a></div>
             <ul class="ot-recent">
-            {% for venta in ventas_recientes %}<li><a href="{% url 'ventas:detalle' venta.pk %}"><span><b>{{ venta.cliente|default:"Cliente de mostrador" }}</b><small>Venta #{{ venta.numero }} · {{ venta.get_tipo_pago_display }}</small></span><strong>USD {{ venta.total|floatformat:2 }} ›</strong></a></li>
+            {% for venta in ventas_recientes %}<li><a href="{% url 'ventas:detalle' venta.pk %}"><span><b>{{ venta.cliente|default:"Cliente de mostrador" }}</b><small>Venta #{{ venta.numero }} · {{ venta.get_tipo_pago_display }}</small></span><strong>{% importe venta.total %} ›</strong></a></li>
             {% empty %}<li class="p-3 text-body-secondary">Las ventas que registres aparecerán aquí.</li>{% endfor %}
             </ul>
         </section>
@@ -138,7 +139,7 @@ Panel principal
                                     </span>
 
                                     <strong>
-                                        ${{ total_compras_hoy|floatformat:2 }}
+                                        {% importe total_compras_hoy %}
                                     </strong>
                                 </div>
 
@@ -160,7 +161,7 @@ Panel principal
                                     </span>
 
                                     <strong>
-                                        ${{ abonos_hoy|floatformat:2 }}
+                                        {% importe abonos_hoy %}
                                     </strong>
                                 </div>
 
@@ -182,7 +183,7 @@ Panel principal
                                     </span>
 
                                     <strong>
-                                        ${{ total_fiado_hoy|floatformat:2 }}
+                                        {% importe total_fiado_hoy %}
                                     </strong>
                                 </div>
 
@@ -205,13 +206,13 @@ Panel principal
                                     {% if flujo_hoy >= 0 %}
 
                                         <strong class="text-success">
-                                            +${{ flujo_hoy|floatformat:2 }}
+                                            +{% importe flujo_hoy %}
                                         </strong>
 
                                     {% else %}
 
                                         <strong class="text-danger">
-                                            ${{ flujo_hoy|floatformat:2 }}
+                                            {% importe flujo_hoy %}
                                         </strong>
 
                                     {% endif %}
@@ -268,18 +269,8 @@ Panel principal
 
 
                                 <h2 class="display-6 mb-1">
-                                    ${{ total_por_cobrar|floatformat:2 }}
+                                    {% importe total_por_cobrar %}
                                 </h2>
-
-
-                                {% if total_por_cobrar_bs is not None %}
-
-                                    <p class="text-muted mb-4">
-                                        Bs.
-                                        {{ total_por_cobrar_bs|floatformat:2 }}
-                                    </p>
-
-                                {% endif %}
 
 
                                 <div
@@ -526,7 +517,7 @@ Panel principal
                                     </span>
 
                                     <strong>
-                                        ${{ valor_inventario|floatformat:2 }}
+                                        {% importe valor_inventario %}
                                     </strong>
 
                                 </div>
@@ -655,13 +646,13 @@ Panel principal
                                                             {% if movimiento.tipo == "ingreso" %}
 
                                                                 <strong class="text-success">
-                                                                    +${{ movimiento.monto|floatformat:2 }}
+                                                                    +{% importe movimiento.monto %}
                                                                 </strong>
 
                                                             {% else %}
 
                                                                 <strong class="text-danger">
-                                                                    -${{ movimiento.monto|floatformat:2 }}
+                                                                    -{% importe movimiento.monto %}
                                                                 </strong>
 
                                                             {% endif %}
@@ -937,7 +928,7 @@ Panel principal
 
 
                                             <strong>
-                                                ${{ cuenta.saldo_pendiente|floatformat:2 }}
+                                                {% importe cuenta.saldo_pendiente %}
                                             </strong>
 
                                         </a>

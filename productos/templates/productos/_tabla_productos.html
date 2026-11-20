@@ -1,3 +1,5 @@
+
+{% load monedas %}
 <div class="card">
 
     <div class="table-responsive">
@@ -171,11 +173,11 @@
                         </td>
 
                         <td data-label="Costo">
-                            ${{ producto.costo|floatformat:2 }}
+                            {% importe producto.costo %}
                         </td>
 
                         <td data-label="Precio">
-                            ${{ producto.precio_venta|floatformat:2 }}
+                            {% importe producto.precio_venta %}
                         </td>
 
                         <td data-label="Estado">

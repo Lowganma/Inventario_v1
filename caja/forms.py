@@ -4,12 +4,12 @@ from .models import MovimientoCaja
 
 
 class AbrirCajaForm(forms.Form):
-    saldo_inicial = forms.DecimalField(min_value=0, max_digits=12, decimal_places=2, widget=forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}))
+    saldo_inicial = forms.DecimalField(label="Saldo inicial (USD)", min_value=0, max_digits=12, decimal_places=2, widget=forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}))
     notas = forms.CharField(required=False, widget=forms.Textarea(attrs={"class": "form-control", "rows": 3}))
 
 
 class CerrarCajaForm(forms.Form):
-    saldo_final_declarado = forms.DecimalField(min_value=0, max_digits=12, decimal_places=2, widget=forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}))
+    saldo_final_declarado = forms.DecimalField(label="Saldo final declarado (USD)", min_value=0, max_digits=12, decimal_places=2, widget=forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}))
     notas = forms.CharField(required=False, widget=forms.Textarea(attrs={"class": "form-control", "rows": 3}))
 
 

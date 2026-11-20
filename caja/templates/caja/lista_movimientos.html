@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load monedas %}
 {% block title %}
 Movimientos de caja
 {% endblock %}
@@ -121,13 +121,13 @@ Movimientos de caja
                                             {% if movimiento.tipo == "ingreso" %}
 
                                                 <strong class="text-success">
-                                                    + ${{ movimiento.monto|floatformat:2 }}
+                                                    + {% importe movimiento.monto %}
                                                 </strong>
 
                                             {% else %}
 
                                                 <strong class="text-danger">
-                                                    - ${{ movimiento.monto|floatformat:2 }}
+                                                    - {% importe movimiento.monto %}
                                                 </strong>
 
                                             {% endif %}

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load monedas %}
 {% block title %}Venta #{{ venta.numero }}{% endblock %}
 
 {% block content %}
@@ -557,7 +557,7 @@
                         <div class="small mt-1">
                             Saldo pendiente:
                             <strong>
-                                ${{ venta.cuenta_por_cobrar.saldo_pendiente|floatformat:2 }}
+                                {% importe venta.cuenta_por_cobrar.saldo_pendiente %}
                             </strong>
                         </div>
                     {% endif %}
@@ -710,13 +710,13 @@
 
 
                                 <td data-label="Precio unitario" class="text-end">
-                                    ${{ detalle.precio_unitario|floatformat:2 }}
+                                    {% importe detalle.precio_unitario %}
                                 </td>
 
 
                                 <td data-label="Importe" class="text-end">
                                     <strong>
-                                        ${{ detalle.subtotal|floatformat:2 }}
+                                        {% importe detalle.subtotal %}
                                     </strong>
                                 </td>
 
@@ -795,7 +795,7 @@
                     </span>
 
                     <strong>
-                        ${{ venta.subtotal|floatformat:2 }}
+                        {% importe venta.subtotal %}
                     </strong>
 
                 </div>
@@ -816,7 +816,7 @@
                         </span>
 
                         <strong>
-                            - ${{ venta.descuento|floatformat:2 }}
+                            - {% importe venta.descuento %}
                         </strong>
 
                     </div>
@@ -830,7 +830,7 @@
                         </span>
 
                         <strong>
-                            $0.00
+                            {% importe 0 %}
                         </strong>
 
                     </div>
@@ -845,7 +845,7 @@
                     </strong>
 
                     <strong>
-                        ${{ venta.total|floatformat:2 }}
+                        {% importe venta.total %}
                     </strong>
 
                 </div>
@@ -859,6 +859,7 @@
              PIE
         ================================================== -->
 
+        <p class="ot-nota-cambio small text-body-secondary mb-2">Importes equivalentes a la tasa BCV del {{ tasa_bcv_global.fecha_vigencia|date:"d/m/Y" }} · 1 USD = Bs. {{ tasa_bcv_global.valor|floatformat:"-6" }}</p>
         <footer class="factura-pie">
 
             <span>

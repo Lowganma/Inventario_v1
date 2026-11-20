@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load monedas %}
 {% block title %}
     Registrar abono
 {% endblock %}
@@ -40,7 +40,7 @@
 
                     <div class="ot-metric mb-3" id="saldoAbono" data-saldo="{{ cuenta.saldo_pendiente|unlocalize }}">
                         <small>Saldo después del pago</small>
-                        <strong><output id="saldoProyectado" for="{{ formulario.monto_pagado.id_for_label }}">USD {{ cuenta.saldo_pendiente|floatformat:2 }}</output></strong>
+                        <strong><output id="saldoProyectado" for="{{ formulario.monto_pagado.id_for_label }}">{% importe cuenta.saldo_pendiente %}</output></strong>
                     </div>
                     <form method="post" novalidate>
                         {% csrf_token %}
@@ -150,7 +150,7 @@
                     </small>
 
                     <strong class="fs-2 text-danger">
-                        ${{ cuenta.saldo_pendiente|floatformat:2 }}
+                        {% importe cuenta.saldo_pendiente %}
                     </strong>
 
                     <div class="alert alert-light border mt-3 mb-0">

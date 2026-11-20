@@ -157,3 +157,21 @@
 .ot-fields :is(input:not([type=hidden]),select) {display:block;width:100%;min-height:42px;padding:.5rem .7rem;color:var(--bs-body-color);background-color:var(--bs-body-bg);border:1px solid var(--ot-borde);border-radius:.2rem}
 .ot-fields .errorlist {color:rgb(var(--bs-danger-rgb));margin-top:.35rem}
 @media(max-width:680px){.ot-modules{grid-template-columns:1fr}}
+
+.ot-divisas {display:inline-flex;flex:none;border:1px solid #85968e;border-radius:4px;overflow:hidden}
+.ot-header .ot-divisas button {border:0;border-radius:0;min-width:2.45rem;padding:.4rem .5rem;font-weight:700}
+.ot-header .ot-divisas button[aria-pressed="true"] {background:var(--ot-lima);color:#1d3028}
+.ot-divisas button:focus-visible {outline:2px solid currentColor;outline-offset:-4px}
+.ot-divisas button:disabled {opacity:.55}
+.ot-nota-cambio {display:none}
+[data-moneda="bs"] .ot-nota-cambio {display:block}
+@media(max-width:575.98px) {
+    #ot-menu-label {display:none}
+    .ot-header {gap:.35rem;padding-inline:.4rem}
+    .ot-header .ot-divisas button {min-width:2rem;padding:.45rem .28rem;font-size:.82rem}
+}
+@media(max-width:379.98px) {
+    .ot-header .ot-brand img {width:20px;height:20px}
+    .ot-header .ot-brand {gap:.2rem;font-size:.94rem}
+    .ot-header {gap:.2rem}
+}

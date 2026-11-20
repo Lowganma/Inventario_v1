@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load monedas %}
 {% block title %}Nueva venta{% endblock %}
 
 {% block content %}
@@ -417,7 +417,7 @@
     .carrito-linea-controls > div::before {display:block;font-size:.68rem;color:var(--bs-secondary-color);}
     .carrito-linea-controls > div:nth-child(1)::before {content:"Presentación";}
     .carrito-linea-controls > div:nth-child(2)::before {content:"Cant.";}
-    .carrito-linea-controls > div:nth-child(3)::before {content:"Precio unit.";width:100%;}
+    .carrito-linea-controls > div:nth-child(3)::before {content:"Precio USD";width:100%;}
     .carrito-linea-controls > div:nth-child(4)::before {content:"Importe";}
     .carrito-linea-controls .form-text:empty {display:none;}
     .venta-resumen .d-grid {margin-top:1rem;}
@@ -491,7 +491,7 @@
                         </div>
                     </div>
 
-                    <div class="ot-cart-head" aria-hidden="true"><span>Producto</span><span>Precio</span><span>Cant.</span><span>Importe</span></div>
+                    <div class="ot-cart-head" aria-hidden="true"><span>Producto</span><span>USD/ud.</span><span>Cant.</span><span>Importe</span></div>
                     <div id="detallesVenta">
                         {% for detalle in detalles %}
                             {% if detalle.producto.value %}
@@ -523,9 +523,9 @@
                                         <div><label class="visually-hidden" for="{{ detalle.cantidad.id_for_label }}">Cantidad</label>{{ detalle.cantidad }}</div>
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text">$</span>
-                                            <label class="visually-hidden" for="{{ detalle.precio_unitario.id_for_label }}">Precio unitario</label>{{ detalle.precio_unitario }}
+                                            <label class="visually-hidden" for="{{ detalle.precio_unitario.id_for_label }}">Precio unitario en USD</label>{{ detalle.precio_unitario }}
                                         </div>
-                                        <div class="carrito-linea-subtotal" data-subtotal>$0.00</div>
+                                        <div class="carrito-linea-subtotal" data-subtotal>{% importe 0 %}</div>
                                     </div>
 
                                     {% for field in detalle %}
@@ -559,8 +559,8 @@
                             </span>
 
                             <div class="catalogo-view-toggle me-1" role="group" aria-label="Cambiar moneda del catálogo">
-                                <button type="button" id="btnMonedaUsd" class="active" title="Ver en Dólares">$</button>
-                                <button type="button" id="btnMonedaBs" title="Ver en Bolívares">Bs</button>
+                                <button type="button" data-moneda-vista="usd" aria-pressed="true" class="active" title="Ver en Dólares">$</button>
+                                <button type="button" data-moneda-vista="bs" aria-pressed="false" title="Ver en Bolívares">Bs</button>
                             </div>
 
                             <div class="catalogo-view-toggle" role="group" aria-label="Cambiar vista del catálogo">
@@ -612,8 +612,8 @@
                                     </div>
                                 </div>
 
-                                <div class="catalogo-card-price" data-precio-usd="{{ producto.precio_venta|stringformat:'.2f' }}">
-                                    ${{ producto.precio_venta|floatformat:2 }}
+                                <div class="catalogo-card-price">
+                                    {% importe producto.precio_venta %}
                                 </div>
 
                                 <i class="bi bi-plus-circle text-primary fs-5"></i>
@@ -727,24 +727,23 @@
                     <div class="venta-resumen">
                         <div class="resumen-row">
                             <span class="text-body-secondary">Subtotal</span>
-                            <strong id="subtotalVenta">$0.00</strong>
+                            <strong id="subtotalVenta">{% importe 0 %}</strong>
                         </div>
 
                         <div class="resumen-row">
                             <span class="text-body-secondary">Descuento</span>
-                            <strong id="descuentoVenta">$0.00</strong>
+                            <strong id="descuentoVenta">{% importe 0 %}</strong>
                         </div>
 
                         <hr class="my-2">
 
                         <div class="d-flex justify-content-between align-items-end mb-3">
                             <span class="fw-semibold">Total</span>
-                            <span id="totalVenta" class="venta-total">$0.00</span>
+                            <span id="totalVenta" class="venta-total">{% importe 0 %}</span>
                         </div>
 
-                        <div class="d-flex justify-content-between align-items-end pt-2 border-top border-secondary-subtle">
-                            <span class="fw-semibold text-success">Total (Bs.)</span>
-                            <span id="totalVentaBs" class="venta-total text-success">Bs. 0,00</span>
+                        <div id="equivalenteVenta" class="pt-2 border-top border-secondary-subtle" hidden>
+                            <div class="d-flex justify-content-between"><span>Equivalente</span><strong></strong></div>
                         </div>
 
                         <input type="hidden" name="tasa_cambio" id="input-tasa-cambio" value="0">
@@ -800,10 +799,10 @@
 
             <div class="input-group input-group-sm">
                 <span class="input-group-text">$</span>
-                <label class="visually-hidden" for="{{ detalles.empty_form.precio_unitario.id_for_label }}">Precio unitario</label>{{ detalles.empty_form.precio_unitario }}
+                <label class="visually-hidden" for="{{ detalles.empty_form.precio_unitario.id_for_label }}">Precio unitario en USD</label>{{ detalles.empty_form.precio_unitario }}
             </div>
 
-            <div class="carrito-linea-subtotal" data-subtotal>$0.00</div>
+            <div class="carrito-linea-subtotal" data-subtotal>{% importe 0 %}</div>
         </div>
 
         {% if detalles.empty_form.DELETE %}
@@ -845,10 +844,6 @@ document.addEventListener("DOMContentLoaded", function () {
     function numero(valor) {
         const n = parseFloat((valor || "0").toString().replace(",", "."));
         return Number.isFinite(n) ? n : 0;
-    }
-
-    function moneda(valor) {
-        return "$" + numero(valor).toFixed(2);
     }
 
     function urlDatosProducto(productoId) {
@@ -1199,7 +1194,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (subtotal) {
             subtotal.dataset.valor = valor.toString();
-            subtotal.textContent = moneda(valor);
+            subtotal.textContent = monedaVista.importe(valor);
         }
 
         recalcularVenta();
@@ -1234,12 +1229,11 @@ document.addEventListener("DOMContentLoaded", function () {
         descuento = Math.max(0, Math.min(descuento, subtotal));
         const totalUSD = subtotal - descuento;
 
-        document.getElementById("subtotalVenta").textContent = moneda(subtotal);
-        document.getElementById("descuentoVenta").textContent = moneda(descuento);
-        document.getElementById("totalVenta").textContent = moneda(totalUSD);
+        document.getElementById("subtotalVenta").textContent = monedaVista.importe(subtotal);
+        document.getElementById("descuentoVenta").textContent = monedaVista.importe(descuento);
+        document.getElementById("totalVenta").textContent = monedaVista.importe(totalUSD);
 
-        const rateContainer = document.getElementById('bcv-rate-container');
-        const tasaBCV = rateContainer ? parseFloat((rateContainer.dataset.tasa || "0").replace(',', '.')) : 0;
+        const tasaBCV = monedaVista.tasa || 0;
 
         const inputTasa = document.getElementById('input-tasa-cambio');
         if (inputTasa) inputTasa.value = tasaBCV;
@@ -1247,14 +1241,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const inputTotalUSD = document.getElementById('input-total-usd');
         if (inputTotalUSD) inputTotalUSD.value = totalUSD.toFixed(2);
 
-        const totalBS = totalUSD * tasaBCV;
-        const totalBsElement = document.getElementById('totalVentaBs');
-        if (totalBsElement) {
-            totalBsElement.textContent = "Bs. " + totalBS.toLocaleString('es-VE', { 
-                minimumFractionDigits: 2, 
-                maximumFractionDigits: 2 
-            });
-        }
+        const alterna = monedaVista.seleccion === "usd" ? "bs" : "usd";
+        const equivalente = document.getElementById("equivalenteVenta");
+        equivalente.hidden = !(tasaBCV > 0);
+        equivalente.querySelector("strong").textContent = monedaVista.importe(totalUSD, alterna);
 
         actualizarEstadoCarrito();
     }
@@ -1317,62 +1307,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // =========================================================
-    // ALTERNAR MONEDA EN CATÁLOGO ($ / Bs)
-    // =========================================================
-    const btnMonedaUsd = document.getElementById("btnMonedaUsd");
-    const btnMonedaBs = document.getElementById("btnMonedaBs");
-    const preciosCards = document.querySelectorAll(".catalogo-card-price");
-
-    const divTasaGlobal = document.getElementById('bcv-rate-container');
-    const tasaCambioGlobal = divTasaGlobal ? parseFloat((divTasaGlobal.dataset.tasa || "0").replace(',', '.')) : 0;
-    
-    let monedaCatalogoActual = "usd";
-
-    function aplicarMonedaCatalogo() {
-        preciosCards.forEach(function(el) {
-            const precioUsd = numero(el.dataset.precioUsd);
-            
-            if (monedaCatalogoActual === "usd") {
-                el.textContent = "$" + precioUsd.toFixed(2);
-            } else {
-                const precioBs = precioUsd * tasaCambioGlobal;
-                el.textContent = "Bs. " + precioBs.toLocaleString('es-VE', { 
-                    minimumFractionDigits: 2, 
-                    maximumFractionDigits: 2 
-                });
-            }
+    document.addEventListener("monedacambiada", () => {
+        detallesVenta.querySelectorAll("[data-subtotal][data-valor]").forEach(linea => {
+            linea.textContent = monedaVista.importe(Number(linea.dataset.valor));
         });
-
-        if (btnMonedaUsd && btnMonedaBs) {
-            btnMonedaUsd.classList.toggle("active", monedaCatalogoActual === "usd");
-            btnMonedaBs.classList.toggle("active", monedaCatalogoActual === "bs");
-        }
-
-        localStorage.setItem("venta_catalogo_moneda", monedaCatalogoActual);
-    }
-
-    if (btnMonedaUsd && btnMonedaBs) {
-        btnMonedaUsd.addEventListener("click", function() {
-            monedaCatalogoActual = "usd";
-            aplicarMonedaCatalogo();
-        });
-
-        btnMonedaBs.addEventListener("click", function() {
-            if (tasaCambioGlobal > 0) {
-                monedaCatalogoActual = "bs";
-                aplicarMonedaCatalogo();
-            } else {
-                alert("No hay una tasa de cambio registrada para convertir a Bolívares.");
-            }
-        });
-    }
-
-    const monedaGuardada = localStorage.getItem("venta_catalogo_moneda");
-    if (monedaGuardada === "bs" && tasaCambioGlobal > 0) {
-        monedaCatalogoActual = "bs";
-    }
-    
-    aplicarMonedaCatalogo();
+        recalcularVenta();
+    });
 
     // =========================================================
     // INICIO

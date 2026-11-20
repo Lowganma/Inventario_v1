@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load monedas %}
 {% block title %}
     Clientes
 {% endblock %}
@@ -232,7 +232,7 @@
                                                 {% endif %}
                                             "
                                         >
-                                            ${{ cliente.total_pendiente|floatformat:2 }}
+                                            {% importe cliente.total_pendiente %}
                                         </strong>
                                     </div>
 
@@ -325,7 +325,7 @@
                                                     {% endif %}
                                                 "
                                             >
-                                                ${{ cliente.total_pendiente|floatformat:2 }}
+                                                {% importe cliente.total_pendiente %}
                                             </strong>
                                         </td>
 

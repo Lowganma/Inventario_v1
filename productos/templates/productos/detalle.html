@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load monedas %}
 {% block title %}
     {{ producto.nombre }} | Inventario
 {% endblock %}
@@ -354,7 +354,7 @@
 
                     <div class="fs-3 fw-bold">
 
-                        ${{ producto.valor_inventario|floatformat:2 }}
+                        {% importe producto.valor_inventario %}
 
                     </div>
 
@@ -418,7 +418,7 @@
 
                     <div class="fs-3 fw-bold">
 
-                        ${{ producto.costo|floatformat:2 }}
+                        {% importe producto.costo %}
 
                     </div>
 
@@ -445,7 +445,7 @@
 
                     <div class="fs-3 fw-bold">
 
-                        ${{ producto.precio_venta|floatformat:2 }}
+                        {% importe producto.precio_venta %}
 
                     </div>
 
@@ -562,7 +562,7 @@
                             <div class="col-12 col-md-4">
 
                                 <label class="form-label">
-                                    Precio de venta
+                                    Precio de venta (USD)
                                 </label>
 
                                 {{ formulario_presentacion.precio_venta }}
@@ -650,7 +650,7 @@
 
                                     {% if presentacion.precio_venta != None %}
 
-                                        ${{ presentacion.precio_venta|floatformat:2 }}
+                                        {% importe presentacion.precio_venta %}
 
                                     {% else %}
 

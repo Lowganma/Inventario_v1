@@ -159,13 +159,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const amount = document.getElementById("id_monto_pagado");
     if (balance && amount) {
         const display = document.getElementById("saldoProyectado");
-        const format = new Intl.NumberFormat("es-VE", {minimumFractionDigits:2,maximumFractionDigits:2});
         const remaining = Math.round(Number(balance.dataset.saldo) * 100);
         function update() {
             const payment = Math.round(Number(amount.value) * 100);
-            display.textContent = payment > remaining ? "El abono supera el saldo" : "USD " + format.format((remaining - Math.max(0, payment)) / 100);
+            display.textContent = payment > remaining ? "El abono supera el saldo" : monedaVista.importe((remaining - Math.max(0, payment)) / 100);
         }
         amount.addEventListener("input", update);
+        document.addEventListener("monedacambiada", update);
         update();
     }
 });

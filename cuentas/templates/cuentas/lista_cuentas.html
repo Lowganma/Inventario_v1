@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load monedas %}
 {# Título de la pestaña del navegador #}
 {% block title %}
     Cuentas por cobrar
@@ -98,7 +98,7 @@
                         </p>
 
                         <h2 class="mb-1">
-                            ${{ total_por_cobrar|floatformat:2 }}
+                            {% importe total_por_cobrar %}
                         </h2>
 
                         <small class="text-muted">
@@ -328,13 +328,13 @@
 
                                     {# Monto original de la cuenta #}
                                     <td data-label="Monto">
-                                        ${{ cuenta.monto_total|floatformat:2 }}
+                                        {% importe cuenta.monto_total %}
                                     </td>
 
 
                                     {# Total acumulado de todos los abonos #}
                                     <td data-label="Abonado" class="text-success">
-                                        ${{ cuenta.total_abonado|floatformat:2 }}
+                                        {% importe cuenta.total_abonado %}
                                     </td>
 
 
@@ -358,7 +358,7 @@
                                                     {% endif %}
                                                 "
                                             >
-                                                ${{ cuenta.saldo_pendiente|floatformat:2 }}
+                                                {% importe cuenta.saldo_pendiente %}
                                             </strong>
 
                                         {% endif %}

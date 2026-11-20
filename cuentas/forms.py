@@ -58,7 +58,7 @@ class CuentaPorCobrarForm(forms.ModelForm):
         labels = {
             "cliente": "Cliente",
             "concepto": "Concepto de la deuda",
-            "monto_total": "Monto total",
+            "monto_total": "Monto total (USD)",
             "fecha_vencimiento": "Fecha de vencimiento",
             "estado": "Estado",
             "notas": "Notas",
@@ -118,7 +118,7 @@ class AbonoForm(forms.ModelForm):
         }
 
         labels = {
-            "monto_pagado": "Monto del abono",
+            "monto_pagado": "Monto del abono (USD)",
             "fecha_pago": "Fecha del pago",
             "metodo": "Método de pago",
             "referencia": "Referencia",

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load monedas %}
 {% block title %}Ventas{% endblock %}
 
 {% block content %}
@@ -140,11 +140,11 @@
 
                     {% if ultima_venta %}
                         <h5 class="mb-0">
-                            ${{ ultima_venta.total|floatformat:2 }}
+                            {% importe ultima_venta.total %}
                         </h5>
                     {% else %}
                         <h5 class="mb-0">
-                            $0.00
+                            {% importe 0 %}
                         </h5>
                     {% endif %}
                 </div>
@@ -418,7 +418,7 @@
 
                                     <td data-label="Total" class="text-end">
                                         <strong>
-                                            ${{ venta.total|floatformat:2 }}
+                                            {% importe venta.total %}
                                         </strong>
                                     </td>
 

@@ -118,11 +118,9 @@ class ProductoForm(forms.ModelForm):
             "activo": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
         labels = {
-            "precio_venta": "Precio de venta", 
-            "stock_minimo": "Stock mínimo",
             "tipo": "Tipo",
             "unidad_base": "Unidad de inventario",
-            "precio_venta": "Precio de venta",
+            "precio_venta": "Precio de venta (USD)",
             "stock_minimo": "Stock mínimo",
             }
         help_texts = {
@@ -213,5 +211,5 @@ class PresentacionProductoForm(forms.ModelForm):
         labels = {
             "nombre": "Nombre",
             "cantidad_unidades": "Contiene",
-            "precio_venta": "Precio de venta",
+            "precio_venta": "Precio de venta (USD)",
         }

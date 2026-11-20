@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load monedas %}
 {% block title %}
     Detalle de compra
 {% endblock %}
@@ -62,7 +62,7 @@
                         </span>
 
                         <strong class="fs-4 text-primary">
-                            ${{ compra.total|floatformat:2 }}
+                            {% importe compra.total %}
                         </strong>
                     </div>
 
@@ -111,16 +111,16 @@
                                     </td>
 
                                     <td>
-                                        ${{ detalle.precio_compra|floatformat:2 }}
+                                        {% importe detalle.precio_compra %}
                                     </td>
 
                                     <td>
-                                        ${{ detalle.precio_venta|floatformat:2 }}
+                                        {% importe detalle.precio_venta %}
                                     </td>
 
                                     <td>
                                         <strong>
-                                            ${{ detalle.subtotal|floatformat:2 }}
+                                            {% importe detalle.subtotal %}
                                         </strong>
                                     </td>
                                 </tr>
