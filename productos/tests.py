@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import Http404
-from django.test import RequestFactory, TestCase, override_settings
+from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
 from usuarios.models import Negocio
@@ -13,9 +13,6 @@ from .models import Categoria, Producto
 from . import views
 
 
-@override_settings(
-    STATICFILES_STORAGE="django.contrib.staticfiles.storage.StaticFilesStorage"
-)
 class InventarioMultiempresaTests(TestCase):
     def setUp(self):
         self.usuario = User.objects.create_user("uno", password="prueba-segura")

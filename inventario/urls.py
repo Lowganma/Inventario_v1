@@ -18,10 +18,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import include, path
 from cuentas import views as cuentas_views
 from usuarios import views as usuarios_views
-from usuarios.forms import RecuperarClaveForm
-
-from django.conf import settings
-from django.conf.urls.static import static
+from productos.views import foto_producto
 
 urlpatterns = [
     path("configuracion/modulos/", usuarios_views.configurar_modulos, name="configuracion_modulos"),
@@ -33,7 +30,6 @@ urlpatterns = [
         name="login",
     ),
     path("recuperar/", auth_views.PasswordResetView.as_view(
-        form_class=RecuperarClaveForm,
         template_name="registration/recuperar.html",
         email_template_name="registration/correo_recuperacion.txt",
         subject_template_name="registration/asunto_recuperacion.txt",
@@ -45,6 +41,7 @@ urlpatterns = [
     path("recuperar/listo/", auth_views.PasswordResetCompleteView.as_view(
         template_name="registration/clave_guardada.html"), name="password_reset_complete"),
     path("cerrar-sesion/", auth_views.LogoutView.as_view(), name="logout"),
+    path("media/productos/<path:nombre>", foto_producto, name="foto_producto"),
     path("productos/", include("productos.urls") ),
     path("clientes/", include("clientes.urls") ),
     path("cuentas/", include("cuentas.urls") ),
@@ -66,8 +63,3 @@ urlpatterns = [
     ),
     
 ]
-if settings.DEBUG:
-    urlpatterns += static(
-        settings.MEDIA_URL,
-        document_root=settings.MEDIA_ROOT,
-    )

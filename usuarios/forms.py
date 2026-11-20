@@ -1,21 +1,9 @@
-import logging
-from smtplib import SMTPException
-
 from django import forms
-from django.contrib.auth.forms import PasswordResetForm, UserCreationForm
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.db import transaction
 
 from .models import MODULOS_DISPONIBLES, Negocio, PerfilUsuario
-
-
-class RecuperarClaveForm(PasswordResetForm):
-    def send_mail(self, *args, **kwargs):
-        try:
-            super().send_mail(*args, **kwargs)
-        except (OSError, SMTPException):
-            # La respuesta pública es igual aunque el servidor de correo falle.
-            logging.getLogger(__name__).error("Falló la entrega de un correo de recuperación.")
 
 
 def correo_disponible(valor):

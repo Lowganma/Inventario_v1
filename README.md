@@ -19,9 +19,9 @@ El proyecto está diseñado de forma modular para facilitar su escalabilidad y m
 
 ## 🛠️ Tecnologías Utilizadas
 
-* **Backend:** Python / Django
+* **Backend:** Python / Django 5.2 LTS
 * **Frontend:** HTML5, CSS3, Bootstrap
-* **Base de Datos:** SQLite (Entorno de desarrollo local)
+* **Base de Datos:** SQLite (local y Docker)
 * **Control de Versiones:** Git / GitHub
 
 ---
@@ -111,4 +111,4 @@ Para mostrar el flujo en una demo del portafolio, registra un negocio de prueba 
 
 Capturas de la demo: [inicio de sesión en móvil](docs/demo/login-movil.png) y [revisión del Excel en escritorio](docs/demo/carga-excel.png).
 
-[Recuperación de contraseña y preparación de la demo en Hostinger](docs/DEMO_HOSTINGER.md)
+[Actualizar con Pipenv o Docker, conservar las fotos y preparar la demo en Hostinger](docs/DEMO_HOSTINGER.md)

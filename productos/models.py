@@ -194,22 +194,22 @@ class Producto(models.Model):
             
 
             models.CheckConstraint(
-                check=models.Q(stock__gte=0),
+                condition=models.Q(stock__gte=0),
                 name="producto_stock_no_negativo",
             ),
 
             models.CheckConstraint(
-                check=models.Q(stock_minimo__gte=0),
+                condition=models.Q(stock_minimo__gte=0),
                 name="producto_stock_minimo_no_negativo",
             ),
 
             models.CheckConstraint(
-                check=models.Q(costo__gte=0),
+                condition=models.Q(costo__gte=0),
                 name="producto_costo_no_negativo",
             ),
 
             models.CheckConstraint(
-                check=models.Q(precio_venta__gte=0),
+                condition=models.Q(precio_venta__gte=0),
                 name="producto_precio_no_negativo",
             ),
         ]

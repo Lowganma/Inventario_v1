@@ -4,13 +4,16 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "==4.1.7"
+django = "==5.2.19"
 pylint-django = "*"
 requests = "*"
 beautifulsoup4 = "*"
 whitenoise = "*"
+pillow = "==12.3.0"
+openpyxl = "==3.1.5"
+defusedxml = "==0.7.1"
+# Pipenv también debe incluir las dependencias condicionales de Windows al bloquear desde Linux.
+colorama = {version = "*", markers = "sys_platform == 'win32'"}
+tzdata = {version = "*", markers = "sys_platform == 'win32'"}
 
 [dev-packages]
-
-[requires]
-python_version = "3.14"

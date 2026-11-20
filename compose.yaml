@@ -18,6 +18,7 @@ services:
     restart: unless-stopped
     volumes:
       - inventario_data:/app/data
+      - ./media:/app/media
 
 volumes:
   inventario_data:

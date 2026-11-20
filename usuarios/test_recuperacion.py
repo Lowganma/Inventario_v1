@@ -25,7 +25,7 @@ class RecuperacionTests(TestCase):
         self.assertContains(respuesta, "Elige una nueva contraseña")
         destino = respuesta.redirect_chain[-1][0]
         respuesta = self.client.post(destino, {"new_password1": "abc", "new_password2": "x"})
-        self.assertFormError(respuesta, "form", "new_password2", "The two password fields didn’t match.")
+        self.assertFormError(respuesta.context["form"], "new_password2", "The two password fields didn’t match.")
         clave = "Nueva-Clave-8961"
         self.assertRedirects(self.client.post(destino, {"new_password1": clave, "new_password2": clave}),
                              reverse("password_reset_complete"))
@@ -45,5 +45,5 @@ class RecuperacionTests(TestCase):
             self.assertContains(self.client.get(enlace, follow=True), "Enlace no disponible")
 
     def test_fallo_smtp_tiene_misma_respuesta(self):
-        with patch("django.core.mail.message.EmailMultiAlternatives.send", side_effect=OSError), self.assertLogs("usuarios.forms"):
+        with patch("django.core.mail.message.EmailMultiAlternatives.send", side_effect=OSError), self.assertLogs("django.contrib.auth", level="ERROR"):
             self.assertRedirects(self.solicitar(self.user.email), reverse("password_reset_done"))
