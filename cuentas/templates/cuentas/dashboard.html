@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
 Panel principal
@@ -12,263 +13,42 @@ Panel principal
     <div class="col-12 col-xl-11">
 
 
-        <!-- =================================================
-             ENCABEZADO
-        ================================================== -->
-
-        <div
-            class="
-                d-flex
-                flex-column
-                flex-md-row
-                justify-content-between
-                align-items-md-center
-                gap-3
-                mb-4
-            "
-        >
-
-            <div>
-
-                <h1 class="page-title mb-1">
-                    Panel principal
-                </h1>
-
-                <p class="page-subtitle mb-0">
-                    Resumen general de tu negocio.
-                </p>
-
-            </div>
-
-
-            <div class="text-md-end">
-
-                <span class="text-muted small">
-                    Hoy
-                </span>
-
-                <div class="fw-semibold">
-                    {{ hoy|date:"d/m/Y" }}
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- =================================================
-             INDICADORES PRINCIPALES
-        ================================================== -->
-
-        <div class="row g-3 mb-4">
-
-
-            {% if modulos_activos.ventas %}
-
-                <div class="col-12 col-sm-6 col-xl-3">
-
-                    <div class="card content-card h-100">
-
-                        <div class="card-body p-4">
-
-                            <div
-                                class="
-                                    d-flex
-                                    justify-content-between
-                                    align-items-start
-                                "
-                            >
-
-                                <div>
-
-                                    <p class="text-muted mb-1">
-                                        Ventas hoy
-                                    </p>
-
-                                    <h2 class="mb-1">
-                                        ${{ total_ventas_hoy|floatformat:2 }}
-                                    </h2>
-
-                                    <small class="text-muted">
-                                        {{ cantidad_ventas_hoy }}
-                                        operación{{ cantidad_ventas_hoy|pluralize:"es" }}
-                                    </small>
-
-                                </div>
-
-                                <i
-                                    class="
-                                        bi bi-cart-check
-                                        fs-2
-                                        text-primary
-                                    "
-                                ></i>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            {% endif %}
-
-
+        <header class="ot-page-head">
+            <div><h1 class="page-title mb-1">Panel principal</h1><p class="page-subtitle mb-0">{% language "es" %}{{ hoy|date:"l, j \d\e F"|capfirst }}{% endlanguage %} · USD</p></div>
+            {% if modulos_activos.ventas %}<a class="btn btn-primary" href="{% url 'ventas:crear' %}"><i class="bi bi-plus-lg"></i> Nueva venta</a>{% endif %}
+        </header>
+        <div class="ot-dashboard">
             {% if modulos_activos.caja %}
-
-                <div class="col-12 col-sm-6 col-xl-3">
-
-                    <div class="card content-card h-100">
-
-                        <div class="card-body p-4">
-
-                            <div
-                                class="
-                                    d-flex
-                                    justify-content-between
-                                    align-items-start
-                                "
-                            >
-
-                                <div>
-
-                                    <p class="text-muted mb-1">
-                                        Ingresos hoy
-                                    </p>
-
-                                    <h2 class="mb-1">
-                                        ${{ ingresos_hoy|floatformat:2 }}
-                                    </h2>
-
-                                    <small class="text-muted">
-                                        Dinero recibido
-                                    </small>
-
-                                </div>
-
-                                <i
-                                    class="
-                                        bi bi-arrow-down-circle
-                                        fs-2
-                                        text-success
-                                    "
-                                ></i>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="col-12 col-sm-6 col-xl-3">
-
-                    <div class="card content-card h-100">
-
-                        <div class="card-body p-4">
-
-                            <div
-                                class="
-                                    d-flex
-                                    justify-content-between
-                                    align-items-start
-                                "
-                            >
-
-                                <div>
-
-                                    <p class="text-muted mb-1">
-                                        Egresos hoy
-                                    </p>
-
-                                    <h2 class="mb-1">
-                                        ${{ egresos_hoy|floatformat:2 }}
-                                    </h2>
-
-                                    <small class="text-muted">
-                                        Dinero utilizado
-                                    </small>
-
-                                </div>
-
-                                <i
-                                    class="
-                                        bi bi-arrow-up-circle
-                                        fs-2
-                                        text-danger
-                                    "
-                                ></i>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="col-12 col-sm-6 col-xl-3">
-
-                    <a
-                        href="{% url 'caja:dashboard' %}"
-                        class="text-decoration-none"
-                    >
-
-                        <div class="card content-card h-100">
-
-                            <div class="card-body p-4">
-
-                                <div
-                                    class="
-                                        d-flex
-                                        justify-content-between
-                                        align-items-start
-                                    "
-                                >
-
-                                    <div>
-
-                                        <p class="text-muted mb-1">
-                                            Saldo de caja
-                                        </p>
-
-                                        <h2 class="mb-1">
-                                            ${{ saldo_caja|floatformat:2 }}
-                                        </h2>
-
-                                        <small class="text-muted">
-                                            Saldo registrado
-                                        </small>
-
-                                    </div>
-
-                                    <i
-                                        class="
-                                            bi bi-wallet2
-                                            fs-2
-                                            text-primary
-                                        "
-                                    ></i>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </a>
-
-                </div>
-
+            <a class="ot-metric ot-cash" href="{% url 'caja:dashboard' %}"><small>Saldo de caja</small><strong>USD {{ saldo_caja|floatformat:2 }}</strong><span>{% if caja_hoy %}Caja {{ caja_hoy.estado }} · Ver caja{% else %}Ir a caja{% endif %} <i class="bi bi-arrow-right"></i></span></a>
             {% endif %}
-
-
+            <div class="ot-stats">
+                {% if modulos_activos.ventas %}<a href="{% url 'ventas:lista' %}"><span>Ventas de hoy</span><strong>{{ cantidad_ventas_hoy }}</strong><small>USD {{ total_ventas_hoy|floatformat:2 }}</small></a>{% endif %}
+                {% if modulos_activos.cuentas %}<a href="{% url 'cuentas:lista' %}"><span>Por cobrar</span><strong>USD {{ total_por_cobrar|floatformat:2 }}</strong><small>{{ cuentas_pendientes }} pendiente{{ cuentas_pendientes|pluralize }}</small></a>{% endif %}
+                {% if modulos_activos.caja %}<a href="{% url 'caja:dashboard' %}"><span>Ingresos de hoy</span><strong>USD {{ ingresos_hoy|floatformat:2 }}</strong></a><a href="{% url 'caja:dashboard' %}"><span>Egresos de hoy</span><strong>USD {{ egresos_hoy|floatformat:2 }}</strong></a>{% endif %}
+            </div>
         </div>
-
+        {% if modulos_activos.caja %}
+        <section class="card ot-cash-chart mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center"><h2 class="h5 mb-0">Flujo de caja</h2><span>{% language "es" %}{{ hoy|date:"F Y"|capfirst }}{% endlanguage %}</span></div>
+            {% if flujo_mes %}<div class="card-body">
+                <div class="ot-legend"><span>Ingresos <b>USD {{ flujo_mes.ingreso.total|floatformat:2 }}</b></span><span>Egresos <b>USD {{ flujo_mes.egreso.total|floatformat:2 }}</b></span></div>
+                <svg class="ot-chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Ingresos y egresos acumulados desde el primer día del mes">
+                    <path d="M0 4H100 M0 51H100 M0 98H100" fill="none" stroke="var(--ot-borde)" vector-effect="non-scaling-stroke"/>
+                    <polyline points="{{ flujo_mes.ingreso.puntos }}" stroke="var(--bs-primary)" fill="none" stroke-width="3" vector-effect="non-scaling-stroke"/>
+                    <polyline points="{{ flujo_mes.egreso.puntos }}" stroke="rgb(var(--bs-danger-rgb))" fill="none" stroke-width="2" stroke-dasharray="5 3" vector-effect="non-scaling-stroke"/>
+                </svg>
+                <div class="d-flex justify-content-between small text-body-secondary"><span>Inicio de mes</span><span>Hoy</span></div>
+            </div>{% else %}<p class="card-body mb-0 text-body-secondary">Aún no hay movimientos de caja este mes.</p>{% endif %}
+        </section>
+        {% endif %}
+        {% if modulos_activos.ventas %}
+        <section class="card mb-4"><div class="card-header d-flex align-items-center justify-content-between gap-2"><h2 class="h5 mb-0">Ventas recientes</h2><a href="{% url 'ventas:lista' %}">Ver historial</a></div>
+            <ul class="ot-recent">
+            {% for venta in ventas_recientes %}<li><a href="{% url 'ventas:detalle' venta.pk %}"><span><b>{{ venta.cliente|default:"Cliente de mostrador" }}</b><small>Venta #{{ venta.numero }} · {{ venta.get_tipo_pago_display }}</small></span><strong>USD {{ venta.total|floatformat:2 }} ›</strong></a></li>
+            {% empty %}<li class="p-3 text-body-secondary">Las ventas que registres aparecerán aquí.</li>{% endfor %}
+            </ul>
+        </section>
+        {% endif %}
 
         <!-- =================================================
              RESUMEN OPERATIVO + CUENTAS

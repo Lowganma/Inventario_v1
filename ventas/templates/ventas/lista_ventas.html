@@ -313,7 +313,7 @@
 
                 <div class="table-responsive">
 
-                    <table class="table table-hover ventas-table align-middle mb-0">
+                    <table class="ot-table-cards table table-hover ventas-table align-middle mb-0">
 
                         <thead>
                             <tr>
@@ -334,19 +334,19 @@
 
                                 <tr>
 
-                                    <td>
+                                    <td data-label="Venta">
                                         <strong>
                                             #{{ venta.numero }}
                                         </strong>
                                     </td>
 
 
-                                    <td>
+                                    <td data-label="Fecha">
                                         {{ venta.fecha|date:"d/m/Y H:i" }}
                                     </td>
 
 
-                                    <td class="cliente-col">
+                                    <td data-label="Cliente" class="cliente-col">
 
                                         {% if venta.cliente %}
                                             <strong>
@@ -362,7 +362,7 @@
                                     </td>
 
 
-                                    <td class="detalle-col">
+                                    <td data-label="Detalle" class="detalle-col">
 
                                         <div class="small fw-semibold">
                                             {{ venta.detalles.count }}
@@ -387,7 +387,7 @@
                                     </td>
 
 
-                                    <td>
+                                    <td data-label="Pago">
 
                                         {% if venta.tipo_pago == "fiado" %}
 
@@ -416,14 +416,14 @@
                                     </td>
 
 
-                                    <td class="text-end">
+                                    <td data-label="Total" class="text-end">
                                         <strong>
                                             ${{ venta.total|floatformat:2 }}
                                         </strong>
                                     </td>
 
 
-                                    <td class="text-end">
+                                    <td data-label="Acción" class="text-end">
                                         <a
                                             href="{% url 'ventas:detalle' venta.id %}"
                                             class="btn btn-sm btn-outline-primary"

@@ -1,6 +1,6 @@
 # Guía fácil de instalación y despliegue
 
-Esta guía está pensada para instalar **Inventario v1** sin conocer Python ni
+Esta guía está pensada para instalar **organiza-te** sin conocer Python ni
 Django. Con Docker no hace falta instalar manualmente Django, Gunicorn ni
 WhiteNoise: todo queda dentro del contenedor.
 

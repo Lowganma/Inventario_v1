@@ -342,58 +342,16 @@
         {# ================================================== #}
         {# COLUMNA DERECHA                                    #}
         {# ================================================== #}
-        <div class="col-12 col-lg-4">
+        <div class="col-12 col-lg-4 order-first order-lg-last">
 
-            {# RESUMEN FINANCIERO #}
-            <div class="card content-card mb-4">
-                <div class="card-body p-4">
-
-                    <h2 class="h5 mb-4">
-                        Resumen financiero
-                    </h2>
-
-                    <div class="mb-3">
-                        <small class="text-muted d-block">
-                            Monto original
-                        </small>
-
-                        <strong class="fs-4">
-                            ${{ cuenta.monto_total|floatformat:2 }}
-                        </strong>
-                    </div>
-
-                    <div class="mb-3">
-                        <small class="text-muted d-block">
-                            Total abonado
-                        </small>
-
-                        <strong class="fs-4 text-success">
-                            ${{ cuenta.total_abonado|floatformat:2 }}
-                        </strong>
-                    </div>
-
-                    <div class="border-top pt-3">
-                        <small class="text-muted d-block">
-                            Saldo pendiente
-                        </small>
-
-                        <strong
-                            class="
-                                fs-2
-                                {% if cuenta.saldo_pendiente > 0 %}
-                                    text-danger
-                                {% else %}
-                                    text-success
-                                {% endif %}
-                            "
-                        >
-                            ${{ cuenta.saldo_pendiente|floatformat:2 }}
-                        </strong>
-                    </div>
-
+            <section class="ot-metric mb-3">
+                <h2 class="h6">Saldo pendiente</h2>
+                <strong>USD {{ cuenta.saldo_pendiente|floatformat:2 }}</strong>
+                <div class="d-flex gap-3 flex-wrap mt-3">
+                    <small>Original · USD {{ cuenta.monto_total|floatformat:2 }}</small>
+                    <small>Abonado · USD {{ cuenta.total_abonado|floatformat:2 }}</small>
                 </div>
-            </div>
-
+            </section>
 
             {# ACCIONES #}
             {% if cuenta.saldo_pendiente > 0 %}

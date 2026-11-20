@@ -183,7 +183,8 @@
                                         mb-2
                                     "
                                 >
-                                    <div class="min-width-0">
+                                    <div class="ot-avatar" aria-hidden="true">{{ cliente.nombre|first|upper }}</div>
+                                    <div class="min-width-0 flex-grow-1">
                                         <h2 class="h5 mb-1 text-truncate">
                                             {{ cliente }}
                                         </h2>
@@ -243,6 +244,7 @@
 
                                 {# Acciones del cliente #}
                                 <div class="d-grid gap-2">
+                                    {% if modulos_activos.cuentas %}<a class="btn btn-sm btn-primary" href="{% url 'cuentas:lista' %}?cliente={{ cliente.pk }}">Ver cuentas <span aria-hidden="true">→</span></a>{% endif %}
 
                                     <a
                                         href="{% url 'clientes:editar' cliente.id %}"
@@ -281,7 +283,7 @@
                 <div class="card-body p-0">
 
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
+                        <table class="ot-table-cards table table-hover align-middle mb-0">
 
                             <thead class="table-light">
                                 <tr>
@@ -299,21 +301,21 @@
                             <tbody>
                                 {% for cliente in clientes %}
                                     <tr>
-                                        <td class="ps-4">
+                                        <td data-label="Cliente" class="ps-4">
                                             <strong>
                                                 {{ cliente }}
                                             </strong>
                                         </td>
 
-                                        <td>
+                                        <td data-label="Teléfono">
                                             {{ cliente.telefono }}
                                         </td>
 
-                                        <td>
+                                        <td data-label="Cuentas">
                                             {{ cliente.total_cuentas }}
                                         </td>
 
-                                        <td>
+                                        <td data-label="Saldo">
                                             <strong
                                                 class="
                                                     {% if cliente.total_pendiente > 0 %}
@@ -327,7 +329,7 @@
                                             </strong>
                                         </td>
 
-                                        <td>
+                                        <td data-label="Estado">
                                             {% if cliente.estado == "Activo" or cliente.estado == "activo" %}
                                                 <span class="badge text-bg-success">
                                                     Activo
@@ -339,7 +341,8 @@
                                             {% endif %}
                                         </td>
 
-                                        <td class="text-end pe-4">
+                                        <td data-label="Acciones" class="text-end pe-4">
+                                            {% if modulos_activos.cuentas %}<a class="btn btn-sm btn-primary" href="{% url 'cuentas:lista' %}?cliente={{ cliente.pk }}">Ver cuentas <span aria-hidden="true">→</span></a>{% endif %}
                                             <a
                                                 href="{% url 'clientes:editar' cliente.id %}"
                                                 class="btn btn-sm btn-outline-primary"

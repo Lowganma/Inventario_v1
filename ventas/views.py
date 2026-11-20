@@ -393,6 +393,7 @@ def datos_producto(request, producto_id):
         {
             "id": producto.id,
             "nombre": producto.nombre,
+            "codigo": producto.codigo,
             "tipo": producto.tipo,
             "imagen": producto.imagen.url if producto.imagen else None,
             "stock": str(producto.stock),

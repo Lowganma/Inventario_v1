@@ -1,4 +1,4 @@
-# 📦 Sistema de Gestión de Inventario y Caja (`Inventario_v1`)
+# organiza-te · Inventario y caja
 
 Un sistema web modular, robusto y liviano desarrollado en **Django** para la administración de stock, control de ventas, caja chica y gestión de clientes en pequeños comercios y negocios locales.
 

@@ -148,6 +148,11 @@ def registrar_venta(
             precio_unitario = producto_actual.precio_venta
             costo_unitario = producto_actual.costo
 
+        precio_acordado = linea.get("precio_unitario")
+        if precio_acordado is not None:
+            if precio_acordado < 0:
+                raise ValidationError("El precio unitario debe ser igual o mayor que cero.")
+            precio_unitario = precio_acordado
         precio_unitario = _moneda(precio_unitario)
         costo_unitario = _moneda(costo_unitario)
         subtotal_linea = _moneda(Decimal(cantidad) * precio_unitario)

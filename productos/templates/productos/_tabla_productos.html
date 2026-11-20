@@ -2,7 +2,7 @@
 
     <div class="table-responsive">
 
-        <table class="table table-hover align-middle mb-0">
+        <table class="ot-table-cards table table-hover align-middle mb-0">
 
             <thead>
                 <tr>
@@ -23,7 +23,7 @@
 
                     <tr>
 
-                        <td>
+                        <td data-label="Producto">
 
                         <div class="d-flex align-items-center gap-3">
 
@@ -85,7 +85,7 @@
 
                     </td>
 
-                        <td>
+                        <td data-label="Categoría">
 
                             <div class="d-flex align-items-center gap-2">
 
@@ -107,7 +107,7 @@
                         </td>
 
 
-                        <td>
+                        <td data-label="Stock">
 
                             {% if producto.tipo == "servicio" %}
 
@@ -154,7 +154,7 @@
                         </td>
 
 
-                        <td>
+                        <td data-label="Stock mínimo">
 
                             {% if producto.tipo == "servicio" %}
 
@@ -170,15 +170,15 @@
 
                         </td>
 
-                        <td>
+                        <td data-label="Costo">
                             ${{ producto.costo|floatformat:2 }}
                         </td>
 
-                        <td>
+                        <td data-label="Precio">
                             ${{ producto.precio_venta|floatformat:2 }}
                         </td>
 
-                        <td>
+                        <td data-label="Estado">
 
                             <span
                                 class="badge
@@ -198,7 +198,7 @@
                         </td>
 
 
-                        <td>
+                        <td data-label="Acciones">
 
                             <div class="d-flex gap-2">
 

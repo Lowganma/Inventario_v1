@@ -41,7 +41,7 @@
             {# ------------------------------------------------- #}
             {% if estado_seleccionado == "pendiente" %}
                 <a
-                    href="?buscar={{ busqueda|urlencode }}&estado=todas&orden={{ orden_seleccionado }}"
+                    href="?{% if cliente_filtrado %}cliente={{ cliente_filtrado.pk }}&amp;{% endif %}buscar={{ busqueda|urlencode }}&estado=todas&orden={{ orden_seleccionado }}"
                     class="btn btn-outline-secondary"
                 >
                     <i class="bi bi-eye me-1"></i>
@@ -52,7 +52,7 @@
             {# las cuentas pagadas.                               #}
             {% else %}
                 <a
-                    href="?buscar={{ busqueda|urlencode }}&estado=pendiente&orden={{ orden_seleccionado }}"
+                    href="?{% if cliente_filtrado %}cliente={{ cliente_filtrado.pk }}&amp;{% endif %}buscar={{ busqueda|urlencode }}&estado=pendiente&orden={{ orden_seleccionado }}"
                     class="btn btn-outline-warning"
                 >
                     <i class="bi bi-eye-slash me-1"></i>
@@ -66,7 +66,7 @@
                 class="btn btn-primary"
             >
                 <i class="bi bi-file-earmark-plus me-1"></i>
-                Registrar cuenta
+                Registrar cuenta manual
             </a>
         </div>
     </div>
@@ -79,7 +79,7 @@
 
     <div class="col-12 col-md-6 col-xl-4">
 
-        <div class="card content-card h-100">
+        <div class="card content-card ot-balance h-100">
 
             <div class="card-body p-4">
 
@@ -102,7 +102,7 @@
                         </h2>
 
                         <small class="text-muted">
-                            Saldo pendiente de clientes
+                            Saldo pendiente de todo el negocio
                         </small>
 
                     </div>
@@ -135,6 +135,10 @@
         <div class="card-body p-4">
 
             <form method="get" class="row g-3 align-items-end">
+                {% if cliente_filtrado %}
+                    <input type="hidden" name="cliente" value="{{ cliente_filtrado.pk }}">
+                    <div class="col-12">Cuentas de <strong>{{ cliente_filtrado }}</strong> · <a href="{% url 'cuentas:lista' %}">Ver todos los clientes</a></div>
+                {% endif %}
 
                 {# Campo de búsqueda por cliente, teléfono o concepto #}
                 <div class="col-12 col-lg-5">
@@ -282,7 +286,7 @@
 
                 {# Permite desplazamiento horizontal en pantallas pequeñas #}
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="ot-table-cards table table-hover align-middle mb-0">
 
                         {# Encabezados de la tabla #}
                         <thead class="table-light">
@@ -305,7 +309,7 @@
                                 <tr>
 
                                     {# Datos principales del cliente #}
-                                    <td class="ps-4">
+                                    <td data-label="Cliente" class="ps-4">
                                         <strong>
                                             {{ cuenta.cliente }}
                                         </strong>
@@ -317,25 +321,25 @@
 
 
                                     {# Motivo o descripción de la deuda #}
-                                    <td>
+                                    <td data-label="Concepto">
                                         {{ cuenta.concepto }}
                                     </td>
 
 
                                     {# Monto original de la cuenta #}
-                                    <td>
+                                    <td data-label="Monto">
                                         ${{ cuenta.monto_total|floatformat:2 }}
                                     </td>
 
 
                                     {# Total acumulado de todos los abonos #}
-                                    <td class="text-success">
+                                    <td data-label="Abonado" class="text-success">
                                         ${{ cuenta.total_abonado|floatformat:2 }}
                                     </td>
 
 
                                     {# Saldo restante #}
-                                    <td>
+                                    <td data-label="Saldo">
 
                                         {% if cuenta.estado == "anulada" %}
 
@@ -363,7 +367,7 @@
 
 
                                     {# Etiqueta visual del estado #}
-                                    <td>
+                                    <td data-label="Estado">
                                         {% if cuenta.estado == "pagada" %}
 
                                             <span class="badge text-bg-success">
@@ -390,7 +394,7 @@
 
 
                                     {# Fecha de vencimiento opcional #}
-                                    <td>
+                                    <td data-label="Vencimiento">
                                         {% if cuenta.fecha_vencimiento %}
                                             {{ cuenta.fecha_vencimiento|date:"d/m/Y" }}
                                         {% else %}
@@ -402,7 +406,7 @@
 
 
                                     {# Acceso al detalle completo de la cuenta #}
-                                    <td class="text-end pe-4">
+                                    <td data-label="Acciones" class="text-end pe-4">
 
     <div
         class="
@@ -492,7 +496,7 @@
                         href="{% url 'cuentas:crear' %}"
                         class="btn btn-primary"
                     >
-                        Registrar cuenta
+                        Registrar cuenta manual
                     </a>
                 {% endif %}
             </div>

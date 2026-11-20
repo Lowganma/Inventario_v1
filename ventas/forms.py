@@ -150,7 +150,6 @@ class DetalleVentaForm(forms.Form):
                 "class": "form-control venta-precio",
                 "step": "0.01",
                 "min": "0",
-                "readonly": "readonly",
             }
         ),
     )

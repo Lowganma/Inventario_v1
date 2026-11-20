@@ -287,6 +287,8 @@
 
                             {{ formulario.imagen.label_tag }}
                             {{ formulario.imagen }}
+                            <img id="vistaFotoProducto" alt="Vista previa de la foto del producto" class="ot-photo-preview"
+                                {% if formulario.instance.imagen %}src="{{ formulario.instance.imagen.url }}"{% else %}hidden{% endif %}>
 
                             {% for error in formulario.imagen.errors %}
                                 <div class="text-danger small">

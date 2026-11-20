@@ -10,6 +10,7 @@ from django.db.models import (
     Q,
     Sum,
 )
+from django.db.models.functions import TruncDate
 from django.views.decorators.http import require_POST
 
 from .services.tasa_bcv import (
@@ -28,7 +29,7 @@ from django.shortcuts import (
 from django.utils import timezone
 
 from usuarios.permisos import dueno_required
-from caja.models import MovimientoCaja
+from caja.models import CajaDiaria, MovimientoCaja
 from clientes.models import Cliente
 from compras.models import Compra
 from productos.models import Producto
@@ -38,6 +39,28 @@ from .forms import AbonoForm, CuentaPorCobrarForm
 from .models import CuentaPorCobrar, TasaCambio
 from .services.cobros import registrar_abono_cuenta
 # Create your views here.
+
+
+def flujo_mensual(movimientos, hoy):
+    filas = (movimientos.filter(fecha__date__range=(hoy.replace(day=1), hoy))
+            .annotate(dia=TruncDate("fecha")).values("dia", "tipo")
+            .annotate(importe=Sum("monto")).order_by("dia"))
+    por_dia = {(fila["dia"].day, fila["tipo"]): fila["importe"] for fila in filas}
+    if not por_dia:
+        return None
+
+    series = {"ingreso": [Decimal(0)], "egreso": [Decimal(0)]}
+    for dia in range(1, hoy.day + 1):
+        for tipo, valores in series.items():
+            valores.append(valores[-1] + por_dia.get((dia, tipo), 0))
+
+    maximo = max(series["ingreso"][-1], series["egreso"][-1], 1)
+    resultado = {}
+    for tipo, valores in series.items():
+        puntos = [f"{dia * 100 / hoy.day:.2f},{98 - valor * 94 / maximo:.2f}"
+                  for dia, valor in enumerate(valores)]
+        resultado[tipo] = {"total": valores[-1], "puntos": " ".join(puntos)}
+    return resultado
 
 
 @login_required
@@ -200,6 +223,7 @@ def dashboard(request):
     )
 
     saldo_caja = ingresos_totales - egresos_totales
+    caja_hoy = CajaDiaria.objects.filter(negocio=negocio, fecha=hoy).first() if activos["caja"] else None
 
     # Abonos recibidos específicamente hoy.
     abonos_hoy = (
@@ -363,6 +387,7 @@ def dashboard(request):
         "hoy": hoy,
 
         # Ventas
+        "ventas_recientes": ventas.select_related("cliente").order_by("-fecha", "-id")[:3],
         "cantidad_ventas_hoy": cantidad_ventas_hoy,
         "total_ventas_hoy": total_ventas_hoy,
         "unidades_vendidas_hoy": unidades_vendidas_hoy,
@@ -377,6 +402,8 @@ def dashboard(request):
         "egresos_hoy": egresos_hoy,
         "flujo_hoy": flujo_hoy,
         "saldo_caja": saldo_caja,
+        "caja_hoy": caja_hoy,
+        "flujo_mes": flujo_mensual(movimientos, hoy) if activos["caja"] else None,
         "abonos_hoy": abonos_hoy,
         "ultimos_movimientos": ultimos_movimientos,
 
@@ -458,7 +485,14 @@ def lista_cuentas(request):
     Decimal("0.00"),
 )
 
+    cliente_filtrado = None
+    cliente_id = request.GET.get("cliente", "")
+    if cliente_id.isascii() and cliente_id.isdigit() and len(cliente_id) <= 18:
+        cliente_filtrado = get_object_or_404(Cliente, negocio=negocio, pk=cliente_id)
+
     cuentas = cuentas_negocio
+    if cliente_filtrado:
+        cuentas = cuentas.filter(cliente=cliente_filtrado)
 
     # Búsqueda por datos del cliente o concepto.
     if busqueda:
@@ -494,6 +528,7 @@ def lista_cuentas(request):
 
     contexto = {
         "cuentas": cuentas,
+        "cliente_filtrado": cliente_filtrado,
         "busqueda": busqueda,
         "estado_seleccionado": estado,
         "orden_seleccionado": orden,

@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block content %}
+{% load l10n %}
 
     {# ====================================================== #}
     {# ENCABEZADO                                             #}
@@ -37,6 +38,10 @@
             <div class="card content-card">
                 <div class="card-body p-4">
 
+                    <div class="ot-metric mb-3" id="saldoAbono" data-saldo="{{ cuenta.saldo_pendiente|unlocalize }}">
+                        <small>Saldo después del pago</small>
+                        <strong><output id="saldoProyectado" for="{{ formulario.monto_pagado.id_for_label }}">USD {{ cuenta.saldo_pendiente|floatformat:2 }}</output></strong>
+                    </div>
                     <form method="post" novalidate>
                         {% csrf_token %}
 

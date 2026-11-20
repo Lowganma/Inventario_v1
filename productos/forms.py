@@ -44,6 +44,11 @@ class ProductoForm(forms.ModelForm):
     def __init__(self, *args, negocio=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.negocio = negocio
+        if self.is_bound and ("tipo" not in self.data or "unidad_base" not in self.data):
+            # Formularios anteriores a la distinción entre productos y servicios.
+            self.data = self.data.copy()
+            for field in ("tipo", "unidad_base"):
+                self.data.setdefault(field, getattr(self.instance, field))
         # La lista nunca expone categorías de otra empresa.
         categorias = Categoria.objects.none()
         if negocio:

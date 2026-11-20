@@ -321,6 +321,23 @@
             text-decoration: none !important;
         }
     }
+    @media screen {
+        .factura-card,.factura-bloque,.factura-resumen,.factura-notas {border-radius:var(--bs-border-radius);box-shadow:none;}
+        .factura-header,.factura-resumen {background:var(--ot-tinta);color:#fffef9;}
+        .factura-header .factura-label,.factura-header .text-body-secondary,.factura-resumen .factura-label,.factura-resumen .text-body-secondary,.factura-resumen .resumen-total strong:last-child {color:var(--ot-lima)!important;}
+        .factura-logo {color:var(--bs-body-color);}
+    }
+    @media screen and (max-width:650px) {
+        .factura-toolbar {flex-wrap:wrap;}
+        .factura-header,.factura-meta,.factura-footer-grid {gap:.6rem;padding:1rem;}
+        .factura-titulo {display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;}
+        .factura-numero,.factura-titulo .mb-2 {margin:0!important;}
+        .factura-footer-grid .factura-resumen {order:-1;}
+        .factura-notas {min-height:0;}
+        .ot-app .factura-tabla.ot-table-cards {min-width:0;}
+        .ot-app .factura-tabla.ot-table-cards tr {grid-template-columns:repeat(4,minmax(0,1fr));}
+        .ot-app .factura-tabla.ot-table-cards td:last-child {grid-column:auto;}
+    }
 </style>
 
 
@@ -398,7 +415,7 @@
                     {% endif %}
 
                     <div class="small text-body-secondary mt-2">
-                        Comprobante generado por el sistema administrativo.
+                        Comprobante emitido con organiza-te.
                     </div>
 
                 </div>
@@ -492,7 +509,7 @@
 
                 <div class="mb-1">
 
-                    <strong>
+                    <strong class="ot-payment-tag {% if venta.tipo_pago == 'fiado' %}ot-credit{% endif %}">
                         {% if venta.tipo_pago == "fiado" %}
                             Fiado
                         {% else %}
@@ -575,7 +592,7 @@
 
             <div class="table-responsive">
 
-                <table class="factura-tabla">
+                <table class="ot-table-cards factura-tabla">
 
                     <thead>
                         <tr>
@@ -608,7 +625,7 @@
 
                             <tr>
 
-                                <td>
+                                <td data-label="Producto o servicio">
 
                                     <div class="factura-producto">
 
@@ -652,7 +669,7 @@
                                 </td>
 
 
-                                <td>
+                                <td data-label="Presentación">
 
                                     {% if detalle.producto.tipo == "servicio" %}
 
@@ -681,7 +698,7 @@
                                 </td>
 
 
-                                <td class="text-center">
+                                <td data-label="Cantidad" class="text-center">
 
                                     {% if detalle.producto.unidad_base == "unidad" or detalle.presentacion %}
                                         {{ detalle.cantidad|floatformat:"-0" }}
@@ -692,12 +709,12 @@
                                 </td>
 
 
-                                <td class="text-end">
+                                <td data-label="Precio unitario" class="text-end">
                                     ${{ detalle.precio_unitario|floatformat:2 }}
                                 </td>
 
 
-                                <td class="text-end">
+                                <td data-label="Importe" class="text-end">
                                     <strong>
                                         ${{ detalle.subtotal|floatformat:2 }}
                                     </strong>

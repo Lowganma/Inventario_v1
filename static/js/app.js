@@ -100,3 +100,63 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+document.addEventListener("DOMContentLoaded", () => {
+    const button = document.getElementById("ot-menu");
+    const sidebar = document.getElementById("menuPrincipal");
+    if (!button || !sidebar) return;
+    const wide = window.matchMedia("(min-width: 992px)");
+    function show(open) {
+        document.body.classList.toggle("ot-menu-open", open);
+        sidebar.hidden = !open;
+        button.setAttribute("aria-expanded", String(open));
+    }
+    function reset() {
+        show(wide.matches && localStorage.getItem("ot-menu") !== "closed");
+    }
+    button.addEventListener("click", () => {
+        const open = sidebar.hidden;
+        show(open);
+        if (wide.matches) localStorage.setItem("ot-menu", open ? "open" : "closed");
+        if (open && !wide.matches) sidebar.querySelector("a").focus();
+    });
+    function dismiss() { show(false); button.focus(); }
+    document.querySelector(".ot-backdrop").addEventListener("click", dismiss);
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && !wide.matches && !sidebar.hidden) dismiss();
+    });
+    sidebar.addEventListener("focusout", event => {
+        if (!wide.matches && event.relatedTarget && !sidebar.contains(event.relatedTarget) && event.relatedTarget !== button) show(false);
+    });
+    wide.addEventListener("change", reset);
+    reset();
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const photo = document.getElementById("vistaFotoProducto");
+    const input = document.getElementById("id_imagen");
+    if (photo && input) {
+        const original = photo.getAttribute("src");
+        let preview;
+        input.addEventListener("change", () => {
+            if (preview) URL.revokeObjectURL(preview);
+            preview = input.files[0] && URL.createObjectURL(input.files[0]);
+            const url = preview || original;
+            if (url) photo.src = url;
+            else photo.removeAttribute("src");
+            photo.hidden = !url;
+        });
+    }
+    const balance = document.getElementById("saldoAbono");
+    const amount = document.getElementById("id_monto_pagado");
+    if (balance && amount) {
+        const display = document.getElementById("saldoProyectado");
+        const format = new Intl.NumberFormat("es-VE", {minimumFractionDigits:2,maximumFractionDigits:2});
+        const remaining = Math.round(Number(balance.dataset.saldo) * 100);
+        function update() {
+            const payment = Math.round(Number(amount.value) * 100);
+            display.textContent = payment > remaining ? "El abono supera el saldo" : "USD " + format.format((remaining - Math.max(0, payment)) / 100);
+        }
+        amount.addEventListener("input", update);
+        update();
+    }
+});
