@@ -2,7 +2,7 @@ services:
   web:
     build: .
     ports:
-      - "${APP_PORT:-8000}:8000"
+      - "${APP_BIND_ADDRESS:-127.0.0.1}:${APP_PORT:-8000}:8000"
     environment:
       DJANGO_DEBUG: "False"
       DJANGO_ALLOWED_HOSTS: "${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}"
@@ -15,6 +15,14 @@ services:
       EMAIL_HOST_PASSWORD: "${EMAIL_HOST_PASSWORD:-}"
       DEFAULT_FROM_EMAIL: "${DEFAULT_FROM_EMAIL:-}"
       DJANGO_TRUST_HTTPS_PROXY: "${DJANGO_TRUST_HTTPS_PROXY:-0}"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1', 8000), timeout=3).close()"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
     restart: unless-stopped
     volumes:
       - inventario_data:/app/data

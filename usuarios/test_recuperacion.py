@@ -1,3 +1,4 @@
+import secrets
 import re
 from unittest.mock import patch
 
@@ -10,7 +11,7 @@ from django.urls import reverse
 @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
 class RecuperacionTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user("ana", email="ana@example.org", password="Inicial-79851")
+        self.user = User.objects.create_user("ana", email="ana@example.org", password=secrets.token_urlsafe(24))
 
     def solicitar(self, correo):
         return self.client.post(reverse("password_reset"), {"email": correo})
@@ -26,7 +27,7 @@ class RecuperacionTests(TestCase):
         destino = respuesta.redirect_chain[-1][0]
         respuesta = self.client.post(destino, {"new_password1": "abc", "new_password2": "x"})
         self.assertFormError(respuesta.context["form"], "new_password2", "The two password fields didn’t match.")
-        clave = "Nueva-Clave-8961"
+        clave = secrets.token_urlsafe(24)
         self.assertRedirects(self.client.post(destino, {"new_password1": clave, "new_password2": clave}),
                              reverse("password_reset_complete"))
         self.user.refresh_from_db()

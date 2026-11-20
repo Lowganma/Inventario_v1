@@ -1,19 +1,22 @@
 #!/bin/sh
 set -eu
 cd "$(dirname "$0")"
-
-if ! command -v docker >/dev/null 2>&1; then
-    echo "ERROR: instala Docker y Docker Compose antes de continuar."
-    exit 1
-fi
+docker compose version >/dev/null || { echo "Instala Docker con Compose v2 para continuar."; exit 1; }
 
 if [ ! -f .env ]; then
-    cp .env.example .env
-    secret="$(od -An -N48 -tx1 /dev/urandom | tr -d ' \n')"
-    sed "s/cambia-esto-por-una-clave-larga-y-unica/$secret/" .env > .env.tmp
-    mv .env.tmp .env
+    (
+        umask 077
+        temporal=$(mktemp .env.XXXXXX)
+        trap 'rm -f "$temporal"' EXIT
+        clave=$(od -An -N48 -tx1 /dev/urandom | tr -d ' \n')
+        {
+            printf 'DJANGO_SECRET_KEY=%s\n' "$clave"
+            sed '/^DJANGO_SECRET_KEY=/d' .env.example
+        } > "$temporal"
+        ln "$temporal" .env
+    )
 fi
 
-echo "Instalando Inventario v1. La primera vez puede tardar varios minutos..."
-docker compose up -d --build
-echo "Listo: abre http://localhost:8000/usuarios/registro/"
+docker compose up -d --build --wait --wait-timeout 120
+direccion=$(docker compose port web 8000)
+echo "Abre http://localhost:${direccion##*:}/usuarios/registro/"

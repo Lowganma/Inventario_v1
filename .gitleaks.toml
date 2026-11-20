@@ -1,0 +1,9 @@
+[extend]
+useDefault = true
+
+[[rules]]
+id = "django-generated-secret-key"
+description = "Clave de firma generada por Django"
+regex = '''(django-insecure-[a-z0-9!@#$%^&*()_=+\-]{45,})'''
+secretGroup = 1
+keywords = ["django-insecure-"]

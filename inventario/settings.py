@@ -3,10 +3,11 @@
 import os
 import sys
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
 from django.forms.renderers import TemplatesSetting
 
 class CustomFormRenderer(TemplatesSetting):
-    form_template_name = 'productos/form_snipet.html'
+    form_template_name = 'productos/form_snippet.html'
 
 FORM_RENDERER = 'inventario.settings.CustomFormRenderer'
 
@@ -17,14 +18,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY",
-    "django-insecure-solo-para-desarrollo-local",
-)
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() in {"1", "true", "yes"}
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "").strip()
+if DEBUG and not SECRET_KEY:
+    SECRET_KEY = "django-insecure-solo-para-desarrollo-local"
+if not DEBUG and (
+    not SECRET_KEY or SECRET_KEY.startswith("django-insecure-")
+    or SECRET_KEY == "cambia-esto-por-una-clave-larga-y-unica"
+):
+    raise ImproperlyConfigured("Configura una DJANGO_SECRET_KEY privada para producción.")
+
 
 ALLOWED_HOSTS = [
     host.strip()

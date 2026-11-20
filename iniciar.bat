@@ -1,41 +1,17 @@
 @echo off
 setlocal
-
-title Control de cuentas
-
 cd /d "%~dp0"
-
-echo.
-echo Iniciando Control de cuentas...
-echo.
-
-docker info >nul 2>nul
-
+title organiza-te
+docker compose up -d --wait --wait-timeout 120
 if errorlevel 1 (
-    echo Docker Desktop no esta funcionando.
-    echo.
-    echo Abre Docker Desktop y vuelve a intentarlo.
-    echo.
+    echo Comprueba que Docker Desktop este activo y que exista el archivo .env.
+    docker compose logs --tail=30 web
     pause
     exit /b 1
 )
-
-docker compose up -d
-
-if errorlevel 1 (
-    echo.
-    echo No fue posible iniciar la aplicacion.
-    echo.
-    docker compose logs --tail=50 web
-    echo.
-    pause
-    exit /b 1
-)
-
-echo Esperando al servidor...
-
-timeout /t 4 /nobreak >nul
-
-start "" "http://localhost:8000/"
-
+for /f "delims=" %%P in ('powershell -NoProfile -Command "(docker compose port web 8000).Split(':')[-1]"') do set "puerto=%%P"
+if not defined puerto exit /b 1
+set "ruta=/"
+if /i "%~1"=="registro" set "ruta=/usuarios/registro/"
+start "" "http://localhost:%puerto%%ruta%"
 exit /b 0

@@ -38,3 +38,27 @@ htmlcov/
 # Sistema operativo
 .DS_Store
 Thumbs.db
+# Datos privados, archivos auxiliares de SQLite y respaldos locales
+*.sqlite
+*.sqlite3-*
+*.sqlite-*
+*.db-wal
+*.db-shm
+*.sql.gz
+*.dump
+*.bak
+copias/
+backups/
+respaldo-*/
+data/
+
+# Material de autenticación local
+*.pem
+*.key
+*.p12
+*.pfx
+.ssh/
+id_rsa
+id_ed25519
+credentials*.json
+secrets/

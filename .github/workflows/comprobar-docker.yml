@@ -1,0 +1,47 @@
+name: Comprobar Django y Docker
+on:
+  push:
+    branches: [rediseno/organiza-te]
+  pull_request:
+    branches: [rediseno/organiza-te, main]
+permissions:
+  contents: read
+
+jobs:
+  comprobar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Generar clave temporal de pruebas
+        shell: bash
+        run: |
+          clave=$(openssl rand -hex 48)
+          echo "::add-mask::$clave"
+          echo "DJANGO_SECRET_KEY=$clave" >> "$GITHUB_ENV"
+      - name: Construir y ejecutar las pruebas
+        run: |
+          docker compose config --quiet
+          docker compose build
+          docker compose run --rm --no-deps --entrypoint python web manage.py test
+      - name: Verificar datos y fotos entre dos contenedores
+        run: |
+          docker compose up -d --wait --wait-timeout 120
+          docker compose exec -T web python manage.py shell <<'PY'
+          from django.contrib.auth import get_user_model
+          from django.core.files.storage import default_storage
+          from PIL import Image
+          get_user_model().objects.create_user("prueba-persistencia")
+          with default_storage.open("foto-ci.png", "wb") as archivo:
+              Image.new("RGB", (2, 2), "green").save(archivo, "PNG")
+          PY
+          docker compose up -d --force-recreate --wait --wait-timeout 120
+          curl -fsS -o /dev/null http://127.0.0.1:8000/iniciar-sesion/
+          docker compose exec -T web python manage.py shell <<'PY'
+          from django.contrib.auth import get_user_model
+          from django.core.files.storage import default_storage
+          from PIL import Image
+          assert get_user_model().objects.filter(username="prueba-persistencia").exists()
+          with default_storage.open("foto-ci.png") as archivo, Image.open(archivo) as foto:
+              assert foto.getpixel((0, 0)) == (0, 128, 0)
+          PY
