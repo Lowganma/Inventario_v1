@@ -1,1 +1,15 @@
-{% extends "base.html" %}{% block title %}Usuarios{% endblock %}{% block content %}<div class="d-flex justify-content-between"><h1>Usuarios</h1><a class="btn btn-primary" href="{% url 'usuarios:crear' %}">Nuevo usuario</a></div><div class="table-responsive"><table class="table"><thead><tr><th>Usuario</th><th>Rol</th><th></th></tr></thead><tbody><tr><td>{{ propietario.username }}</td><td>Administrador (propietario)</td><td></td></tr>{% for miembro in miembros %}<tr><td>{{ miembro.usuario.username }}</td><td>{{ miembro.get_rol_display }}</td><td><a href="{% url 'usuarios:editar_rol' miembro.id %}">Cambiar rol</a></td></tr>{% endfor %}</tbody></table></div>{% endblock %}
+{% extends "base.html" %}
+{% block title %}Usuarios{% endblock %}
+{% block content %}
+<section class="ot-settings">
+    <header class="ot-page-head"><div><small>Configuración / {{ request.negocio.nombre }}</small><h1>Usuarios</h1></div>
+        <a class="btn btn-primary" href="{% url 'usuarios:crear' %}">＋ Nuevo usuario</a></header>
+    <div class="ot-owner"><i class="bi bi-key" aria-hidden="true"></i><div><small>Propietario del negocio</small><h2>{{ propietario.username }}</h2>{{ propietario.email }}</div></div>
+    <h2 class="h5 mt-4">Equipo</h2>
+    <ul class="ot-team">
+        {% for miembro in miembros %}<li><div><strong>{{ miembro.usuario.username }}</strong><small>{{ miembro.usuario.email|default:"Sin correo de recuperación" }}</small></div>
+            <span>{{ miembro.get_rol_display }}</span><a href="{% url 'usuarios:editar_rol' miembro.pk %}" aria-label="Cambiar rol de {{ miembro.usuario.username }}">Cambiar rol</a></li>
+        {% empty %}<li>Todavía no has agregado miembros al equipo.</li>{% endfor %}
+    </ul>
+</section>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Recuperar contraseña{% endblock %}
+{% block content %}
+<section class="ot-login">
+    <div class="ot-login-brand"><img src="{% static 'img/organiza-te.svg' %}" alt="" width="96" height="96"><strong>organiza-te</strong></div>
+    <div class="ot-login-form">{% block paso %}{% endblock %}</div>
+</section>
+{% endblock %}

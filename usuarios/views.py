@@ -49,7 +49,7 @@ def registro(request):
 def configurar_modulos(request):
     negocio = request.user.negocio
     actuales = set(negocio.modulos.filter(activo=True).values_list("modulo", flat=True))
-    formulario = ModulosNegocioForm(request.POST or None, initial={"modulos": actuales})
+    formulario = ModulosNegocioForm(request.POST if request.method == "POST" else None, initial={"modulos": actuales})
     if request.method == "POST" and formulario.is_valid():
         try:
             actualizar_modulos(negocio=negocio, seleccionados=formulario.cleaned_data["modulos"])
@@ -58,7 +58,16 @@ def configurar_modulos(request):
         else:
             messages.success(request, "Configuración de módulos actualizada.")
             return redirect("usuarios:modulos")
-    return render(request, "usuarios/modulos.html", {"formulario": formulario, "catalogo": MODULOS_DISPONIBLES})
+    detalles = {
+        "inventario": ("box-seam", "Productos, precios y existencias."),
+        "compras": ("bag", "Entradas de mercancía. Requiere Inventario."),
+        "ventas": ("cart", "Ventas y comprobantes. Requiere Inventario."),
+        "caja": ("cash-stack", "Ingresos, egresos y cierre de caja."),
+        "clientes": ("people", "Datos de contacto de tus clientes."),
+        "cuentas": ("receipt", "Saldos pendientes y abonos."),
+    }
+    catalogo = [(codigo, nombre, *detalles[codigo]) for codigo, nombre in MODULOS_DISPONIBLES]
+    return render(request, "usuarios/modulos.html", {"formulario": formulario, "catalogo": catalogo})
 
 
 @login_required

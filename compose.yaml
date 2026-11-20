@@ -9,6 +9,12 @@ services:
       SQLITE_PATH: "/app/data/db.sqlite3"
       DJANGO_SECRET_KEY: "${DJANGO_SECRET_KEY:?Copia .env.example como .env y configura DJANGO_SECRET_KEY}"
       CSRF_TRUSTED_ORIGINS: "${CSRF_TRUSTED_ORIGINS:-}"
+      EMAIL_HOST: "${EMAIL_HOST:-}"
+      EMAIL_PORT: "${EMAIL_PORT:-465}"
+      EMAIL_HOST_USER: "${EMAIL_HOST_USER:-}"
+      EMAIL_HOST_PASSWORD: "${EMAIL_HOST_PASSWORD:-}"
+      DEFAULT_FROM_EMAIL: "${DEFAULT_FROM_EMAIL:-}"
+      DJANGO_TRUST_HTTPS_PROXY: "${DJANGO_TRUST_HTTPS_PROXY:-0}"
     restart: unless-stopped
     volumes:
       - inventario_data:/app/data

@@ -1,0 +1,4 @@
+{% extends "registration/base_clave.html" %}
+{% block paso %}
+<h1 class="h3">Recuperar contraseña</h1><p>Escribe el correo asociado a tu usuario.</p><form method="post" class="ot-fields border-0 p-0">{% csrf_token %}{% include "registration/campos.html" %}<button class="btn btn-primary w-100">Enviar enlace</button></form><a class="d-inline-block mt-3" href="{% url 'login' %}">Volver a iniciar sesión</a>
+{% endblock %}

@@ -1,1 +1,14 @@
-{% extends "base.html" %}{% block title %}Usuario{% endblock %}{% block content %}<div class="row justify-content-center"><div class="col-lg-6"><h1>{% if perfil %}Cambiar rol{% else %}Nuevo usuario{% endif %}</h1><form method="post" class="card"><div class="card-body">{% csrf_token %}{{ formulario.as_p }}<button class="btn btn-primary">Guardar</button></div></form></div></div>{% endblock %}
+{% extends "base.html" %}
+{% block title %}{% if perfil %}Cambiar rol{% else %}Nuevo usuario{% endif %}{% endblock %}
+{% block content %}
+<section class="ot-settings ot-narrow">
+    <a href="{% url 'usuarios:lista' %}">‹ Volver a usuarios</a>
+    <h1 class="mt-3">{% if perfil %}Cambiar rol{% else %}Nuevo usuario{% endif %}</h1>
+    <p class="text-body-secondary">{% if perfil %}Usuario: <strong>{{ perfil.usuario.username }}</strong>{% else %}Crea un acceso individual para un miembro de {{ request.negocio.nombre }}.{% endif %}</p>
+    <form class="ot-fields" method="post">{% csrf_token %}
+        {% include "registration/campos.html" with form=formulario %}
+        <button type="submit" class="btn btn-primary">{% if perfil %}Guardar rol{% else %}Crear usuario{% endif %}</button>
+        <a class="btn btn-link" href="{% url 'usuarios:lista' %}">Cancelar</a>
+    </form>
+</section>
+{% endblock %}

@@ -110,3 +110,5 @@ Para una actualización basta el ID del catálogo o un código existente y la co
 Para mostrar el flujo en una demo del portafolio, registra un negocio de prueba y usa **Probar con un ejemplo de papelería**. El Excel incluye un cuaderno físico y un servicio de copias. Después de importarlo, descarga el catálogo, cambia el precio del cuaderno y vuelve a subirlo para mostrar la comparación.
 
 Capturas de la demo: [inicio de sesión en móvil](docs/demo/login-movil.png) y [revisión del Excel en escritorio](docs/demo/carga-excel.png).
+
+[Recuperación de contraseña y preparación de la demo en Hostinger](docs/DEMO_HOSTINGER.md)

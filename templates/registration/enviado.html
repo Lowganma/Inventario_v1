@@ -1,0 +1,4 @@
+{% extends "registration/base_clave.html" %}
+{% block paso %}
+<h1 class="h3">Revisa tu correo</h1><p>Si el correo corresponde a una cuenta activa, recibirás un enlace para elegir una nueva contraseña. Revisa también la carpeta de spam.</p><a class="d-inline-block mt-3" href="{% url 'login' %}">Volver a iniciar sesión</a>
+{% endblock %}

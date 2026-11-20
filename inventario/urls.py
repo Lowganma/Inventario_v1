@@ -18,6 +18,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import include, path
 from cuentas import views as cuentas_views
 from usuarios import views as usuarios_views
+from usuarios.forms import RecuperarClaveForm
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -31,6 +32,18 @@ urlpatterns = [
         auth_views.LoginView.as_view(template_name="registration/login.html"),
         name="login",
     ),
+    path("recuperar/", auth_views.PasswordResetView.as_view(
+        form_class=RecuperarClaveForm,
+        template_name="registration/recuperar.html",
+        email_template_name="registration/correo_recuperacion.txt",
+        subject_template_name="registration/asunto_recuperacion.txt",
+    ), name="password_reset"),
+    path("recuperar/enviado/", auth_views.PasswordResetDoneView.as_view(
+        template_name="registration/enviado.html"), name="password_reset_done"),
+    path("recuperar/clave/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(
+        template_name="registration/nueva_clave.html"), name="password_reset_confirm"),
+    path("recuperar/listo/", auth_views.PasswordResetCompleteView.as_view(
+        template_name="registration/clave_guardada.html"), name="password_reset_complete"),
     path("cerrar-sesion/", auth_views.LogoutView.as_view(), name="logout"),
     path("productos/", include("productos.urls") ),
     path("clientes/", include("clientes.urls") ),
